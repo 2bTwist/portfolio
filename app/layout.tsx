@@ -1,41 +1,39 @@
-import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
+import "../styles/tokens.css";
+import { Inter } from "next/font/google";
+import ThemeProvider from "@/components/ThemeProvider";
+import Sidebar from "@/components/Sidebar";
 import FileTree from "@/components/FileTree";
 import { buildFileTree } from "@/lib/buildFileTree";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-});
+const inter = Inter({ subsets: ["latin"], variable: "--font-sans" });
 
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
-});
-
-export const metadata: Metadata = {
-  title: "Portfolio & Blog",
-  description: "MDX-powered portfolio with recursive file tree navigation",
+export const metadata = {
+  title: "Eddy B — Portfolio",
+  description: "Personal blog & projects of Eddy",
 };
 
-export default function RootLayout({
-  children,
-}: Readonly<{
-  children: React.ReactNode;
-}>) {
-  const tree = buildFileTree();
-
+export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en">
-      <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased flex`}
-      >
-        <aside className="w-64 border-r h-screen overflow-y-auto p-4 sticky top-0">
-          <FileTree tree={tree} />
-        </aside>
+    <html lang="en" suppressHydrationWarning>
+      <body className={`${inter.variable} bg-bg text-text`}>
+        <ThemeProvider>
+          <div className="flex h-screen">
+            <Sidebar>
+              <FileTree tree={buildFileTree()} />
+            </Sidebar>
 
-        <main className="flex-1 p-6 overflow-y-auto">{children}</main>
+            {/* Main content area */}
+            <main className="flex-1 relative">
+              {/* Right nav (Phase 2.4) */}
+              <nav id="floating-nav" className="hidden md:block"></nav>
+
+              <div className="max-w-content mx-auto px-4 md:px-8 py-16">
+                {children}
+              </div>
+            </main>
+          </div>
+        </ThemeProvider>
       </body>
     </html>
   );

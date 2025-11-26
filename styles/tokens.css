@@ -1,0 +1,38 @@
+:root {
+  /* Backgrounds */
+  --bg: #ffffff;
+  --bg-subtle: #f7f7f8;
+
+  /* Surfaces */
+  --surface: #ffffff;
+  --surface-hover: #f3f3f4;
+
+  /* Text */
+  --text: #111111;
+  --text-subtle: #6b7280;
+
+  /* Borders */
+  --border: #e5e7eb;
+  --border-subtle: #d1d5db;
+
+  /* Accent */
+  --accent: #2563eb;
+  --accent-strong: #1d4ed8;
+}
+
+.dark {
+  --bg: #0f0f11;
+  --bg-subtle: #18181b;
+
+  --surface: #1c1c1f;
+  --surface-hover: #232326;
+
+  --text: #f7f7f7;
+  --text-subtle: #9ca3af;
+
+  --border: #2b2b2f;
+  --border-subtle: #3a3a3f;
+
+  --accent: #3b82f6;
+  --accent-strong: #60a5fa;
+}
