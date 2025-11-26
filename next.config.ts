@@ -1,7 +1,10 @@
-import type { NextConfig } from "next";
+import createMDX from '@next/mdx';
 
-const nextConfig: NextConfig = {
-  /* config options here */
-};
+const withMDX = createMDX({
+  extension: /\.mdx?$/,
+});
 
-export default nextConfig;
+export default withMDX({
+  pageExtensions: ['ts', 'tsx', 'md', 'mdx'],
+});
+// This configuration enables MDX support in a Next.js project.

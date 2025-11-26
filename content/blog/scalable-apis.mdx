@@ -1,0 +1,48 @@
+# Building Scalable APIs
+
+Learn how to design and build APIs that scale from zero to millions of users.
+
+## Introduction
+
+Building scalable APIs requires careful consideration of:
+
+1. **Architecture patterns** - Choosing the right patterns for your use case
+2. **Database design** - Optimizing for read/write patterns
+3. **Caching strategies** - Reducing load on your database
+4. **Rate limiting** - Protecting your API from abuse
+
+## Key Principles
+
+### Stateless Design
+
+Keep your API stateless to enable horizontal scaling.
+
+```typescript
+// Good - stateless
+export async function GET(request: Request) {
+  const data = await fetchFromDatabase();
+  return Response.json(data);
+}
+```
+
+### Caching
+
+Implement caching at multiple levels:
+- CDN caching for static responses
+- Application-level caching (Redis, Memcached)
+- Database query caching
+
+### Rate Limiting
+
+Protect your API endpoints with proper rate limiting:
+
+```typescript
+const rateLimit = {
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 100 // limit each IP to 100 requests per windowMs
+};
+```
+
+## Conclusion
+
+Building scalable APIs is a journey. Start simple, measure, and optimize based on real-world usage patterns.
