@@ -7,10 +7,8 @@ export default function Home() {
   const source = fs.readFileSync(filePath, "utf-8");
 
   return (
-    <div className="max-w-content mx-auto px-6 py-12">
-      <article className="prose prose-lg max-w-none">
-        <MDXRemote source={source} />
-      </article>
-    </div>
+    <article className="prose-custom content-wrapper">
+      <MDXRemote source={source} />
+    </article>
   );
 }

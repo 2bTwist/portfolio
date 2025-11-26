@@ -6,6 +6,7 @@
   /* Surfaces */
   --surface: #ffffff;
   --surface-hover: #f3f3f4;
+  --surface-subtle: #f9f9fa;
 
   /* Text */
   --text: #111111;
@@ -26,6 +27,7 @@
 
   --surface: #1c1c1f;
   --surface-hover: #232326;
+  --surface-subtle: #18181b;
 
   --text: #f7f7f7;
   --text-subtle: #9ca3af;

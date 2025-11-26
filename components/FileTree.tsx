@@ -1,77 +1,89 @@
 "use client";
 
-import { ChevronRight, ChevronDown, File, Folder, FolderOpen } from "lucide-react";
 import { useState } from "react";
+import {
+  ChevronRight,
+  ChevronDown,
+  File,
+  Folder,
+  FolderOpen,
+} from "lucide-react";
+import { cn } from "@/lib/utils";
+import type { TreeNode } from "@/lib/buildFileTree";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import type { TreeNode } from "@/lib/buildFileTree";
 
-interface Props {
-  tree: TreeNode[];
-}
-
-export default function FileTree({ tree }: Props) {
+export default function FileTree({ tree }: { tree: TreeNode[] }) {
   return (
-    <div className="text-sm space-y-0.5">
+    <div className="text-sm font-medium space-y-1">
       {tree.map((node) => (
-        <Item key={node.path} node={node} level={0} />
+        <TreeItem key={node.path} node={node} level={0} />
       ))}
     </div>
   );
 }
 
-function Item({ node, level }: { node: TreeNode; level: number }) {
+function TreeItem({ node, level }: { node: TreeNode; level: number }) {
+  const isFolder = node.type === "folder";
   const [open, setOpen] = useState(true);
   const pathname = usePathname();
-  const isFolder = node.type === "folder";
-  const isActive = pathname === `/${node.path}`;
+  const active = pathname.includes(node.path);
 
-  const content = (
-    <div
-      className={`flex items-center gap-2 px-2 py-1.5 rounded cursor-pointer transition-colors ${
-        isActive
-          ? "bg-accent/10 text-accent-strong"
-          : "text-text hover:bg-surface-hover"
-      }`}
-      onClick={() => isFolder && setOpen(prev => !prev)}
-      style={{ paddingLeft: `calc(0.5rem + ${level * 12}px)` }}
-    >
-      {isFolder ? (
-        open ? (
-          <ChevronDown size={14} className="text-text-subtle shrink-0" />
-        ) : (
-          <ChevronRight size={14} className="text-text-subtle shrink-0" />
-        )
-      ) : (
-        <File size={14} className="text-text-subtle shrink-0" />
-      )}
-
-      {isFolder ? (
-        open ? (
-          <FolderOpen size={16} className="text-text-subtle shrink-0" />
-        ) : (
-          <Folder size={16} className="text-text-subtle shrink-0" />
-        )
-      ) : null}
-
-      <span className="truncate text-sm">{node.name}</span>
-    </div>
-  );
+  // Indent width
+  const indent = { paddingLeft: `${level * 12}px` };
 
   return (
     <div>
-      {isFolder ? (
-        content
-      ) : (
-        <Link href={`/${node.path}`} className="block">
-          {content}
+      {/* FOLDER */}
+      {isFolder && (
+        <button
+          className={cn(
+            "w-full flex items-center gap-2 py-1.5 px-2 rounded-md",
+            "hover:bg-surface-hover transition-colors",
+            active && "bg-surface-hover"
+          )}
+          style={indent}
+          onClick={() => setOpen(!open)}
+        >
+          {open ? (
+            <ChevronDown size={14} className="text-text-subtle" />
+          ) : (
+            <ChevronRight size={14} className="text-text-subtle" />
+          )}
+
+          {open ? (
+            <FolderOpen size={16} className="text-text-subtle" />
+          ) : (
+            <Folder size={16} className="text-text-subtle" />
+          )}
+
+          <span className="truncate text-text">{node.name}</span>
+        </button>
+      )}
+
+      {/* FILE */}
+      {!isFolder && (
+        <Link
+          href={`/${node.path}`}
+          className={cn(
+            "flex items-center gap-2 py-1.5 px-2 rounded-md",
+            "hover:bg-surface-hover transition-colors",
+            active &&
+              "bg-accent/10 border border-accent/20 text-accent font-semibold",
+            "text-text"
+          )}
+          style={indent}
+        >
+          <File size={14} className="text-text-subtle" />
+          <span className="truncate">{node.name.replace(".mdx", "")}</span>
         </Link>
       )}
 
-      {isFolder && open && node.children && (
-        <div className="mt-0.5">
-          {node.children.map(child => (
-            <Item key={child.path} node={child} level={level + 1} />
+      {/* CHILDREN */}
+      {isFolder && open && (
+        <div className="mt-0.5 space-y-0.5">
+          {node.children?.map((child) => (
+            <TreeItem key={child.path} node={child} level={level + 1} />
           ))}
         </div>
       )}

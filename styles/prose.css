@@ -1,0 +1,65 @@
+@layer base {
+  .prose-custom {
+    @apply text-text leading-7 max-w-content mx-auto;
+
+    /* Headings */
+    h1, h2, h3, h4 {
+      @apply font-display text-text mb-6 mt-12 scroll-mt-24;
+    }
+
+    h1 {
+      @apply text-4xl font-semibold;
+    }
+    h2 {
+      @apply text-3xl font-semibold;
+    }
+    h3 {
+      @apply text-2xl font-semibold;
+    }
+    h4 {
+      @apply text-xl font-semibold;
+    }
+
+    /* Text */
+    p {
+      @apply my-4 text-base leading-7;
+    }
+
+    /* Lists */
+    ul, ol {
+      @apply ml-6 my-4 space-y-2;
+    }
+
+    li {
+      @apply leading-7;
+    }
+
+    /* Code blocks */
+    pre {
+      @apply bg-surface p-4 rounded-lg overflow-x-auto;
+    }
+
+    code {
+      @apply text-accent;
+    }
+
+    /* Links */
+    a {
+      @apply text-accent underline-offset-2 hover:underline;
+    }
+
+    /* Images */
+    img {
+      @apply rounded-lg my-8;
+    }
+
+    /* Blockquotes */
+    blockquote {
+      @apply border-l-4 border-accent pl-4 italic text-text-subtle my-6;
+    }
+  }
+
+  .content-wrapper {
+    @apply space-y-8;
+  }
+}
