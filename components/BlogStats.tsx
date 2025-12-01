@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { EyeIcon, HeartIcon } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 
@@ -14,7 +14,7 @@ export function BlogStats({ slug }: BlogStatsProps) {
   const [hasLiked, setHasLiked] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState(true);
 
-  const fetchStats = async () => {
+  const fetchStats = useCallback(async () => {
     try {
       const { data, error } = await supabase
         .from("post_stats")
@@ -33,9 +33,9 @@ export function BlogStats({ slug }: BlogStatsProps) {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [slug]);
 
-  const incrementViews = async () => {
+  const incrementViews = useCallback(async () => {
     try {
       // Check if post stats exist
       const { data: existingData, error: fetchError } = await supabase
@@ -85,7 +85,7 @@ export function BlogStats({ slug }: BlogStatsProps) {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [slug]);
 
   useEffect(() => {
     // Check if user has already liked this post
@@ -107,56 +107,6 @@ export function BlogStats({ slug }: BlogStatsProps) {
     } else {
       // Already viewed, just fetch the current stats
       fetchStats();
-    }
-  }, [slug, incrementViews, fetchStats]);
-    try {
-      // Check if post stats exist
-      const { data: existingData, error: fetchError } = await supabase
-        .from("post_stats")
-        .select("*")
-        .eq("slug", slug)
-        .single();
-
-      if (fetchError && fetchError.code !== "PGRST116") {
-        console.error("Error fetching stats:", fetchError);
-        setIsLoading(false);
-        return;
-      }
-
-      if (existingData) {
-        // Update existing record
-        const { data, error } = await supabase
-          .from("post_stats")
-          .update({ views: existingData.views + 1 })
-          .eq("slug", slug)
-          .select()
-          .single();
-
-        if (error) {
-          console.error("Error updating views:", error);
-        } else if (data) {
-          setViews(data.views);
-          setLikes(data.likes);
-        }
-      } else {
-        // Create new record
-        const { data, error } = await supabase
-          .from("post_stats")
-          .insert({ slug, views: 1, likes: 0 })
-          .select()
-          .single();
-
-        if (error) {
-          console.error("Error creating stats:", error);
-        } else if (data) {
-          setViews(data.views);
-          setLikes(data.likes);
-        }
-      }
-    } catch (error) {
-      console.error("Error in incrementViews:", error);
-    } finally {
-      setIsLoading(false);
     }
   }, [slug, incrementViews, fetchStats]);
 
