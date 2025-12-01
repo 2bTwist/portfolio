@@ -10,7 +10,8 @@ export function Navbar() {
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
-    setMounted(true);
+    const timer = setTimeout(() => setMounted(true), 0);
+    return () => clearTimeout(timer);
   }, []);
 
   return (
@@ -18,14 +19,11 @@ export function Navbar() {
       <Link href="/" className="hover:opacity-70">
         Home
       </Link>
-      <Link href="/#about" className="hover:opacity-70 scroll-smooth">
-        About
+      <Link href="/#projects" className="hover:opacity-70">
+        Projects
       </Link>
       <Link href="/blog" className="hover:opacity-70">
         Blog
-      </Link>
-      <Link href="/#projects" className="hover:opacity-70">
-        Projects
       </Link>
 
       <button

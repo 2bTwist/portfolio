@@ -54,18 +54,9 @@ export default function HomePage() {
 
       {/* Bio */}
       <div className="text-zinc-600 dark:text-zinc-400 max-w-5xl leading-relaxed space-y-4">
-        <p>
-          Hi there! I&apos;m Edmond, a passionate full stack engineer with a love for building innovative products.
-          I enjoy going down the rabbit hole to understand how engineers create systems that feel seemless and intuitive but are actually a combination of complex and intricate systems working together in a cohesive manner.
-        </p>
-        
-        <p>
-          When I&apos;m not coding, you can find me exploring new technologies (A.K.A going back and forth with new AI agents), or learning about product design and user experience.
-        </p>
-
-        <p>
-          I&apos;m always eager to connect with like-minded individuals at the intersection of technology, finance, and entrepreneurship, so feel free to reach out!
-        </p>
+      <p> Hi there! I&apos;m Edmond, a passionate full-stack engineer with a love for building innovative products. I enjoy going down the rabbit hole to understand how engineers create systems that feel seamless and intuitive, but are actually made up of complex and intricate parts working together in a cohesive way. </p> 
+      <p> When I&apos;m not coding, you&apos;ll probably find me exploring new technologies (A.K.A. going back and forth with new AI agents) or diving into product design and user experience. </p> 
+      <p> I&apos;m always excited to connect with like-minded people at the intersection of technology, finance, and entrepreneurship, so feel free to reach out! </p>
       </div>
 
       <SkillsSection />
