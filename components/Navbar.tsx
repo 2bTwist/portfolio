@@ -18,13 +18,13 @@ export function Navbar() {
       <Link href="/" className="hover:opacity-70">
         Home
       </Link>
-      <Link href="/about" className="hover:opacity-70">
+      <Link href="/#about" className="hover:opacity-70 scroll-smooth">
         About
       </Link>
       <Link href="/blog" className="hover:opacity-70">
         Blog
       </Link>
-      <Link href="/projects" className="hover:opacity-70">
+      <Link href="/#projects" className="hover:opacity-70">
         Projects
       </Link>
 
