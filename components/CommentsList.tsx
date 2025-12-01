@@ -10,7 +10,7 @@ interface Comment {
   content: string;
   created_at: string;
   user_id: string;
-  user_email?: string;
+  user_display_name: string;
 }
 
 export function CommentsList({ slug }: { slug: string }) {
@@ -60,7 +60,7 @@ export function CommentsList({ slug }: { slug: string }) {
     
     const { data, error } = await supabase
       .from("comments")
-      .select("id, content, created_at, user_id")
+      .select("id, content, created_at, user_id, user_display_name")
       .eq("slug", slug)
       .order("created_at", { ascending: true });
 
@@ -70,20 +70,7 @@ export function CommentsList({ slug }: { slug: string }) {
       return;
     }
 
-    // Fetch user emails separately (since auth.users is not directly accessible via RLS)
-    const commentsWithUsers = await Promise.all(
-      (data || []).map(async (comment) => {
-        const { data: userData } = await supabase.auth.admin.getUserById(
-          comment.user_id
-        );
-        return {
-          ...comment,
-          user_email: userData?.user?.email || "Anonymous",
-        };
-      })
-    ).catch(() => data || []); // Fallback if admin API not available
-
-    setComments(commentsWithUsers as Comment[]);
+    setComments(data || []);
     setLoading(false);
   }
 
@@ -129,7 +116,7 @@ export function CommentsList({ slug }: { slug: string }) {
 
           <div className="flex items-center justify-between text-xs text-zinc-500 dark:text-zinc-400 mt-3">
             <span>
-              {comment.user_email || "Anonymous"} •{" "}
+              {comment.user_display_name} •{" "}
               {new Date(comment.created_at).toLocaleDateString("en-US", {
                 year: "numeric",
                 month: "short",

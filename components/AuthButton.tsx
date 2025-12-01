@@ -36,7 +36,7 @@ export function AuthButton() {
     }
 
     // Get current URL for redirect after auth
-    const currentUrl = typeof window !== "undefined" ? window.location.pathname : "/";
+    const currentUrl = typeof window !== "undefined" ? `${window.location.pathname}#comments` : "/";
     const redirectUrl = typeof window !== "undefined" 
       ? `${window.location.origin}/auth/callback?next=${encodeURIComponent(currentUrl)}`
       : "/auth/callback";

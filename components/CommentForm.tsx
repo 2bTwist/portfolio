@@ -36,10 +36,20 @@ export function CommentForm({ slug }: { slug: string }) {
     setLoading(true);
     setError("");
 
+    // Get display name from user metadata (GitHub username, Google name, etc.)
+    // NEVER use email for privacy
+    const displayName = 
+      session.user.user_metadata?.full_name ||
+      session.user.user_metadata?.user_name ||
+      session.user.user_metadata?.name ||
+      session.user.user_metadata?.preferred_username ||
+      "Anonymous User";
+
     const { error: insertError } = await supabase.from("comments").insert({
       slug,
       content: content.trim(),
       user_id: session.user.id,
+      user_display_name: displayName,
     });
 
     if (insertError) {

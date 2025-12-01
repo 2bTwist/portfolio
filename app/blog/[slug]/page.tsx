@@ -139,7 +139,7 @@ export default async function BlogPost({
       </article>
 
       {/* Comments Section */}
-      <div className="max-w-4xl mx-auto mt-16 pt-12 border-t border-zinc-200 dark:border-zinc-800">
+      <div id="comments" className="max-w-4xl mx-auto mt-16 pt-12 border-t border-zinc-200 dark:border-zinc-800">
         <h2
           className="text-4xl mb-6"
           style={{ fontFamily: "var(--font-caveat)" }}

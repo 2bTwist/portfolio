@@ -3,6 +3,7 @@ CREATE TABLE IF NOT EXISTS comments (
   id BIGSERIAL PRIMARY KEY,
   slug TEXT NOT NULL,
   user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE,
+  user_display_name TEXT NOT NULL,
   content TEXT NOT NULL,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
