@@ -27,8 +27,10 @@ export function CodeBlock(props: any) {
             style={style}
             className="p-4 text-sm overflow-x-auto bg-zinc-50 dark:bg-zinc-900 leading-relaxed"
           >
-            {tokens.map((line, i) => (
-              <div key={i} className="table-row" {...getLineProps({ line })}>
+            {tokens.map((line, i) => {
+              const { className: _, ...lineProps } = getLineProps({ line });
+              return (
+              <div key={i} {...lineProps} className="table-row">
                 <span className="table-cell pr-4 select-none text-zinc-400 text-right">
                   {i + 1}
                 </span>
@@ -38,7 +40,8 @@ export function CodeBlock(props: any) {
                   ))}
                 </span>
               </div>
-            ))}
+              );
+            })}
           </pre>
         )}
       </Highlight>
