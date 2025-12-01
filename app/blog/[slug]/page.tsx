@@ -2,6 +2,8 @@ import fs from "fs";
 import path from "path";
 import matter from "gray-matter";
 import { compileMDX } from "next-mdx-remote/rsc";
+import { MDXComponents } from "@/components/MDXComponents";
+import { BlogStats } from "@/components/BlogStats";
 
 export default async function BlogPost({
   params,
@@ -18,6 +20,7 @@ export default async function BlogPost({
   const { content: MDXContent } = await compileMDX({
     source: content,
     options: { parseFrontmatter: false },
+    components: MDXComponents,
   });
 
   return (
@@ -29,7 +32,11 @@ export default async function BlogPost({
         {data.title as string}
       </h1>
 
-      <p className="text-zinc-500 text-sm mb-10 text-center">{data.date as string}</p>
+      <div className="flex items-center justify-center gap-4 mb-10">
+        <p className="text-zinc-500 text-sm">{data.date as string}</p>
+        <span className="text-zinc-300 dark:text-zinc-700">•</span>
+        <BlogStats slug={slug} />
+      </div>
 
       <div className="prose prose-zinc dark:prose-invert max-w-none">
         {MDXContent}

@@ -1,36 +1,193 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Portfolio Website
 
-## Getting Started
+My personal portfolio and blog built with Next.js 16, showcasing my projects, skills, and writing.
 
-First, run the development server:
+## 🚀 Tech Stack
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+- **Framework:** Next.js 16 (App Router)
+- **Styling:** Tailwind CSS v4
+- **Content:** MDX for blog posts
+- **Typography:** Inter (body), Caveat (headings)
+- **Theme:** Dark mode support with next-themes
+- **Icons:** Lucide React
+- **Syntax Highlighting:** Prism React Renderer
+
+## 📁 Project Structure
+
+```
+portfolio/
+├── app/                    # Next.js App Router pages
+│   ├── blog/              # Blog listing and posts
+│   ├── layout.tsx         # Root layout with theme provider
+│   └── page.tsx           # Homepage
+├── components/            # React components
+│   ├── CodeBlock.tsx      # Syntax highlighted code blocks
+│   ├── ExperienceSection.tsx
+│   ├── MDXComponents.tsx  # Custom MDX component mappings
+│   ├── Navbar.tsx         # Navigation sidebar
+│   ├── ProjectsSection.tsx
+│   ├── SkillsSection.tsx
+│   └── ThemeProvider.tsx  # Dark mode wrapper
+├── content/               # MDX content
+│   └── blog/             # Blog posts (.mdx files)
+├── data/                  # Data models
+│   ├── experience.ts      # Work experience data
+│   ├── projects.ts        # Projects data
+│   └── skills.ts          # Skills data
+├── lib/                   # Utilities
+│   └── posts.ts          # Blog post utilities
+└── public/               # Static assets
+    └── images/           # Images for blog posts
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## 🎨 Features
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+- **Data-Driven Architecture** - Update content by editing data files
+- **MDX Blog** - Write blog posts with code blocks and images
+- **Dark Mode** - Automatic theme switching
+- **Responsive Design** - Mobile-friendly layout
+- **Type-Safe** - Full TypeScript support
+- **Modular Components** - Reusable section components
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## 🏃 Getting Started
 
-## Learn More
+### Prerequisites
 
-To learn more about Next.js, take a look at the following resources:
+- Node.js 18+ 
+- pnpm (or npm/yarn)
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+### Installation
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+```bash
+# Install dependencies
+pnpm install
 
-## Deploy on Vercel
+# Run development server
+pnpm dev
+```
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+Open [http://localhost:3000](http://localhost:3000) to view the site.
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## 📝 Adding Content
+
+### Add a Blog Post
+
+Create a new `.mdx` file in `/content/blog/`:
+
+```mdx
+---
+title: "Your Post Title"
+date: "2025-01-20"
+summary: "Brief description"
+---
+
+# Your content here
+
+Code blocks with syntax highlighting:
+
+\`\`\`typescript
+const greeting = "Hello World";
+\`\`\`
+
+Images:
+![Alt text](/images/blog/your-image.png)
+```
+
+### Update Projects
+
+Edit `/data/projects.ts`:
+
+```typescript
+export const projects: ProjectItem[] = [
+  {
+    title: "Your Project",
+    summary: "Description",
+    tech: ["React", "Node.js"],
+    status: "shipped",
+    externalUrl: "https://yourproject.com",
+  },
+];
+```
+
+### Update Skills
+
+Edit `/data/skills.ts`:
+
+```typescript
+export const skillGroups: SkillGroup[] = [
+  {
+    label: "Languages",
+    items: ["TypeScript", "Python", "Go"],
+  },
+];
+```
+
+### Update Experience
+
+Edit `/data/experience.ts`:
+
+```typescript
+export const experience: ExperienceItem[] = [
+  {
+    company: "Company Name",
+    roles: [
+      {
+        title: "Your Title",
+        description: "What you did",
+        dateRange: "2024 – Present",
+      },
+    ],
+  },
+];
+```
+
+## 🎨 Customization
+
+### Fonts
+
+Fonts are configured in `/app/globals.css`:
+- **Body:** Inter
+- **Headings:** Caveat (handwritten style)
+
+### Colors
+
+Tailwind color system using zinc palette with dark mode support.
+
+### Theme
+
+Toggle between light and dark mode using the button in the navbar.
+
+## 🚢 Deployment
+
+### Deploy to Vercel
+
+```bash
+# Install Vercel CLI
+pnpm add -g vercel
+
+# Deploy
+vercel
+```
+
+Or connect your GitHub repo to Vercel for automatic deployments.
+
+### Build for Production
+
+```bash
+pnpm build
+pnpm start
+```
+
+## 📄 License
+
+MIT License - feel free to use this as a template for your own portfolio!
+
+## 🔗 Links
+
+- **Live Site:** [Your URL]
+- **GitHub:** [@2bTwist](https://github.com/2bTwist)
+- **LinkedIn:** [Edmond Batch](https://linkedin.com/in/edmond-batch)
+
+---
+
+Built with ❤️ using Next.js

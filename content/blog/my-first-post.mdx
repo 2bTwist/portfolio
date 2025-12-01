@@ -16,16 +16,65 @@ I'll be writing about:
 - **Product Development** - Building things people actually want to use
 - **Technologies I'm Exploring** - New tools, frameworks, and best practices
 
-## Code Example
+## MDX Features Guide
 
-Here's a simple TypeScript function:
+This blog supports rich content formatting through MDX. Here's what you can use:
 
-```ts
+### Callouts
+
+Use callouts to highlight important information:
+
+<Callout type="note">
+Notes provide additional context or interesting facts.
+</Callout>
+
+<Callout type="tip">
+Tips offer helpful suggestions and best practices.
+</Callout>
+
+<Callout type="warning">
+Warnings alert readers to important cautions.
+</Callout>
+
+<Callout type="success">
+Success callouts celebrate achievements or confirmations.
+</Callout>
+
+<Callout type="link">
+Link callouts highlight external resources or references.
+</Callout>
+
+### Text Emphasis
+
+Emphasize inline text with the <Mark variant="code">Mark</Mark> component:
+
+- <Mark variant="highlight">Highlight</Mark> for yellow background emphasis
+- <Mark variant="code">Code-style</Mark> for inline code references
+- <Mark variant="bold">Bold</Mark> for strong emphasis
+- <Mark variant="gradient">Gradient</Mark> for eye-catching text
+- <Mark variant="underline">Underline</Mark> to draw attention
+
+### Code Blocks
+
+Syntax-highlighted code blocks with language support:
+
+```typescript
 function greet(name: string): string {
   return `Hello, ${name}!`;
 }
 
 console.log(greet("World"));
+```
+
+### Images
+
+Add images from the `/public/images/` directory:
+
+<img src="/images/first-image.png" alt="Testing Excalidraw diagram" className="max-w-2xl mx-auto" />
+
+Example code:
+```mdx
+<img src="/images/your-image.png" alt="Description" className="max-w-2xl mx-auto" />
 ```
 
 ## What's Next
