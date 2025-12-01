@@ -4,8 +4,8 @@ import { ThemeProvider } from "@/components/ThemeProvider";
 import { Navbar } from "@/components/Navbar";
 
 export const metadata: Metadata = {
-  title: "Eddy B — Software Engineer",
-  description: "Backend engineer and product builder.",
+  title: "Edmond Ndanji — Software Engineer",
+  description: "Backend engineer and product enthusiast.",
 };
 
 export default function RootLayout({

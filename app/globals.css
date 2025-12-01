@@ -9,6 +9,8 @@
   --font-caveat: "Caveat", cursive;
 }
 
+@variant dark (&:is(.dark *));
+
 body {
   font-family: var(--font-inter);
 }
