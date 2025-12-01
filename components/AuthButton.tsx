@@ -50,8 +50,10 @@ export function AuthButton() {
     );
   }
 
-  // Use current domain for redirect (works in both dev and production)
-  const redirectTo = typeof window !== "undefined" ? window.location.origin : undefined;
+  // Use current URL with #comments anchor for redirect
+  const redirectTo = typeof window !== "undefined" 
+    ? `${window.location.origin}/auth/callback?returnTo=${encodeURIComponent(window.location.pathname + '#comments')}`
+    : undefined;
 
   return (
     <div className="border border-zinc-200 dark:border-zinc-800 p-6 rounded-lg mb-6 max-w-md">
