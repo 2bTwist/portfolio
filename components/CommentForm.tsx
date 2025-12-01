@@ -8,87 +8,63 @@ export function CommentForm({ slug }: { slug: string }) {
   const [session, setSession] = useState<Session | null>(null);
   const [content, setContent] = useState("");
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data }) => setSession(data.session));
-    
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event, session) => {
-      setSession(session);
-    });
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      (_event, session) => setSession(session)
+    );
 
     return () => subscription.unsubscribe();
   }, []);
 
-  async function submitComment() {
-    if (!content.trim()) {
-      setError("Comment cannot be empty");
-      return;
-    }
-
-    if (!session?.user) {
-      setError("You must be logged in to comment");
-      return;
-    }
+  async function handleSubmit() {
+    if (!session || !content.trim()) return;
 
     setLoading(true);
-    setError("");
 
-    // Get display name from user metadata (GitHub username, Google name, etc.)
-    // NEVER use email for privacy
-    const displayName = 
-      session.user.user_metadata?.full_name ||
+    // Extract name from user metadata (GitHub username or Google name)
+    const userName =
       session.user.user_metadata?.user_name ||
       session.user.user_metadata?.name ||
-      session.user.user_metadata?.preferred_username ||
-      "Anonymous User";
+      session.user.user_metadata?.full_name ||
+      "Anonymous";
 
-    const { error: insertError } = await supabase.from("comments").insert({
+    const { error } = await supabase.from("comments").insert({
       slug,
-      content: content.trim(),
       user_id: session.user.id,
-      user_display_name: displayName,
+      user_name: userName,
+      content: content.trim(),
     });
 
-    if (insertError) {
-      setError(insertError.message);
-      setLoading(false);
-      return;
-    }
-
-    setContent("");
     setLoading(false);
+
+    if (error) {
+      console.error("Error posting comment:", error);
+      alert("Failed to post comment");
+    } else {
+      setContent(""); // Clear the form immediately after successful post
+    }
   }
 
   if (!session) {
-    return (
-      <p className="text-zinc-500 dark:text-zinc-400 text-sm italic my-6">
-        Please sign in to leave a comment.
-      </p>
-    );
+    return null;
   }
 
   return (
-    <div className="my-8">
+    <div className="mb-8">
       <textarea
         value={content}
-        onChange={(e) => {
-          setContent(e.target.value);
-          setError("");
-        }}
+        onChange={(e) => setContent(e.target.value)}
         placeholder="Write a comment..."
         rows={4}
-        className="w-full p-3 bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-lg resize-none focus:outline-none focus:ring-2 focus:ring-blue-500 text-zinc-900 dark:text-zinc-100"
+        className="w-full p-3 border border-zinc-200 dark:border-zinc-800 rounded-lg bg-white dark:bg-zinc-900 text-zinc-900 dark:text-zinc-100"
       />
-
-      {error && <p className="text-red-500 text-sm mt-2">{error}</p>}
-
       <button
-        onClick={submitComment}
+        onClick={handleSubmit}
         disabled={loading || !content.trim()}
-        className="mt-3 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+        className="mt-3 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
       >
         {loading ? "Posting..." : "Post Comment"}
       </button>

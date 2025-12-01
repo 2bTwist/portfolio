@@ -1,9 +1,9 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabase";
 import { Auth } from "@supabase/auth-ui-react";
 import { ThemeSupa } from "@supabase/auth-ui-shared";
-import { useEffect, useState } from "react";
 import type { Session } from "@supabase/supabase-js";
 
 export function AuthButton() {
@@ -12,68 +12,58 @@ export function AuthButton() {
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data }) => setSession(data.session));
-    
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event, session) => {
-      setSession(session);
-      setShowAuth(false);
-    });
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      (_event, session) => {
+        setSession(session);
+        setShowAuth(false);
+      }
+    );
 
     return () => subscription.unsubscribe();
   }, []);
 
-  if (!session) {
-    if (!showAuth) {
-      return (
-        <button
-          onClick={() => setShowAuth(true)}
-          className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm"
-        >
-          Sign in to comment
-        </button>
-      );
-    }
-
-    // Get current URL for redirect after auth
-    const currentUrl = typeof window !== "undefined" ? `${window.location.pathname}#comments` : "/";
-    const redirectUrl = typeof window !== "undefined" 
-      ? `${window.location.origin}/auth/callback?next=${encodeURIComponent(currentUrl)}`
-      : "/auth/callback";
-
+  if (session) {
     return (
-      <div className="border border-zinc-200 dark:border-zinc-800 p-6 rounded-lg max-w-md bg-white dark:bg-zinc-900">
-        <div className="mb-4 flex items-center justify-between">
-          <h3 className="font-medium">Sign in to comment</h3>
-          <button
-            onClick={() => setShowAuth(false)}
-            className="text-zinc-500 hover:text-zinc-900 dark:hover:text-zinc-100"
-          >
-            ✕
-          </button>
-        </div>
-        <Auth
-          supabaseClient={supabase}
-          providers={["google", "github"]}
-          appearance={{ theme: ThemeSupa }}
-          theme="dark"
-          redirectTo={redirectUrl}
-        />
+      <div className="flex items-center gap-3 text-sm mb-6">
+        <span className="text-zinc-600 dark:text-zinc-400">
+          Signed in as {session.user.user_metadata?.name || session.user.user_metadata?.user_name || "User"}
+        </span>
+        <button
+          onClick={() => supabase.auth.signOut()}
+          className="text-zinc-500 hover:text-zinc-900 dark:hover:text-zinc-100"
+        >
+          Sign out
+        </button>
       </div>
     );
   }
 
-  return (
-    <div className="flex items-center gap-3 text-sm">
-      <span className="text-zinc-600 dark:text-zinc-400">
-        Signed in as {session.user.email}
-      </span>
+  if (!showAuth) {
+    return (
       <button
-        className="text-zinc-500 hover:text-zinc-900 dark:hover:text-zinc-100 transition-colors"
-        onClick={() => supabase.auth.signOut()}
+        onClick={() => setShowAuth(true)}
+        className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 mb-6"
       >
-        Sign out
+        Sign in to comment
       </button>
+    );
+  }
+
+  return (
+    <div className="border border-zinc-200 dark:border-zinc-800 p-6 rounded-lg mb-6 max-w-md">
+      <button
+        onClick={() => setShowAuth(false)}
+        className="text-sm text-zinc-500 hover:text-zinc-900 dark:hover:text-zinc-100 mb-4"
+      >
+        ✕ Close
+      </button>
+      <Auth
+        supabaseClient={supabase}
+        providers={["github", "google"]}
+        appearance={{ theme: ThemeSupa }}
+        theme="dark"
+      />
     </div>
   );
 }
