@@ -1,0 +1,14 @@
+@import "@fontsource/inter/400.css";
+@import "@fontsource/inter/600.css";
+@import "@fontsource/caveat/700.css";
+
+@import "tailwindcss";
+
+@theme inline {
+  --font-inter: "Inter", sans-serif;
+  --font-caveat: "Caveat", cursive;
+}
+
+body {
+  font-family: var(--font-inter);
+}
