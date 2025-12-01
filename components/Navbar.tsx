@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useTheme } from "next-themes";
-import { Moon, Sun } from "lucide-react";
+import { Moon, Sun, RssIcon } from "lucide-react";
 import { useEffect, useState } from "react";
 
 export function Navbar() {
@@ -26,17 +26,28 @@ export function Navbar() {
         Blog
       </Link>
 
-      <button
-        className="mt-4"
-        onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
-        aria-label="Toggle theme"
-      >
-        {mounted ? (
-          theme === "dark" ? <Sun size={18} /> : <Moon size={18} />
-        ) : (
-          <div className="w-[18px] h-[18px]" />
-        )}
-      </button>
+      <div className="flex flex-col items-end gap-4 mt-4">
+        <Link
+          href="/rss.xml"
+          className="hover:opacity-70"
+          aria-label="RSS Feed"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          <RssIcon size={18} />
+        </Link>
+
+        <button
+          onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
+          aria-label="Toggle theme"
+        >
+          {mounted ? (
+            theme === "dark" ? <Sun size={18} /> : <Moon size={18} />
+          ) : (
+            <div className="w-[18px] h-[18px]" />
+          )}
+        </button>
+      </div>
     </nav>
   );
 }

@@ -1,8 +1,8 @@
 import Link from "next/link";
 import { getAllPosts } from "@/lib/posts";
 
-export default function BlogPage() {
-  const posts = getAllPosts();
+export default function TagPage({ params }: { params: { tag: string } }) {
+  const posts = getAllPosts().filter((p) => p.tags?.includes(params.tag));
 
   return (
     <div className="max-w-4xl mx-auto">
@@ -10,12 +10,12 @@ export default function BlogPage() {
         className="text-5xl mb-16"
         style={{ fontFamily: "var(--font-caveat)" }}
       >
-        BLOG
+        Posts tagged: #{params.tag}
       </h1>
 
       {posts.length === 0 ? (
         <p className="text-zinc-600 dark:text-zinc-400">
-          No blog posts yet. Check back soon!
+          No posts found with this tag.
         </p>
       ) : (
         <div className="space-y-12">

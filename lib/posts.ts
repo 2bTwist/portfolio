@@ -9,6 +9,7 @@ export interface PostMetadata {
   date: string;
   summary: string;
   slug: string;
+  tags?: string[];
 }
 
 export function getAllPosts(): PostMetadata[] {
@@ -30,6 +31,7 @@ export function getAllPosts(): PostMetadata[] {
         date: data.date,
         summary: data.summary,
         slug: filename.replace(/\.mdx?$/, ""),
+        tags: data.tags ?? [],
       };
     })
     .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
