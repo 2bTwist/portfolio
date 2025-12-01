@@ -50,9 +50,9 @@ export function AuthButton() {
     );
   }
 
-  // Use current URL with #comments anchor for redirect
+  // Use current URL for redirect - Supabase will handle it client-side
   const redirectTo = typeof window !== "undefined" 
-    ? `${window.location.origin}/auth/callback?returnTo=${encodeURIComponent(window.location.pathname + '#comments')}`
+    ? window.location.href
     : undefined;
 
   return (
