@@ -14,7 +14,7 @@ export default function HomePage() {
       </p>
 
       {/* Description */}
-      <p className="text-neutral-600 dark:text-neutral-400 max-w-xl leading-relaxed">
+      <p className="text-zinc-600 dark:text-zinc-400 max-w-xl leading-relaxed">
         I build scalable backend systems and products. Currently working on PeerPush.
         Interested in distributed systems, APIs, and developer tools.
       </p>
@@ -27,7 +27,7 @@ export default function HomePage() {
 
         <div className="flex items-center gap-10">
           <a
-            href="https://github.com/yourusername"
+            href="https://github.com/2bTwist"
             className="flex gap-2 items-center hover:opacity-70"
             target="_blank"
             rel="noopener noreferrer"
@@ -36,7 +36,7 @@ export default function HomePage() {
           </a>
 
           <a
-            href="https://linkedin.com/in/yourusername"
+            href="https://linkedin.com/in/edmond-batch"
             className="flex gap-2 items-center hover:opacity-70"
             target="_blank"
             rel="noopener noreferrer"
@@ -45,7 +45,7 @@ export default function HomePage() {
           </a>
 
           <a
-            href="mailto:youremail@example.com"
+            href="mailto:ndanjiedmond@gmail.com"
             className="flex gap-2 items-center hover:opacity-70"
           >
             <Mail size={20} /> Email

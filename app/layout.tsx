@@ -15,7 +15,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body className="bg-white dark:bg-neutral-950 text-neutral-900 dark:text-neutral-100">
+      <body className="bg-white dark:bg-zinc-950 text-zinc-900 dark:text-zinc-100">
         <ThemeProvider attribute="class" defaultTheme="light">
           <div className="flex">
             {/* Main content */}
