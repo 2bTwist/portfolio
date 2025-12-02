@@ -18,6 +18,19 @@ export function CommentsList({ slug }: { slug: string }) {
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
 
+  const fetchComments = useCallback(async () => {
+    const { data, error } = await supabase
+      .from("comments")
+      .select("*")
+      .eq("slug", slug)
+      .order("created_at", { ascending: true });
+
+    if (!error && data) {
+      setComments(data);
+    }
+    setLoading(false);
+  }, [slug]);
+
   useEffect(() => {
     supabase.auth.getSession().then(({ data }) => setSession(data.session));
 
@@ -55,19 +68,6 @@ export function CommentsList({ slug }: { slug: string }) {
       supabase.removeChannel(channel);
     };
   }, [slug, fetchComments]);
-
-  const fetchComments = useCallback(async () => {
-    const { data, error } = await supabase
-      .from("comments")
-      .select("*")
-      .eq("slug", slug)
-      .order("created_at", { ascending: true });
-
-    if (!error && data) {
-      setComments(data);
-    }
-    setLoading(false);
-  }, [slug]);
 
   async function deleteComment(id: number) {
     const { error } = await supabase.from("comments").delete().eq("id", id);
