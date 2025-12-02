@@ -32,16 +32,21 @@ export function CommentsList({ slug }: { slug: string }) {
   }, [slug]);
 
   useEffect(() => {
+    // Get initial session
     supabase.auth.getSession().then(({ data }) => setSession(data.session));
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      (_event, session) => setSession(session)
-    );
+    // Listen for auth changes
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_event, session) => {
+      setSession(session);
+    });
 
     return () => subscription.unsubscribe();
   }, []);
 
   useEffect(() => {
+    // Fetch comments initially
     fetchComments();
 
     // Subscribe to realtime updates
@@ -55,14 +60,11 @@ export function CommentsList({ slug }: { slug: string }) {
           table: "comments",
           filter: `slug=eq.${slug}`,
         },
-        (payload) => {
-          console.log("Comment change:", payload);
+        () => {
           fetchComments();
         }
       )
-      .subscribe((status) => {
-        console.log("Realtime status:", status);
-      });
+      .subscribe();
 
     return () => {
       supabase.removeChannel(channel);

@@ -13,12 +13,14 @@ export function AuthButton() {
   useEffect(() => {
     supabase.auth.getSession().then(({ data }) => setSession(data.session));
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      (_event, session) => {
-        setSession(session);
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_event, session) => {
+      setSession(session);
+      if (session) {
         setShowAuth(false);
       }
-    );
+    });
 
     return () => subscription.unsubscribe();
   }, []);
@@ -27,7 +29,11 @@ export function AuthButton() {
     return (
       <div className="flex items-center gap-3 text-sm mb-6">
         <span className="text-zinc-600 dark:text-zinc-400">
-          Signed in as {session.user.user_metadata?.name || session.user.user_metadata?.user_name || session.user.user_metadata?.full_name || "User"}
+          Signed in as{" "}
+          {session.user.user_metadata?.name ||
+            session.user.user_metadata?.user_name ||
+            session.user.user_metadata?.full_name ||
+            "User"}
         </span>
         <button
           onClick={() => supabase.auth.signOut()}
@@ -50,11 +56,6 @@ export function AuthButton() {
     );
   }
 
-  // Use current URL with #comments anchor for redirect
-  const redirectTo = typeof window !== "undefined" 
-    ? `${window.location.origin}${window.location.pathname}#comments`
-    : undefined;
-
   return (
     <div className="border border-zinc-200 dark:border-zinc-800 p-6 rounded-lg mb-6 max-w-md">
       <button
@@ -68,7 +69,6 @@ export function AuthButton() {
         providers={["github", "google"]}
         appearance={{ theme: ThemeSupa }}
         theme="dark"
-        redirectTo={redirectTo}
       />
     </div>
   );
