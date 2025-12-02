@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { supabase } from "@/lib/supabase";
 import { Trash2 } from "lucide-react";
 import type { Session } from "@supabase/supabase-js";
@@ -54,9 +54,9 @@ export function CommentsList({ slug }: { slug: string }) {
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [slug]);
+  }, [slug, fetchComments]);
 
-  async function fetchComments() {
+  const fetchComments = useCallback(async () => {
     const { data, error } = await supabase
       .from("comments")
       .select("*")
@@ -67,7 +67,7 @@ export function CommentsList({ slug }: { slug: string }) {
       setComments(data);
     }
     setLoading(false);
-  }
+  }, [slug]);
 
   async function deleteComment(id: number) {
     const { error } = await supabase.from("comments").delete().eq("id", id);

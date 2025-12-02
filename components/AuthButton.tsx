@@ -27,7 +27,7 @@ export function AuthButton() {
     return (
       <div className="flex items-center gap-3 text-sm mb-6">
         <span className="text-zinc-600 dark:text-zinc-400">
-          Signed in as {session.user.user_metadata?.name || session.user.user_metadata?.user_name || "User"}
+          Signed in as {session.user.user_metadata?.name || session.user.user_metadata?.user_name || session.user.user_metadata?.full_name || "User"}
         </span>
         <button
           onClick={() => supabase.auth.signOut()}
@@ -50,9 +50,9 @@ export function AuthButton() {
     );
   }
 
-  // Use current URL for redirect - Supabase will handle it client-side
+  // Use current URL with #comments anchor for redirect
   const redirectTo = typeof window !== "undefined" 
-    ? window.location.href
+    ? `${window.location.origin}${window.location.pathname}#comments`
     : undefined;
 
   return (

@@ -24,10 +24,10 @@ export function CommentForm({ slug }: { slug: string }) {
 
     setLoading(true);
 
-    // Extract name from user metadata (GitHub username or Google name)
+    // Extract name from user metadata - use same logic as AuthButton display
     const userName =
-      session.user.user_metadata?.user_name ||
       session.user.user_metadata?.name ||
+      session.user.user_metadata?.user_name ||
       session.user.user_metadata?.full_name ||
       "Anonymous";
 
