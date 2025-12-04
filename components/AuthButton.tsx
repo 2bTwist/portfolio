@@ -56,6 +56,12 @@ export function AuthButton() {
     );
   }
 
+  // Build redirect URL with callback route
+  const redirectTo =
+    typeof window !== "undefined"
+      ? `${window.location.origin}/auth/callback?redirect_to=${encodeURIComponent(window.location.pathname)}`
+      : undefined;
+
   return (
     <div className="border border-zinc-200 dark:border-zinc-800 p-6 rounded-lg mb-6 max-w-md">
       <button
@@ -69,6 +75,7 @@ export function AuthButton() {
         providers={["github", "google"]}
         appearance={{ theme: ThemeSupa }}
         theme="dark"
+        redirectTo={redirectTo}
       />
     </div>
   );
