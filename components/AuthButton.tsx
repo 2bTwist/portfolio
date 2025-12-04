@@ -60,7 +60,7 @@ export function AuthButton() {
   const redirectTo =
     typeof window !== "undefined"
       ? `${window.location.origin}/auth/callback?redirect_to=${encodeURIComponent(window.location.pathname)}`
-      : undefined;
+      : "https://eddyb.dev/auth/callback";
 
   return (
     <div className="border border-zinc-200 dark:border-zinc-800 p-6 rounded-lg mb-6 max-w-md">
