@@ -21,25 +21,23 @@ export async function GET(request: Request) {
     if (!error) {
       // Build the redirect URL
       const forwardedHost = request.headers.get("x-forwarded-host");
-      const isLocalEnv = process.env.NODE_ENV === "development";
 
       console.log("[Auth Callback] Forwarded host:", forwardedHost);
-      console.log("[Auth Callback] Is local:", isLocalEnv);
       console.log("[Auth Callback] Origin:", origin);
 
-      if (isLocalEnv) {
-        const url = `${origin}${redirectTo}`;
-        console.log("[Auth Callback] Redirecting (local) to:", url);
-        return NextResponse.redirect(url);
-      } else if (forwardedHost) {
-        const url = `https://${forwardedHost}${redirectTo}`;
-        console.log("[Auth Callback] Redirecting (prod) to:", url);
-        return NextResponse.redirect(url);
+      // Determine redirect URL
+      let redirectUrl: string;
+
+      if (forwardedHost && !forwardedHost.includes("localhost")) {
+        // Production on Vercel - use forwarded host with https
+        redirectUrl = `https://${forwardedHost}${redirectTo}`;
       } else {
-        const url = `${origin}${redirectTo}`;
-        console.log("[Auth Callback] Redirecting (fallback) to:", url);
-        return NextResponse.redirect(url);
+        // Local development or localhost - use origin as-is
+        redirectUrl = `${origin}${redirectTo}`;
       }
+
+      console.log("[Auth Callback] Redirecting to:", redirectUrl);
+      return NextResponse.redirect(redirectUrl);
     } else {
       console.log("[Auth Callback] Error exchanging code:", error);
     }
