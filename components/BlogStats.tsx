@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useCallback } from "react";
 import { EyeIcon, HeartIcon } from "lucide-react";
-import { supabase } from "@/lib/supabase";
+import { createClient } from "@/lib/supabase/client";
 
 interface BlogStatsProps {
   slug: string;
@@ -13,6 +13,7 @@ export function BlogStats({ slug }: BlogStatsProps) {
   const [likes, setLikes] = useState<number>(0);
   const [hasLiked, setHasLiked] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState(true);
+  const supabase = createClient();
 
   const fetchStats = useCallback(async () => {
     try {
@@ -33,7 +34,7 @@ export function BlogStats({ slug }: BlogStatsProps) {
     } finally {
       setIsLoading(false);
     }
-  }, [slug]);
+  }, [slug, supabase]);
 
   const incrementViews = useCallback(async () => {
     try {
@@ -85,7 +86,7 @@ export function BlogStats({ slug }: BlogStatsProps) {
     } finally {
       setIsLoading(false);
     }
-  }, [slug]);
+  }, [slug, supabase]);
 
   useEffect(() => {
     // Check if user has already liked this post

@@ -1,13 +1,14 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { supabase } from "@/lib/supabase";
+import { createClient } from "@/lib/supabase/client";
 import type { Session } from "@supabase/supabase-js";
 
 export function CommentForm({ slug }: { slug: string }) {
   const [session, setSession] = useState<Session | null>(null);
   const [content, setContent] = useState("");
   const [loading, setLoading] = useState(false);
+  const supabase = createClient();
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data }) => setSession(data.session));
@@ -17,7 +18,7 @@ export function CommentForm({ slug }: { slug: string }) {
     );
 
     return () => subscription.unsubscribe();
-  }, []);
+  }, [supabase.auth]);
 
   async function handleSubmit() {
     if (!session || !content.trim()) return;

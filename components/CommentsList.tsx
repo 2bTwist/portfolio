@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState, useCallback } from "react";
-import { supabase } from "@/lib/supabase";
+import { createClient } from "@/lib/supabase/client";
 import { Trash2 } from "lucide-react";
 import type { Session } from "@supabase/supabase-js";
 
@@ -17,6 +17,7 @@ export function CommentsList({ slug }: { slug: string }) {
   const [comments, setComments] = useState<Comment[]>([]);
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
+  const supabase = createClient();
 
   const fetchComments = useCallback(async () => {
     const { data, error } = await supabase
@@ -29,7 +30,7 @@ export function CommentsList({ slug }: { slug: string }) {
       setComments(data);
     }
     setLoading(false);
-  }, [slug]);
+  }, [slug, supabase]);
 
   useEffect(() => {
     // Get initial session
@@ -43,7 +44,7 @@ export function CommentsList({ slug }: { slug: string }) {
     });
 
     return () => subscription.unsubscribe();
-  }, []);
+  }, [supabase.auth]);
 
   useEffect(() => {
     // Fetch comments initially
@@ -69,7 +70,7 @@ export function CommentsList({ slug }: { slug: string }) {
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [slug, fetchComments]);
+  }, [slug, fetchComments, supabase]);
 
   async function deleteComment(id: number) {
     const { error } = await supabase.from("comments").delete().eq("id", id);
