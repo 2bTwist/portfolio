@@ -7,7 +7,7 @@ export default function BlogPage() {
   return (
     <div className="max-w-4xl mx-auto">
       <h1
-        className="text-5xl mb-16"
+        className="text-4xl sm:text-5xl mb-16"
         style={{ fontFamily: "var(--font-caveat)" }}
       >
         BLOG

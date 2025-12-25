@@ -75,7 +75,7 @@ export default async function BlogPost({
         </Link>
 
         <h1
-          className="text-5xl mb-4 text-center"
+          className="text-3xl sm:text-5xl mb-4 text-center"
           style={{ fontFamily: "var(--font-caveat)" }}
         >
           {data.title as string}
@@ -102,7 +102,7 @@ export default async function BlogPost({
           </div>
         )}
 
-        <div className="prose prose-zinc dark:prose-invert max-w-none">
+        <div className="prose prose-zinc dark:prose-invert max-w-none overflow-x-hidden">
           {MDXContent}
         </div>
 

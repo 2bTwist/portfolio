@@ -15,7 +15,7 @@ export function Navbar() {
   }, []);
 
   return (
-    <nav className="w-40 pr-10 text-sm flex flex-col items-end gap-4 fixed right-0 top-10">
+    <nav className="fixed top-0 left-0 right-0 px-4 py-3 flex flex-row items-center justify-center gap-6 bg-white dark:bg-zinc-950 border-b border-zinc-200 dark:border-zinc-800 lg:border-0 lg:bg-transparent lg:w-40 lg:pr-10 lg:py-0 lg:flex-col lg:items-end lg:gap-4 lg:right-0 lg:top-10 lg:left-auto text-sm z-50">
       <Link href="/" className="hover:opacity-70">
         Home
       </Link>
@@ -26,7 +26,7 @@ export function Navbar() {
         Blog
       </Link>
 
-      <div className="flex flex-col items-end gap-4 mt-4">
+      <div className="flex flex-row items-center gap-4 lg:flex-col lg:items-end lg:mt-4">
         <Link
           href="/rss.xml"
           className="hover:opacity-70"

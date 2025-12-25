@@ -8,9 +8,9 @@ export default function HomePage() {
     <div className="max-w-5xl mx-auto">
 
       {/* Header with name + icons */}
-      <div className="flex items-center gap-6 mb-4">
+      <div className="flex flex-col sm:flex-row sm:items-center gap-4 sm:gap-6 mb-4">
         <h1
-          className="text-5xl tracking-wide"
+          className="text-4xl sm:text-5xl tracking-wide"
           style={{ fontFamily: "var(--font-caveat)" }}
         >
           EDMOND NDANJI
