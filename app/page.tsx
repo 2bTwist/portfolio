@@ -5,7 +5,7 @@ import { ProjectsSection } from "@/components/ProjectsSection";
 
 export default function HomePage() {
   return (
-    <div className="max-w-5xl">
+    <div className="max-w-5xl mx-auto">
 
       {/* Header with name + icons */}
       <div className="flex items-center gap-6 mb-4">

@@ -33,7 +33,7 @@ export function AuthButton() {
   async function handleSignIn(provider: "github" | "google") {
     const redirectTo =
       typeof window !== "undefined"
-        ? `${window.location.origin}/auth/callback?redirect_to=${encodeURIComponent(window.location.pathname)}`
+        ? `${window.location.origin}/auth/callback?redirect_to=${encodeURIComponent(window.location.pathname + "#comments")}`
         : "https://eddyb.dev/auth/callback";
 
     await supabase.auth.signInWithOAuth({
