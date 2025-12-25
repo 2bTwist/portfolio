@@ -7,6 +7,7 @@ const nextConfig: NextConfig = {
     mdxRs: true,
   },
   pageExtensions: ["ts", "tsx", "md", "mdx"],
+  transpilePackages: ["next-mdx-remote"],
 };
 
 const withMDX = createMDX({
