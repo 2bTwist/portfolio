@@ -5,7 +5,7 @@ export function ProjectsSection() {
   return (
     <section id="projects" className="mt-32 mb-32">
       <h2
-        className="text-4xl mb-16"
+        className="text-3xl sm:text-4xl mb-16"
         style={{ fontFamily: "var(--font-caveat)" }}
       >
         PROJECTS
@@ -15,7 +15,7 @@ export function ProjectsSection() {
         <div key={project.title} className="mb-20">
           <div className="flex items-center justify-between">
             <h3
-              className="text-3xl"
+              className="text-2xl sm:text-3xl"
               style={{ fontFamily: "var(--font-caveat)" }}
             >
               {project.title}
@@ -34,7 +34,7 @@ export function ProjectsSection() {
             )}
           </div>
 
-          <p className="mt-2 text-zinc-700 dark:text-zinc-300 text-lg">
+          <p className="mt-2 text-zinc-700 dark:text-zinc-300 text-base sm:text-lg">
             {project.summary}
           </p>
 

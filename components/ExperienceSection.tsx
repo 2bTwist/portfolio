@@ -4,7 +4,7 @@ export function ExperienceSection() {
   return (
     <section className="mt-32">
       <h2
-        className="text-3xl mb-10"
+        className="text-2xl sm:text-3xl mb-10"
         style={{ fontFamily: "var(--font-caveat)" }}
       >
         EXPERIENCE
@@ -19,7 +19,7 @@ export function ExperienceSection() {
             >
               {/* Left side */}
               <div className="md:col-span-2 space-y-2">
-                <p className="font-semibold text-lg">
+                <p className="font-semibold text-base sm:text-lg">
                   {role.title}, {item.company}
                 </p>
                 <p className="text-zinc-600 dark:text-zinc-400">
@@ -28,7 +28,7 @@ export function ExperienceSection() {
               </div>
 
               {/* Date */}
-              <div className="flex md:justify-end text-lg">
+              <div className="flex md:justify-end text-base sm:text-lg">
                 {role.dateRange}
               </div>
             </div>

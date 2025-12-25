@@ -107,8 +107,8 @@ export default async function BlogPost({
         </div>
 
         {/* Prev/Next Navigation */}
-        <div className="flex justify-between mt-20 pt-10 border-t border-zinc-200 dark:border-zinc-800 text-sm">
-          <div className="flex-1">
+        <div className="flex flex-col sm:flex-row sm:justify-between gap-6 mt-20 pt-10 border-t border-zinc-200 dark:border-zinc-800 text-sm">
+          <div className="sm:flex-1">
             {prevPost && (
               <Link
                 href={`/blog/${prevPost.slug}`}
@@ -122,7 +122,7 @@ export default async function BlogPost({
             )}
           </div>
 
-          <div className="flex-1 text-right">
+          <div className="sm:flex-1 sm:text-right">
             {nextPost && (
               <Link
                 href={`/blog/${nextPost.slug}`}
@@ -140,7 +140,7 @@ export default async function BlogPost({
 
       {/* Comments */}
       <div id="comments" className="max-w-4xl mx-auto mt-16 pt-12 border-t border-zinc-200 dark:border-zinc-800">
-        <h2 className="text-3xl mb-6" style={{ fontFamily: "var(--font-caveat)" }}>
+        <h2 className="text-2xl sm:text-3xl mb-6" style={{ fontFamily: "var(--font-caveat)" }}>
           Comments
         </h2>
         <AuthButton />

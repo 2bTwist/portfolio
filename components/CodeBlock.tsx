@@ -25,7 +25,7 @@ export function CodeBlock(props: any) {
         {({ style, tokens, getLineProps, getTokenProps }) => (
           <pre
             style={style}
-            className="p-4 text-sm overflow-x-auto bg-zinc-50 dark:bg-zinc-900 leading-relaxed"
+            className="p-3 sm:p-4 text-xs sm:text-sm overflow-x-auto bg-zinc-50 dark:bg-zinc-900 leading-relaxed"
           >
             {tokens.map((line, i) => {
               const { className: _, ...lineProps } = getLineProps({ line });
