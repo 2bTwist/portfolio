@@ -4,15 +4,35 @@
    policy), which is exactly the "audible after first interaction" behaviour. */
 
 let ctx: AudioContext | null = null;
+let creating = false;
+
+// Warm up the AudioContext OFF the interaction's critical path. `new
+// AudioContext()` costs ~20-60ms (hardware audio init); doing it inline in the
+// first click would land entirely in that click's INP. Instead the first
+// gesture schedules creation in a separate task — the first sound or two are
+// skipped while it warms up, then every later click plays for ~free.
+function ensureCtx() {
+  if (ctx || creating || typeof window === "undefined") return;
+  const AC =
+    window.AudioContext || (window as unknown as { webkitAudioContext?: typeof AudioContext }).webkitAudioContext;
+  if (!AC) return;
+  creating = true;
+  setTimeout(() => {
+    try {
+      ctx = new AC();
+    } catch {
+      // no Web Audio available
+    }
+    creating = false;
+  }, 0);
+}
 
 function getCtx(): AudioContext | null {
-  if (typeof window === "undefined") return null;
   if (!ctx) {
-    const AC =
-      window.AudioContext || (window as unknown as { webkitAudioContext?: typeof AudioContext }).webkitAudioContext;
-    if (!AC) return null;
-    ctx = new AC();
+    ensureCtx();
+    return null;
   }
+  // resume() runs inside the pointer gesture, satisfying the autoplay policy
   if (ctx.state === "suspended") void ctx.resume();
   return ctx;
 }

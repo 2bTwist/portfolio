@@ -31,13 +31,26 @@ export function CustomCursor() {
     let rx = tx;
     let ry = ty;
     let raf = 0;
+    let running = false;
 
+    // The ring eases toward the pointer; the loop self-suspends once it has
+    // caught up, so there's no idle rAF burning CPU (and the page isn't held in
+    // perpetual animation). onMove restarts it.
     const loop = () => {
-      // ring eases toward the pointer; dot is already snapped in onMove
       rx += (tx - rx) * 0.18;
       ry += (ty - ry) * 0.18;
       ring.style.transform = `translate3d(${rx}px, ${ry}px, 0)`;
+      if (Math.abs(tx - rx) < 0.3 && Math.abs(ty - ry) < 0.3) {
+        running = false;
+        return;
+      }
       raf = requestAnimationFrame(loop);
+    };
+    const start = () => {
+      if (!running) {
+        running = true;
+        raf = requestAnimationFrame(loop);
+      }
     };
 
     const onMove = (e: PointerEvent) => {
@@ -46,6 +59,7 @@ export function CustomCursor() {
       dot.style.transform = `translate3d(${tx}px, ${ty}px, 0)`;
       const hovering = !!(e.target as Element | null)?.closest?.(INTERACTIVE);
       root.dataset.cursorHover = hovering ? "true" : "false";
+      start();
     };
     const onDown = () => (root.dataset.cursorActive = "true");
     const onUp = () => (root.dataset.cursorActive = "false");
@@ -57,7 +71,7 @@ export function CustomCursor() {
     window.addEventListener("pointerup", onUp, { passive: true });
     document.addEventListener("pointerleave", onLeave);
     document.addEventListener("pointerenter", onEnter);
-    raf = requestAnimationFrame(loop);
+    start();
 
     return () => {
       cancelAnimationFrame(raf);
