@@ -567,6 +567,235 @@ body {
   transform: scale(0.88);
 }
 
+/* ── Reading surface (Phase 4: writing/MDX) ──────────────────────────────────
+   The blog/content routes render MDX into .prose-content. Styles use the palette
+   vars so the reading column stays coherent when the theme switches. No Tailwind
+   typography plugin — these are the only prose rules and they're authored, so
+   Lightning CSS keeps them. */
+
+.reading-progress {
+  position: fixed;
+  top: 0;
+  left: 0;
+  height: 3px;
+  background: var(--accent);
+  z-index: 60;
+  transition: width 80ms linear;
+}
+@media (prefers-reduced-motion: reduce) {
+  .reading-progress {
+    transition: none;
+  }
+}
+
+.prose-content {
+  color: var(--text);
+  line-height: 1.75;
+  font-size: 1.02rem;
+}
+.prose-content > * + * {
+  margin-top: 1.15rem;
+}
+.prose-content h1,
+.prose-content h2,
+.prose-content h3 {
+  font-family: var(--display);
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  color: var(--text);
+  line-height: 1.25;
+}
+.prose-content h1 {
+  font-size: 1.9rem;
+  margin-top: 2.5rem;
+}
+.prose-content h2 {
+  font-size: 1.5rem;
+  margin-top: 2.25rem;
+}
+.prose-content h3 {
+  font-size: 1.2rem;
+  margin-top: 1.75rem;
+}
+.prose-content a {
+  color: var(--accent);
+  text-underline-offset: 2px;
+}
+.prose-content a:hover {
+  opacity: 0.8;
+}
+.prose-content strong {
+  color: var(--text);
+  font-weight: 600;
+}
+.prose-content ul,
+.prose-content ol {
+  padding-left: 1.4rem;
+}
+.prose-content li + li {
+  margin-top: 0.4rem;
+}
+.prose-content ul {
+  list-style: disc;
+}
+.prose-content ol {
+  list-style: decimal;
+}
+.prose-content blockquote {
+  border-left: 3px solid var(--border-press);
+  padding-left: 1rem;
+  color: var(--muted);
+  font-style: italic;
+}
+.prose-content hr {
+  border: none;
+  border-top: 1px solid var(--border);
+  margin: 2.5rem 0;
+}
+/* Inline code (not inside a fenced .code-block). */
+.prose-content :not(pre) > code {
+  font-family: var(--mono);
+  font-size: 0.85em;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 5px;
+  padding: 0.1em 0.35em;
+}
+
+/* Mark — inline emphasis variants used inside posts. */
+.mark--highlight {
+  background: color-mix(in srgb, var(--accent) 22%, transparent);
+  padding: 0.05em 0.25em;
+  border-radius: 4px;
+}
+.mark--code {
+  font-family: var(--mono);
+  font-size: 0.85em;
+  color: var(--accent);
+  background: var(--bg);
+  border-radius: 4px;
+  padding: 0.1em 0.35em;
+}
+.mark--bold {
+  font-weight: 700;
+  color: var(--text);
+}
+.mark--gradient {
+  background: linear-gradient(90deg, var(--accent), var(--accent-press));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  font-weight: 700;
+}
+.mark--underline {
+  text-decoration: underline;
+  text-decoration-color: var(--accent);
+  text-decoration-thickness: 2px;
+  text-underline-offset: 2px;
+}
+
+/* Callout — tinted box, colored left rail + icon, type-keyed accent color. */
+.callout {
+  display: flex;
+  gap: 0.7rem;
+  margin: 1.6rem 0;
+  padding: 0.9rem 1rem;
+  border-radius: 10px;
+  border: 1px solid color-mix(in srgb, var(--c) 35%, var(--border));
+  border-left: 3px solid var(--c);
+  background: color-mix(in srgb, var(--c) 9%, var(--surface));
+  color: var(--text);
+}
+.callout-icon {
+  flex-shrink: 0;
+  margin-top: 0.15rem;
+  color: var(--c);
+}
+.callout-body > :first-child {
+  margin-top: 0;
+}
+.callout-body > :last-child {
+  margin-bottom: 0;
+}
+.callout--note {
+  --c: #3b6ea5;
+}
+.callout--tip {
+  --c: #3f8f5b;
+}
+.callout--warning {
+  --c: #b07d23;
+}
+.callout--success {
+  --c: #3f9d6b;
+}
+.callout--link {
+  --c: var(--accent);
+}
+
+/* Fenced code block (CodeBlock.tsx + prism-react-renderer). */
+.code-block {
+  position: relative;
+  margin: 1.8rem 0;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  overflow: hidden;
+  background: var(--surface);
+}
+.code-title {
+  padding: 0.5rem 0.85rem;
+  font-size: 0.78rem;
+  color: var(--muted);
+  background: var(--bg);
+  border-bottom: 1px solid var(--border);
+}
+.code-pre {
+  margin: 0;
+  padding: 0.85rem 0;
+  overflow-x: auto;
+  font-family: var(--mono);
+  font-size: 0.82rem;
+  line-height: 1.6;
+  background: var(--surface);
+}
+.code-line {
+  display: flex;
+  padding: 0 0.95rem;
+}
+.code-ln {
+  flex-shrink: 0;
+  width: 2rem;
+  padding-right: 1rem;
+  text-align: right;
+  user-select: none;
+  color: var(--muted);
+  opacity: 0.6;
+}
+.code-content {
+  flex: 1;
+  white-space: pre;
+}
+.code-copy {
+  position: absolute;
+  top: 0.6rem;
+  right: 0.6rem;
+  z-index: 1;
+  display: inline-flex;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--muted);
+  border-radius: 6px;
+  padding: 0.3rem;
+  cursor: pointer;
+  transition:
+    color 140ms ease-out,
+    border-color 140ms ease-out;
+}
+.code-copy:hover {
+  color: var(--text);
+  border-color: var(--border-press);
+}
+
 /* ── Braille-dot loader (Phase 3) ────────────────────────────────────────────
    Frames cycled via the content property; reduced-motion settles on a full cell. */
 .braille-loader::after {

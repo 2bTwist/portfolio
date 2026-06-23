@@ -8,6 +8,7 @@
 import { useEffect, useRef, useState, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import { NAV } from "@/app/lib/nav";
+import { searchPosts } from "@/app/lib/search";
 import { PALETTES } from "@/app/lib/palette";
 import { profile } from "@/data/profile";
 import { TerminalIcon } from "@/components/feel/animated-icons";
@@ -91,12 +92,16 @@ export default function Terminal() {
           print("usage: grep <term>");
           break;
         }
-        const hits = NAV.filter((n) => n.name.toLowerCase().includes(arg.toLowerCase()));
-        print(
-          hits.length
-            ? hits.map((h) => `${h.name}  ${h.href}`).join("\n")
-            : `no matches for "${arg}" (full-text search lands with the blog)`,
-        );
+        const fileHits = NAV.filter((n) => n.name.toLowerCase().includes(arg.toLowerCase()));
+        if (fileHits.length) print(fileHits.map((h) => `${h.name}  ${h.href}`).join("\n"));
+        // Full-text post search loads its index lazily, so results stream in.
+        searchPosts(arg).then((postHits) => {
+          if (postHits.length) {
+            print(postHits.map((p) => `${p.title}  /writing/${p.slug}`).join("\n"));
+          } else if (!fileHits.length) {
+            print(`no matches for "${arg}"`);
+          }
+        });
         break;
       }
       case "open":

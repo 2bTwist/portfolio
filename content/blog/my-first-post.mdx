@@ -1,0 +1,101 @@
+---
+title: "My First Blog Post"
+date: "2025-01-15"
+summary: "Welcome to my blog! This is my first post exploring web development and building in public."
+tags: ["web-dev", "mdx", "nextjs"]
+---
+
+# Welcome to My Blog
+
+Hey there! 👋
+
+This is my first blog post, and I'm excited to share my journey in software engineering, product development, and everything I'm learning along the way.
+
+<Callout type="note">
+**Note:** This post doubles as a feature showcase for the blog itself. Feel free to skip if you're just here for the content, this is mainly me testing that everything works.
+</Callout>
+
+## What You Can Expect
+
+I'll be writing about:
+
+- **Backend Engineering**: Scalable systems, APIs, and architecture patterns I encounter in real projects
+- **Product Development**: Building things people actually want to use (and the lessons learned from failures)
+- **Technologies I'm Exploring**: New tools, frameworks, and best practices worth sharing
+
+Think of this as a public learning journal mixed with technical deep-dives. No fluff, just practical insights from building real things.
+
+## Quick Feature Tour
+
+Since this is the inaugural post, let me show you some of the features built into this blog:
+
+### Rich Text Formatting
+
+You'll see these throughout my posts to emphasize key points:
+
+Want to <Mark variant="highlight">highlight something important</Mark>? A tinted background works great.
+
+Need to reference <Mark variant="code">inline code like api.get('/users')</Mark>? Got you covered.
+
+Sometimes I'll use <Mark variant="bold">bold emphasis</Mark> for critical takeaways, or <Mark variant="gradient">gradient text</Mark> when I'm feeling fancy.
+
+### Callouts for Important Info
+
+I use these boxes to draw attention to specific types of information:
+
+<Callout type="tip">
+**Pro tip:** These callouts appear throughout my posts to highlight useful insights, warnings, or additional context you might find valuable.
+</Callout>
+
+<Callout type="warning">
+Watch out for these, they warn you about common pitfalls or things that might trip you up.
+</Callout>
+
+<Callout type="success">
+These celebrate wins or confirm when something worked as expected.
+</Callout>
+
+### Code Examples
+
+Since I write about engineering, expect lots of code blocks with syntax highlighting, line numbers, and a copy button:
+
+```typescript
+// Here's a simple example, notice the copy button in the top-right.
+interface User {
+  id: string;
+  name: string;
+  email: string;
+}
+
+async function fetchUser(id: string): Promise<User> {
+  const response = await fetch(`/api/users/${id}`);
+  return response.json();
+}
+```
+
+The syntax highlighting adjusts based on the language (TypeScript, Python, Rust, etc.), making code easier to read.
+
+## Navigation Features
+
+A few things that make reading easier:
+
+- **Reading progress bar**: the accent line at the top tracks how far you've scrolled
+- **Prev/Next links**: at the bottom of posts, navigate chronologically through content
+- **Tags**: click the tags below the title to find related posts
+- **Search**: hit ⌘K or use the terminal's `grep` to find posts by content
+
+## What's Coming Next
+
+I'm planning to write about:
+
+- Building scalable APIs and handling real-world production challenges
+- My approach to system design and making architectural decisions
+- Cool projects I'm working on and the technical problems they solve
+
+If any of these topics interest you, stick around. You can subscribe via RSS to get notified when I publish new posts.
+
+Thanks for reading! 🚀
+
+---
+
+_P.S. If you're wondering "what's with all the feature explanations?", yeah, this post is mostly me making sure everything works. Normal posts won't be this meta, I promise._

@@ -24,12 +24,15 @@ const projectFiles: TreeFile[] = PROJECTS.map((p) => ({
   href: `/projects/${p.id}`,
 }));
 
-/* Hierarchical view for the Explorer. */
+/* Hierarchical view for the Explorer. (Individual posts aren't listed here:
+   nav.ts is imported by client components, so it can't pull the fs-based posts
+   module. Posts are reachable via the writing/ index, ⌘K, and terminal grep.) */
 export const TREE: TreeNode[] = [
   { type: "file", name: "README.md", href: "/" },
   { type: "folder", name: "projects", href: "/projects", children: projectFiles },
   { type: "file", name: "about.md", href: "/about" },
   { type: "file", name: "experience.md", href: "/experience" },
+  { type: "file", name: "writing.md", href: "/writing" },
   { type: "file", name: "contact.md", href: "/contact" },
 ];
 
@@ -42,6 +45,7 @@ export const NAV: NavItem[] = [
   ...projectFiles.map((f) => ({ name: f.name, href: f.href })),
   { name: "about.md", href: "/about" },
   { name: "experience.md", href: "/experience" },
+  { name: "writing.md", href: "/writing" },
   { name: "contact.md", href: "/contact" },
 ];
 
