@@ -8,17 +8,21 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
 import { TREE, type TreeNode } from "@/app/lib/nav";
+import { useMounted } from "@/components/hooks/useMounted";
 import { FileIcon, FolderIcon } from "./FileIcon";
 import { useSession } from "./store";
 
 export function Explorer({ className = "" }: { className?: string }) {
   const pathname = usePathname();
+  // Icons render client-only (after mount) so they stay off the SSR / first-paint
+  // critical path — rendering them server-side regressed Lighthouse LCP ~840ms.
+  const mounted = useMounted();
   return (
     <aside className={className} aria-label="File explorer">
       <div className="ide-explorer-title">~/edmond</div>
       <nav aria-label="Site files">
         {TREE.map((node) => (
-          <Node key={node.href} node={node} pathname={pathname} depth={0} />
+          <Node key={node.href} node={node} pathname={pathname} depth={0} mounted={mounted} />
         ))}
       </nav>
     </aside>
@@ -29,10 +33,12 @@ function Node({
   node,
   pathname,
   depth,
+  mounted,
 }: {
   node: TreeNode;
   pathname: string;
   depth: number;
+  mounted: boolean;
 }) {
   const [open, setOpen] = useState(true);
   const { openTab } = useSession();
@@ -49,7 +55,7 @@ function Node({
         aria-current={active ? "page" : undefined}
         onClick={() => openTab(node.href)}
       >
-        <FileIcon name={node.name} className="ide-file-icon" />
+        {mounted ? <FileIcon name={node.name} className="ide-file-icon" /> : null}
         {node.name}
       </Link>
     );
@@ -77,14 +83,14 @@ function Node({
           style={childActive && pathname !== node.href ? { color: "var(--accent)" } : undefined}
           onClick={() => openTab(node.href)}
         >
-          <FolderIcon open={open} />
+          {mounted ? <FolderIcon open={open} /> : null}
           {node.name}/
         </Link>
       </div>
       <div className="ide-folder" data-open={open}>
         <div className="ide-folder-inner">
           {node.children.map((child) => (
-            <Node key={child.href} node={child} pathname={pathname} depth={depth + 1} />
+            <Node key={child.href} node={child} pathname={pathname} depth={depth + 1} mounted={mounted} />
           ))}
         </div>
       </div>

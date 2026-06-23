@@ -196,7 +196,8 @@ body {
 }
 .ide-row[aria-current="page"] {
   background: var(--bg);
-  color: var(--accent);
+  color: var(--text);
+  font-weight: 600;
 }
 .ide-chevron {
   width: 1rem;
@@ -279,7 +280,7 @@ body {
   padding: 0.4rem 0;
 }
 .ide-tab[data-active="true"] a {
-  color: var(--accent);
+  color: var(--text);
 }
 .ide-tab-close {
   border: none;

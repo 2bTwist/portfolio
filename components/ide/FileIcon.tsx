@@ -1,8 +1,14 @@
 /* File-type + folder icons for the explorer/tabs (Phosphor, duotone for the
-   playful "clicky" look). Imported from the SSR entry so it works in server and
-   client components and tree-shakes to only the icons used. */
+   playful "clicky" look). Imported per-icon from the SSR subpaths (NOT the
+   barrel) — the barrel pulls the whole ~9k-icon index into the server render
+   and added ~840ms to LCP; per-icon subpaths keep only what's used. */
 
-import { File, FileMd, FileTs, FileTsx, Folder, FolderOpen } from "@phosphor-icons/react/ssr";
+import { File } from "@phosphor-icons/react/dist/ssr/File";
+import { FileMd } from "@phosphor-icons/react/dist/ssr/FileMd";
+import { FileTs } from "@phosphor-icons/react/dist/ssr/FileTs";
+import { FileTsx } from "@phosphor-icons/react/dist/ssr/FileTsx";
+import { Folder } from "@phosphor-icons/react/dist/ssr/Folder";
+import { FolderOpen } from "@phosphor-icons/react/dist/ssr/FolderOpen";
 
 const ICON_SIZE = 15;
 

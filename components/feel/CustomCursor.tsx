@@ -8,13 +8,18 @@
    self-suspends once the arrow catches up. Under reduced-motion it snaps 1:1. */
 
 import { useEffect, useRef } from "react";
+import { useMounted } from "@/components/hooks/useMounted";
 
 const INTERACTIVE = "a, button, [role='button'], input, .ide-row, .ide-swatch, .ide-pill, .btn";
 
 export function CustomCursor() {
   const elRef = useRef<HTMLDivElement>(null);
+  // Render client-only (after mount) so the cursor markup stays off the SSR /
+  // first-paint critical path (it's hidden until the first pointer move anyway).
+  const mounted = useMounted();
 
   useEffect(() => {
+    if (!mounted) return;
     if (!window.matchMedia("(pointer: fine)").matches) return;
     const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     // friction: lower = heavier drag. 0.45 feels responsive with a touch of lag.
@@ -83,14 +88,17 @@ export function CustomCursor() {
       delete root.dataset.cursorHover;
       delete root.dataset.cursorActive;
     };
-  }, []);
+  }, [mounted]);
+
+  if (!mounted) return null;
 
   return (
     <div ref={elRef} className="cursor-arrow" aria-hidden="true">
-      {/* solid rounded navigation arrow; path tip at (0,0) = the real pointer */}
+      {/* solid rounded navigation arrow; path tip at (0,0) = the real pointer.
+          Near-vertical left edge so it reads as an upright cursor. */}
       <svg className="cursor-arrow-svg" width="30" height="30" viewBox="-2 -2 30 30" fill="none">
         <path
-          d="M0 0 L19 8 L8.5 10.5 L8 20 Z"
+          d="M0 0 L0 18 L5 13.5 L11.5 15 Z"
           fill="var(--accent)"
           stroke="var(--accent)"
           strokeWidth="3.5"
