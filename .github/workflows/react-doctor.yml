@@ -1,0 +1,39 @@
+# React Doctor — React codebase health (security, performance, correctness,
+# accessibility, bundle-size, architecture). Runs in CI like the perf gates.
+#
+# Telemetry-off (harness rule, matches PERF.md): we run the PINNED local CLI
+# with --no-telemetry (skips the score API, the share URL, and Sentry crash
+# reporting) instead of the hosted millionco/react-doctor action, which posts a
+# health score through their API and needs issues/PR write permissions. So this
+# job needs only `contents: read` and sends nothing off-box.
+#
+# Source: https://github.com/millionco/react-doctor
+
+name: react-doctor
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: react-doctor-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  react-doctor:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # full history so --scope changed can diff the base
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 22, cache: pnpm }
+      - run: pnpm install --frozen-lockfile
+      # Gates on new error-severity findings in changed files. Relax with
+      # --blocking warning (fail on any finding) or --blocking none (advisory).
+      - run: pnpm exec react-doctor --no-telemetry --scope changed --blocking error

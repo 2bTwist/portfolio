@@ -1,0 +1,96 @@
+/* Presentational primitives shared by the content routes. Server components
+   (no "use client") so every route stays SSR'd and crawlable. They read the
+   palette CSS vars set at :root. */
+
+import type { ReactNode } from "react";
+import Link from "next/link";
+
+export function PageHeader({
+  filename,
+  title,
+  lead,
+}: {
+  filename: string;
+  title: string;
+  lead?: ReactNode;
+}) {
+  return (
+    <header className="mb-8">
+      <p className="mono text-sm mb-2" style={{ color: "var(--muted)" }}>
+        {filename}
+      </p>
+      <h1 className="mono text-3xl sm:text-4xl font-bold" style={{ color: "var(--text)" }}>
+        {title}
+      </h1>
+      {lead ? (
+        <p className="mt-4 text-lg leading-relaxed" style={{ color: "var(--text)" }}>
+          {lead}
+        </p>
+      ) : null}
+    </header>
+  );
+}
+
+export function Prose({ children }: { children: ReactNode }) {
+  return <div className="space-y-4 leading-relaxed">{children}</div>;
+}
+
+export function Body({ children }: { children: ReactNode }) {
+  return (
+    <p className="leading-relaxed" style={{ color: "var(--muted)" }}>
+      {children}
+    </p>
+  );
+}
+
+export function Tag({ children }: { children: ReactNode }) {
+  return (
+    <span
+      className="mono text-xs px-2 py-1 rounded-md"
+      style={{ background: "var(--bg)", color: "var(--text)", border: "1px solid var(--border)" }}
+    >
+      {children}
+    </span>
+  );
+}
+
+export function TagRow({ tags }: { tags: string[] }) {
+  return (
+    <div className="flex flex-wrap gap-2">
+      {tags.map((t) => (
+        <Tag key={t}>{t}</Tag>
+      ))}
+    </div>
+  );
+}
+
+/* Tactile action rendered as a real anchor (works without JS, crawlable).
+   The tactile *feel* is rebuilt properly in Phase 3; for now it reuses the
+   existing .btn-tactile with accessible label contrast from the adjusted
+   palette. External links get the right rel/target. */
+export function ActionLink({
+  href,
+  children,
+  variant = "primary",
+}: {
+  href: string;
+  children: ReactNode;
+  variant?: "primary" | "ghost";
+}) {
+  const className =
+    "btn-tactile inline-flex items-center justify-center no-underline" +
+    (variant === "ghost" ? " btn-tactile--ghost" : "");
+  const external = href.startsWith("http");
+  if (external) {
+    return (
+      <a href={href} className={className} target="_blank" rel="noopener noreferrer">
+        {children}
+      </a>
+    );
+  }
+  return (
+    <Link href={href} className={className}>
+      {children}
+    </Link>
+  );
+}

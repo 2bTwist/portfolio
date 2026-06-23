@@ -1,0 +1,24 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>bench A: naive class merge</title>
+  </head>
+  <body>
+    <script type="module">
+      // Example hot-path microbench: a naive class-string merge over many iters.
+      // Replace with the real function under test.
+      function mergeNaive(base, override) {
+        return (base + " " + override).split(" ").filter(Boolean).join(" ");
+      }
+      const start = performance.now();
+      let sink = "";
+      for (let i = 0; i < 200000; i++) {
+        sink = mergeNaive("px-4 py-2 bg-gray-500", i % 2 ? "bg-blue-600" : "bg-red-500");
+      }
+      // tachometer reads this:
+      window.tachometerResult = performance.now() - start;
+      document.body.textContent = sink + " :: " + window.tachometerResult.toFixed(2) + "ms";
+    </script>
+  </body>
+</html>

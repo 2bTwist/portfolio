@@ -1,21 +1,26 @@
-export interface ExperienceItem {
-  company: string;
-  roles: {
-    title: string;
-    description: string;
-    dateRange: string;
-  }[];
-}
+/* Work history timeline. Placeholder until Phase 6. */
 
-export const experience: ExperienceItem[] = [
+export type ExperienceEntry = {
+  role: string;
+  org?: string;
+  period: string;
+  summary: string;
+  highlights?: string[];
+};
+
+export const EXPERIENCE: ExperienceEntry[] = [
   {
-    company: "Cisco",
-    roles: [
-      {
-        title: "Software Engineering Intern",
-        description: "Integrated a browser-based MCP client chatbot to test tools directly in-app, reducing testing time by 40% and streamlining engineering workflows.",
-        dateRange: "Jun 2025 – Nov 2025",
-      },
+    role: "Software Engineer",
+    period: "Now",
+    summary: "Building full-stack and mobile products end to end.",
+    highlights: [
+      "Ship features across web, backend services, and native apps.",
+      "Own the path from interaction detail to deployed system.",
     ],
+  },
+  {
+    role: "Software Engineer",
+    period: "Earlier",
+    summary: "Shipping features across web, backend services, and native apps.",
   },
 ];

@@ -39,3 +39,11 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# perf harness + e2e artifacts (generated)
+/perf-results
+/test-results
+/playwright-report
+
+# stray
+.swift-version

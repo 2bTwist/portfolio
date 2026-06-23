@@ -1,22 +1,361 @@
-@import "@fontsource/inter/400.css";
-@import "@fontsource/inter/600.css";
-@import "@fontsource/caveat/700.css";
-
 @import "tailwindcss";
 
-@theme inline {
-  --font-inter: "Inter", sans-serif;
-  --font-caveat: "Caveat", cursive;
-}
-
-@variant dark (&:is(.dark *));
-
-html {
-  scroll-behavior: smooth;
+/* Font tokens live here (referenced in-CSS, so Lightning keeps them). The
+   PALETTE color vars are injected as inline styles on <body> in layout.tsx —
+   they're referenced only from inline styles / .btn-tactile, which Tailwind v4's
+   Lightning CSS can't see, so a :root{} block here gets dead-code-eliminated.
+   Inline styles are never pruned and keep palette.ts as the single source the
+   Phase 2 switcher overrides. */
+:root {
+  --mono: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace;
+  --sans: ui-sans-serif, system-ui, -apple-system, sans-serif;
 }
 
 body {
-  font-family: var(--font-inter);
-  overflow-x: hidden;
-  min-width: 0;
+  font-family: var(--sans);
+  min-height: 100vh;
+}
+
+.mono {
+  font-family: var(--mono);
+}
+
+/* Tactile / skeuomorphic press button. Reused as-is in Phase 1; rebuilt
+   properly (Comeau press-layer + sound) in Phase 3. */
+.btn-tactile {
+  position: relative;
+  background: var(--accent);
+  color: var(--on-accent);
+  border: none;
+  border-radius: 12px;
+  padding: 0.7rem 1.4rem;
+  font-weight: 600;
+  font-size: 0.95rem;
+  cursor: pointer;
+  user-select: none;
+  box-shadow:
+    0 5px 0 var(--accent-press),
+    0 8px 14px rgba(0, 0, 0, 0.18);
+  transform: translateY(0);
+  transition:
+    transform 90ms cubic-bezier(0.2, 0.8, 0.3, 1),
+    box-shadow 90ms cubic-bezier(0.2, 0.8, 0.3, 1),
+    filter 120ms ease;
+}
+.btn-tactile:hover {
+  filter: brightness(1.05);
+}
+.btn-tactile:active {
+  transform: translateY(5px);
+  box-shadow:
+    0 0 0 var(--accent-press),
+    0 2px 4px rgba(0, 0, 0, 0.16);
+}
+
+/* Secondary tactile button using the surface color. */
+.btn-tactile--ghost {
+  background: var(--surface);
+  color: var(--text);
+  box-shadow:
+    0 5px 0 var(--border-press),
+    0 8px 14px rgba(0, 0, 0, 0.12);
+}
+.btn-tactile--ghost:active {
+  box-shadow:
+    0 0 0 var(--border-press),
+    0 2px 4px rgba(0, 0, 0, 0.12);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .btn-tactile {
+    transition: none;
+  }
+}
+
+/* ── IDE shell chrome (Phase 2) ──────────────────────────────────────────────
+   Authored classes (like .btn-tactile) survive Lightning CSS; the palette vars
+   they reference resolve at runtime from the inline <body> styles. The shell is
+   additive — display is toggled by Tailwind md: utilities in the JSX, so mobile
+   / no-JS fall back to <SiteNav> and the plain stacked site. */
+
+.ide-titlebar {
+  align-items: center;
+  gap: 0.45rem;
+  height: 38px;
+  flex-shrink: 0;
+  padding: 0 0.85rem;
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+}
+.ide-dot {
+  width: 11px;
+  height: 11px;
+  border-radius: 50%;
+  background: var(--border-press);
+  display: inline-block;
+}
+
+.ide-explorer {
+  flex-direction: column;
+  width: 220px;
+  flex-shrink: 0;
+  padding: 0.5rem 0.35rem;
+  border-right: 1px solid var(--border);
+  background: var(--surface);
+  /* Scrolls independently inside the fixed-height shell row. */
+  overflow-y: auto;
+}
+.ide-explorer-title {
+  font-family: var(--mono);
+  font-size: 0.66rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--muted);
+  padding: 0.25rem 0.6rem 0.45rem;
+}
+
+.ide-row {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-family: var(--mono);
+  font-size: 0.8rem;
+  padding: 0.16rem 0.45rem;
+  border-radius: 6px;
+  color: var(--text);
+  text-decoration: none;
+  white-space: nowrap;
+}
+.ide-row:hover {
+  background: var(--bg);
+}
+.ide-row[aria-current="page"] {
+  background: var(--bg);
+  color: var(--accent);
+}
+.ide-chevron {
+  width: 1rem;
+  display: inline-flex;
+  justify-content: center;
+  border: none;
+  background: none;
+  cursor: pointer;
+  color: var(--muted);
+  font-size: 0.7rem;
+  padding: 0;
+}
+
+.ide-tabs {
+  align-items: stretch;
+  flex-shrink: 0;
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  overflow-x: auto;
+  min-height: 33px;
+}
+.ide-tab {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0 0.3rem 0 0.7rem;
+  border-right: 1px solid var(--border);
+  font-family: var(--mono);
+  font-size: 0.78rem;
+  white-space: nowrap;
+}
+.ide-tab[data-active="true"] {
+  background: var(--bg);
+}
+.ide-tab a {
+  color: var(--text);
+  text-decoration: none;
+  padding: 0.4rem 0;
+}
+.ide-tab[data-active="true"] a {
+  color: var(--accent);
+}
+.ide-tab-close {
+  border: none;
+  background: none;
+  cursor: pointer;
+  color: var(--muted);
+  border-radius: 4px;
+  width: 1.15rem;
+  height: 1.15rem;
+  line-height: 1;
+}
+.ide-tab-close:hover {
+  background: var(--border);
+  color: var(--text);
+}
+
+.ide-statusbar {
+  align-items: center;
+  gap: 0.6rem;
+  flex-shrink: 0;
+  padding: 0.3rem 0.85rem;
+  background: var(--surface);
+  border-top: 1px solid var(--border);
+}
+.ide-pill {
+  border: 1px solid var(--border);
+  background: none;
+  cursor: pointer;
+  font-family: var(--mono);
+  font-size: 0.7rem;
+  color: var(--muted);
+  border-radius: 5px;
+  padding: 0.1rem 0.45rem;
+}
+.ide-pill:hover {
+  color: var(--text);
+  border-color: var(--border-press);
+}
+.ide-swatch {
+  width: 14px;
+  height: 14px;
+  border-radius: 4px;
+  border: 1px solid var(--border);
+  cursor: pointer;
+  padding: 0;
+}
+
+.ide-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding-top: 14vh;
+  background: rgba(0, 0, 0, 0.28);
+}
+.ide-palette {
+  width: min(34rem, 92vw);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 18px 50px rgba(0, 0, 0, 0.25);
+}
+.ide-palette-input {
+  width: 100%;
+  box-sizing: border-box;
+  border: none;
+  border-bottom: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--text);
+  font-family: var(--mono);
+  font-size: 0.95rem;
+  padding: 0.85rem 1rem;
+  outline: none;
+}
+.ide-palette-list {
+  max-height: 48vh;
+  overflow-y: auto;
+  margin: 0;
+  padding: 0.35rem;
+  list-style: none;
+}
+.ide-palette-item {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  width: 100%;
+  border: none;
+  background: none;
+  cursor: pointer;
+  font-family: var(--mono);
+  font-size: 0.82rem;
+  color: var(--text);
+  text-align: left;
+  padding: 0.45rem 0.6rem;
+  border-radius: 7px;
+}
+.ide-palette-item[data-active="true"] {
+  background: var(--bg);
+  color: var(--accent);
+}
+.ide-palette-empty {
+  font-family: var(--mono);
+  font-size: 0.82rem;
+  color: var(--muted);
+  padding: 0.6rem;
+}
+
+/* Dark console — reads as a terminal, palette-aware (--term-* per theme) so it
+   stays coherent when the theme switches. */
+.ide-terminal {
+  border-top: 1px solid var(--border);
+  background: var(--term-bg);
+  color: var(--term-text);
+  font-family: var(--mono);
+}
+.ide-terminal-bar {
+  display: flex;
+  align-items: center;
+  padding: 0.35rem 0.7rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+  color: var(--term-muted);
+}
+.ide-terminal-bar .ide-tab-close {
+  color: var(--term-muted);
+}
+.ide-terminal-bar .ide-tab-close:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: var(--term-text);
+}
+.ide-terminal-out {
+  max-height: 34vh;
+  overflow-y: auto;
+  padding: 0.6rem 0.85rem;
+  font-size: 0.8rem;
+  color: var(--term-text);
+}
+.ide-terminal-line {
+  white-space: pre-wrap;
+  line-height: 1.55;
+}
+.ide-terminal-line[data-kind="in"] {
+  color: var(--term-accent);
+}
+.ide-terminal-form {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 0.85rem;
+  /* Elevated, clearly-divided input row so it reads as a distinct prompt
+     rather than blending into the output log above. */
+  border-top: 1px solid rgba(255, 255, 255, 0.14);
+  background: rgba(255, 255, 255, 0.04);
+  color: var(--term-accent);
+}
+.ide-terminal-input {
+  flex: 1;
+  border: none;
+  background: none;
+  outline: none;
+  color: var(--term-text);
+  caret-color: var(--term-accent);
+  font-family: var(--mono);
+  font-size: 0.8rem;
+}
+
+/* Editor-pane route enter — CSS keyframe (no motion dep), LCP-safe: only runs on
+   client navigations because the Shell withholds the class on first render. */
+@keyframes ideEnter {
+  from {
+    transform: translateY(6px);
+  }
+  to {
+    transform: none;
+  }
+}
+.ide-enter {
+  animation: ideEnter 160ms cubic-bezier(0.2, 0.8, 0.3, 1);
+}
+@media (prefers-reduced-motion: reduce) {
+  .ide-enter {
+    animation: none;
+  }
 }

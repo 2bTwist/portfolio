@@ -1,67 +1,59 @@
-import { Github, Mail, Linkedin as LinkedinIcon } from "lucide-react";
-import { SkillsSection } from "@/components/SkillsSection";
-import { ExperienceSection } from "@/components/ExperienceSection";
-import { ProjectsSection } from "@/components/ProjectsSection";
+import type { Metadata } from "next";
+import Link from "next/link";
+import { profile } from "@/data/profile";
+import { PROJECTS } from "@/data/projects";
+import { PageShell } from "@/components/site/PageShell";
+import { ActionLink } from "@/components/content/ui";
+import { ProjectCard } from "@/components/content/ProjectCard";
+
+export const metadata: Metadata = {
+  title: "Edmond Ndanji — Full-stack & mobile engineer",
+  description: profile.tagline,
+};
 
 export default function HomePage() {
+  const featured = PROJECTS.filter((p) => p.featured);
   return (
-    <div className="max-w-5xl mx-auto">
-
-      {/* Header with name + icons */}
-      <div className="flex flex-col sm:flex-row sm:items-center gap-4 sm:gap-6 mb-4">
-        <h1
-          className="text-4xl sm:text-5xl tracking-wide"
-          style={{ fontFamily: "var(--font-caveat)" }}
-        >
-          EDMOND NDANJI
-        </h1>
-
-        <div className="flex items-center gap-4">
-          <a
-            href="https://github.com/2bTwist"
-            className="hover:opacity-70"
-            target="_blank"
-            rel="noopener noreferrer"
-            aria-label="GitHub"
-          >
-            <Github size={22} />
-          </a>
-
-          <a
-            href="https://linkedin.com/in/edmond-batch"
-            className="hover:opacity-70"
-            target="_blank"
-            rel="noopener noreferrer"
-            aria-label="LinkedIn"
-          >
-            <LinkedinIcon size={22} />
-          </a>
-
-          <a
-            href="mailto:ndanjiedmond@gmail.com"
-            className="hover:opacity-70"
-            aria-label="Email"
-          >
-            <Mail size={22} />
-          </a>
-        </div>
-      </div>
-
-      {/* Subtitle */}
-      <p className="text-xl mb-2">
-        Software Engineer & Product Enthusiast
+    <PageShell>
+      <p className="mono text-sm mb-2" style={{ color: "var(--muted)" }}>
+        README.md
+      </p>
+      <h1 className="mono text-4xl sm:text-5xl font-bold" style={{ color: "var(--text)" }}>
+        {profile.name}
+      </h1>
+      <p className="mono mt-2" style={{ color: "var(--accent)" }}>
+        {profile.role}
+      </p>
+      <p className="mt-6 text-lg leading-relaxed" style={{ color: "var(--text)" }}>
+        {profile.tagline}
+      </p>
+      <p className="mt-4 leading-relaxed" style={{ color: "var(--muted)" }}>
+        This site is a filesystem. Browse from the explorer, or read it as a plain page — every
+        section is a real link.
       </p>
 
-      {/* Bio */}
-      <div className="text-zinc-600 dark:text-zinc-400 max-w-5xl leading-relaxed space-y-4">
-      <p> Hi there! I&apos;m Edmond, a passionate full-stack engineer with a love for building innovative products. I enjoy going down the rabbit hole to understand how engineers create systems that feel seamless and intuitive, but are actually made up of complex and intricate parts working together in a cohesive way. </p> 
-      <p> When I&apos;m not coding, you&apos;ll probably find me exploring new technologies (A.K.A. going back and forth with new AI agents) or diving into product design and user experience. </p> 
-      <p> I&apos;m always excited to connect with like-minded people at the intersection of technology, finance, and entrepreneurship, so feel free to reach out! </p>
+      <div className="mt-7 flex flex-wrap gap-4">
+        <ActionLink href={profile.links.resume}>Resume</ActionLink>
+        <ActionLink href={profile.links.github} variant="ghost">
+          GitHub
+        </ActionLink>
       </div>
 
-      <SkillsSection />
-      <ExperienceSection />
-      <ProjectsSection />
-    </div>
+      <section className="mt-14">
+        <div className="flex items-baseline justify-between mb-4">
+          <h2 className="mono text-xl font-semibold" style={{ color: "var(--text)" }}>
+            Featured work
+          </h2>
+          <Link href="/projects" className="mono text-sm no-underline hover:opacity-80" style={{ color: "var(--muted)" }}>
+            all projects →
+          </Link>
+        </div>
+        <div className="grid gap-4 sm:grid-cols-2">
+          {featured.map((p) => (
+            <ProjectCard key={p.id} project={p} />
+          ))}
+        </div>
+      </section>
+    </PageShell>
   );
 }

@@ -1,14 +1,20 @@
 import type { Metadata } from "next";
-import "./globals.css";
-import { ThemeProvider } from "@/components/ThemeProvider";
-import { Navbar } from "@/components/Navbar";
-import { Analytics } from "@vercel/analytics/next";
+import type { CSSProperties } from "react";
 import { SpeedInsights } from "@vercel/speed-insights/next";
+import "./globals.css";
+import { ClientBoot } from "@/components/ClientBoot";
+import { IdeProvider } from "@/components/ide/store";
+import { Shell } from "@/components/ide/Shell";
+import { PALETTES, DEFAULT_PALETTE_INDEX } from "@/app/lib/palette";
 
 export const metadata: Metadata = {
-  title: "Edmond Ndanji — Software Engineer",
-  description: "Backend engineer and product enthusiast.",
+  title: "Edmond Ndanji",
+  description: "Full-stack & mobile engineer.",
 };
+
+// Default palette injected as inline CSS vars (server-rendered, no JS, not
+// pruned by Lightning CSS). The Phase 2 switcher overrides these client-side.
+const paletteVars = PALETTES[DEFAULT_PALETTE_INDEX].vars as CSSProperties;
 
 export default function RootLayout({
   children,
@@ -16,15 +22,12 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" suppressHydrationWarning>
-      <body className="bg-white dark:bg-zinc-950 text-zinc-900 dark:text-zinc-100" suppressHydrationWarning>
-        <ThemeProvider attribute="class" defaultTheme="light">
-          <Navbar />
-          <main className="px-6 md:px-12 lg:pr-48 pt-20 pb-20">
-            {children}
-          </main>
-        </ThemeProvider>
-        <Analytics />
+    <html lang="en">
+      <body style={{ ...paletteVars, background: "var(--bg)", color: "var(--text)" }}>
+        <IdeProvider>
+          <Shell>{children}</Shell>
+        </IdeProvider>
+        <ClientBoot />
         <SpeedInsights />
       </body>
     </html>
