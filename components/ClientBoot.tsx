@@ -17,11 +17,6 @@ function killStaleServiceWorker() {
   }
 }
 
-function loadDevReactScan() {
-  if (process.env.NODE_ENV !== "development") return;
-  import("react-scan").then(({ scan }) => scan({ enabled: true }));
-}
-
 function loadDevReactGrab() {
   if (process.env.NODE_ENV !== "development") return;
   // Side-effect import auto-activates the hover + ⌘C "grab element context"
@@ -29,19 +24,15 @@ function loadDevReactGrab() {
   import("react-grab");
 }
 
-/* Two dev/runtime concerns kept out of the server tree:
+/* Dev/runtime concerns kept out of the server tree:
    1. Kill any stale service worker from the old portfolio (it 404s on /sw.js
       and forces reload loops). public/sw.js is the robust network-level fix;
       this is the in-page belt-and-suspenders.
-   2. React Scan render overlay (dev only) — verifies the React Compiler is
-      eliminating re-renders. Never ships. */
+   2. react-grab (dev only) — hover + ⌘C to grab element context for the agent.
+   react-scan was removed: its render overlay janked scroll in dev. */
 export function ClientBoot() {
   useEffect(() => {
     killStaleServiceWorker();
-  }, []);
-
-  useEffect(() => {
-    loadDevReactScan();
   }, []);
 
   useEffect(() => {

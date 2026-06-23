@@ -50,7 +50,6 @@
     "lighthouse": "^13.4.0",
     "react-doctor": "^0.5.8",
     "react-grab": "^0.1.47",
-    "react-scan": "^0.5.7",
     "size-limit": "^12.1.0",
     "tailwindcss": "^4",
     "tsx": "^4.22.4",
