@@ -4,6 +4,7 @@ import { SpeedInsights } from "@vercel/speed-insights/next";
 import "./globals.css";
 import { ClientBoot } from "@/components/ClientBoot";
 import { IdeProvider } from "@/components/ide/store";
+import { SoundProvider } from "@/components/feel/SoundProvider";
 import { Shell } from "@/components/ide/Shell";
 import { PALETTES, DEFAULT_PALETTE_INDEX } from "@/app/lib/palette";
 import { clashDisplay, satoshi } from "@/app/fonts/fonts";
@@ -25,9 +26,11 @@ export default function RootLayout({
   return (
     <html lang="en" className={`${clashDisplay.variable} ${satoshi.variable}`}>
       <body style={{ ...paletteVars, background: "var(--bg)", color: "var(--text)" }}>
-        <IdeProvider>
-          <Shell>{children}</Shell>
-        </IdeProvider>
+        <SoundProvider>
+          <IdeProvider>
+            <Shell>{children}</Shell>
+          </IdeProvider>
+        </SoundProvider>
         <ClientBoot />
         <SpeedInsights />
       </body>

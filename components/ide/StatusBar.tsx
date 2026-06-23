@@ -6,11 +6,13 @@
 import { usePathname } from "next/navigation";
 import { PALETTES } from "@/app/lib/palette";
 import { useSession, useOverlay } from "./store";
+import { useSound } from "@/components/feel/SoundProvider";
 
 export function StatusBar({ className = "" }: { className?: string }) {
   const pathname = usePathname();
   const { paletteIndex, setPaletteIndex } = useSession();
   const { openCmdk, openTerm } = useOverlay();
+  const { muted, toggleMuted } = useSound();
 
   return (
     <footer className={className} aria-label="Status bar">
@@ -23,6 +25,15 @@ export function StatusBar({ className = "" }: { className?: string }) {
         </button>
         <button type="button" className="ide-pill" onClick={() => openTerm()}>
           terminal
+        </button>
+        <button
+          type="button"
+          className="ide-pill"
+          aria-pressed={!muted}
+          aria-label={muted ? "Unmute UI sounds" : "Mute UI sounds"}
+          onClick={() => toggleMuted()}
+        >
+          {muted ? "♪̸" : "♪"}
         </button>
         <div className="flex items-center gap-1 ml-1" role="group" aria-label="Theme">
           {PALETTES.map((p, i) => (
