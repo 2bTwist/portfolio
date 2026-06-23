@@ -94,12 +94,11 @@ export function CustomCursor() {
 
   return (
     <div ref={elRef} className="cursor-arrow" aria-hidden="true">
-      {/* classic recognizable mouse pointer (vertical left edge + tail); tip at
-          (0,0) = the real pointer. Reads as an upright cursor, not a tilted
-          triangle. */}
-      <svg className="cursor-arrow-svg" width="20" height="26" viewBox="-2 -2 20 26" fill="none">
+      {/* tail-less send arrow at the cursor angle (vertical left edge, ~45°
+          right edge); tip at (0,0) = the real pointer. */}
+      <svg className="cursor-arrow-svg" width="18" height="22" viewBox="-2 -2 18 22" fill="none">
         <path
-          d="M0 0 L0 17 L4.2 13.2 L6.9 19.5 L9.4 18.4 L6.7 12.1 L12 12.1 Z"
+          d="M0 0 L0 17 L5.5 13.2 L12 12 Z"
           fill="var(--accent)"
           stroke="var(--accent)"
           strokeWidth="3.5"
