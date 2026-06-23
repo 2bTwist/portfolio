@@ -181,9 +181,14 @@ body {
   color: var(--text);
   text-decoration: none;
   white-space: nowrap;
+  transition:
+    background 140ms ease-out,
+    color 140ms ease-out,
+    transform 160ms cubic-bezier(0.2, 0.9, 0.3, 1.3);
 }
 .ide-row:hover {
   background: var(--bg);
+  transform: translateX(2px);
 }
 .ide-row[aria-current="page"] {
   background: var(--bg);
@@ -199,6 +204,36 @@ body {
   color: var(--muted);
   font-size: 0.7rem;
   padding: 0;
+  transition:
+    transform 240ms cubic-bezier(0.2, 0.9, 0.3, 1.3),
+    color 140ms ease-out;
+}
+.ide-chevron:hover {
+  color: var(--text);
+}
+/* single ▾ glyph rotated to ▸ when collapsed */
+.ide-chevron[data-open="false"] {
+  transform: rotate(-90deg);
+}
+
+/* Folder accordion — animate via grid-template-rows 1fr<->0fr so children
+   collapse smoothly with no JS-measured heights. Children stay in the DOM
+   (JS-off renders them expanded by default). */
+.ide-folder {
+  display: grid;
+  grid-template-rows: 1fr;
+  transition: grid-template-rows 300ms cubic-bezier(0.2, 0.9, 0.3, 1.12);
+}
+.ide-folder[data-open="false"] {
+  grid-template-rows: 0fr;
+}
+.ide-folder-inner {
+  overflow: hidden;
+  min-height: 0;
+  transition: opacity 220ms ease-out;
+}
+.ide-folder[data-open="false"] .ide-folder-inner {
+  opacity: 0;
 }
 
 .ide-tabs {
@@ -218,6 +253,18 @@ body {
   font-family: var(--mono);
   font-size: 0.78rem;
   white-space: nowrap;
+  transition: background 160ms ease-out;
+  animation: ideTabIn 260ms cubic-bezier(0.2, 0.9, 0.3, 1.2);
+}
+@keyframes ideTabIn {
+  from {
+    opacity: 0;
+    transform: translateY(-4px) scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
 }
 .ide-tab[data-active="true"] {
   background: var(--bg);
@@ -285,6 +332,15 @@ body {
   justify-content: center;
   padding-top: 14vh;
   background: rgba(0, 0, 0, 0.28);
+  animation: ideOverlayIn 160ms ease-out;
+}
+@keyframes ideOverlayIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
 }
 .ide-palette {
   width: min(34rem, 92vw);
@@ -293,6 +349,18 @@ body {
   border-radius: 12px;
   overflow: hidden;
   box-shadow: 0 18px 50px rgba(0, 0, 0, 0.25);
+  transform-origin: top center;
+  animation: idePaletteIn 240ms cubic-bezier(0.2, 0.9, 0.3, 1.25);
+}
+@keyframes idePaletteIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px) scale(0.97);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
 }
 .ide-palette-input {
   width: 100%;
@@ -411,7 +479,23 @@ body {
   animation: ideEnter 160ms cubic-bezier(0.2, 0.8, 0.3, 1);
 }
 @media (prefers-reduced-motion: reduce) {
-  .ide-enter {
+  .ide-enter,
+  .ide-tab,
+  .ide-overlay,
+  .ide-palette {
     animation: none;
+  }
+  .ide-row,
+  .ide-chevron,
+  .ide-folder,
+  .ide-folder-inner {
+    transition: none;
+  }
+  .ide-row:hover {
+    transform: none;
+  }
+  /* collapse instantly instead of animating height */
+  .ide-folder[data-open="false"] .ide-folder-inner {
+    opacity: 1;
   }
 }

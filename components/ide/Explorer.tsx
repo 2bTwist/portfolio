@@ -60,11 +60,12 @@ function Node({
         <button
           type="button"
           className="ide-chevron"
+          data-open={open}
           aria-expanded={open}
           aria-label={`${open ? "Collapse" : "Expand"} ${node.name}`}
           onClick={() => setOpen((o) => !o)}
         >
-          {open ? "▾" : "▸"}
+          ▾
         </button>
         <Link
           href={node.href}
@@ -77,11 +78,13 @@ function Node({
           {node.name}/
         </Link>
       </div>
-      {open
-        ? node.children.map((child) => (
+      <div className="ide-folder" data-open={open}>
+        <div className="ide-folder-inner">
+          {node.children.map((child) => (
             <Node key={child.href} node={child} pathname={pathname} depth={depth + 1} />
-          ))
-        : null}
+          ))}
+        </div>
+      </div>
     </div>
   );
 }
