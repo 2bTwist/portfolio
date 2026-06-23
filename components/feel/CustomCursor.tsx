@@ -94,11 +94,11 @@ export function CustomCursor() {
 
   return (
     <div ref={elRef} className="cursor-arrow" aria-hidden="true">
-      {/* solid rounded navigation arrow; path tip at (0,0) = the real pointer.
-          Near-vertical left edge so it reads as an upright cursor. */}
-      <svg className="cursor-arrow-svg" width="30" height="30" viewBox="-2 -2 30 30" fill="none">
+      {/* symmetric arrow pointing STRAIGHT UP (no tilt); tip at (10,0).
+          The svg is offset in CSS so the tip sits on the real pointer. */}
+      <svg className="cursor-arrow-svg" width="26" height="27" viewBox="-3 -3 26 27" fill="none">
         <path
-          d="M0 0 L0.5 17 L4 13 L7.5 14.5 Z"
+          d="M10 0 L18 18 L10 13.5 L2 18 Z"
           fill="var(--accent)"
           stroke="var(--accent)"
           strokeWidth="3.5"
