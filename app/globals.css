@@ -8,7 +8,10 @@
    Phase 2 switcher overrides. */
 :root {
   --mono: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace;
-  --sans: ui-sans-serif, system-ui, -apple-system, sans-serif;
+  /* --font-sans / --font-display are injected by next/font/local (layout.tsx).
+     They fall back to the system stack before the face loads (display:swap). */
+  --sans: var(--font-sans), ui-sans-serif, system-ui, -apple-system, sans-serif;
+  --display: var(--font-display), var(--sans);
 }
 
 body {
@@ -20,55 +23,108 @@ body {
   font-family: var(--mono);
 }
 
-/* Tactile / skeuomorphic press button. Reused as-is in Phase 1; rebuilt
-   properly (Comeau press-layer + sound) in Phase 3. */
-.btn-tactile {
-  position: relative;
-  background: var(--accent);
-  color: var(--on-accent);
-  border: none;
-  border-radius: 12px;
-  padding: 0.7rem 1.4rem;
-  font-weight: 600;
-  font-size: 0.95rem;
-  cursor: pointer;
-  user-select: none;
-  box-shadow:
-    0 5px 0 var(--accent-press),
-    0 8px 14px rgba(0, 0, 0, 0.18);
-  transform: translateY(0);
-  transition:
-    transform 90ms cubic-bezier(0.2, 0.8, 0.3, 1),
-    box-shadow 90ms cubic-bezier(0.2, 0.8, 0.3, 1),
-    filter 120ms ease;
-}
-.btn-tactile:hover {
-  filter: brightness(1.05);
-}
-.btn-tactile:active {
-  transform: translateY(5px);
-  box-shadow:
-    0 0 0 var(--accent-press),
-    0 2px 4px rgba(0, 0, 0, 0.16);
+/* Clash Display — used for big titles / hero. The small IDE filename labels
+   stay .mono so the editor identity reads. */
+.display {
+  font-family: var(--display);
+  letter-spacing: -0.01em;
 }
 
-/* Secondary tactile button using the surface color. */
-.btn-tactile--ghost {
+/* Tactile press button — Comeau three-layer technique (shadow / edge / front).
+   The front layer floats above a static edge; pressing drops it onto the edge
+   so the button physically compresses. Spring-ish asymmetric easing: slow,
+   slightly overshooting on release, near-instant on press. Pure CSS so
+   ActionLink stays a server component and the feel works with JS off. Sound is
+   layered on as a client enhancement (Phase 3 sound layer). */
+.btn {
+  position: relative;
+  display: inline-flex;
+  border: none;
+  background: transparent;
+  padding: 0;
+  cursor: pointer;
+  outline-offset: 4px;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+}
+.btn__shadow {
+  position: absolute;
+  inset: 0;
+  border-radius: 12px;
+  background: rgba(0, 0, 0, 0.22);
+  transform: translateY(2px);
+  filter: blur(4px);
+  will-change: transform;
+  transition: transform 600ms cubic-bezier(0.3, 0.7, 0.4, 1);
+}
+.btn__edge {
+  position: absolute;
+  inset: 0;
+  border-radius: 12px;
+  background: var(--accent-press);
+}
+.btn__front {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.7rem 1.4rem;
+  border-radius: 12px;
+  background: var(--accent);
+  color: var(--on-accent);
+  font-weight: 600;
+  font-size: 0.95rem;
+  transform: translateY(-4px);
+  will-change: transform;
+  transition: transform 600ms cubic-bezier(0.3, 0.7, 0.4, 1);
+}
+.btn:hover .btn__front {
+  transform: translateY(-6px);
+  transition: transform 250ms cubic-bezier(0.3, 0.7, 0.4, 1.5);
+}
+.btn:hover .btn__shadow {
+  transform: translateY(4px);
+  transition: transform 250ms cubic-bezier(0.3, 0.7, 0.4, 1.5);
+}
+.btn:active .btn__front {
+  transform: translateY(-1px);
+  transition: transform 34ms;
+}
+.btn:active .btn__shadow {
+  transform: translateY(1px);
+  transition: transform 34ms;
+}
+.btn:focus-visible {
+  outline: none;
+}
+.btn:focus-visible .btn__front {
+  outline: 2px solid var(--text);
+  outline-offset: 2px;
+}
+
+/* Ghost variant — surface-colored over a bordered edge. */
+.btn--ghost .btn__edge {
+  background: var(--border-press);
+}
+.btn--ghost .btn__front {
   background: var(--surface);
   color: var(--text);
-  box-shadow:
-    0 5px 0 var(--border-press),
-    0 8px 14px rgba(0, 0, 0, 0.12);
-}
-.btn-tactile--ghost:active {
-  box-shadow:
-    0 0 0 var(--border-press),
-    0 2px 4px rgba(0, 0, 0, 0.12);
+  border: 1px solid var(--border);
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .btn-tactile {
+  .btn__front,
+  .btn__shadow {
     transition: none;
+  }
+  /* keep a small static lift so the layering still reads, but no travel */
+  .btn:hover .btn__front,
+  .btn:active .btn__front {
+    transform: translateY(-4px);
+  }
+  .btn:hover .btn__shadow,
+  .btn:active .btn__shadow {
+    transform: translateY(2px);
   }
 }
 

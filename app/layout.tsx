@@ -6,6 +6,7 @@ import { ClientBoot } from "@/components/ClientBoot";
 import { IdeProvider } from "@/components/ide/store";
 import { Shell } from "@/components/ide/Shell";
 import { PALETTES, DEFAULT_PALETTE_INDEX } from "@/app/lib/palette";
+import { clashDisplay, satoshi } from "@/app/fonts/fonts";
 
 export const metadata: Metadata = {
   title: "Edmond Ndanji",
@@ -22,7 +23,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="en" className={`${clashDisplay.variable} ${satoshi.variable}`}>
       <body style={{ ...paletteVars, background: "var(--bg)", color: "var(--text)" }}>
         <IdeProvider>
           <Shell>{children}</Shell>

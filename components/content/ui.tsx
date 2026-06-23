@@ -19,7 +19,7 @@ export function PageHeader({
       <p className="mono text-sm mb-2" style={{ color: "var(--muted)" }}>
         {filename}
       </p>
-      <h1 className="mono text-3xl sm:text-4xl font-bold" style={{ color: "var(--text)" }}>
+      <h1 className="display text-4xl sm:text-5xl font-bold" style={{ color: "var(--text)" }}>
         {title}
       </h1>
       {lead ? (
@@ -65,9 +65,9 @@ export function TagRow({ tags }: { tags: string[] }) {
 }
 
 /* Tactile action rendered as a real anchor (works without JS, crawlable).
-   The tactile *feel* is rebuilt properly in Phase 3; for now it reuses the
-   existing .btn-tactile with accessible label contrast from the adjusted
-   palette. External links get the right rel/target. */
+   The three-layer press button (shadow / edge / front) is pure CSS, so this
+   stays a server component. The label lives in .btn__front; the shadow/edge
+   layers are decorative (aria-hidden). External links get the right rel/target. */
 export function ActionLink({
   href,
   children,
@@ -77,20 +77,25 @@ export function ActionLink({
   children: ReactNode;
   variant?: "primary" | "ghost";
 }) {
-  const className =
-    "btn-tactile inline-flex items-center justify-center no-underline" +
-    (variant === "ghost" ? " btn-tactile--ghost" : "");
+  const className = "btn no-underline" + (variant === "ghost" ? " btn--ghost" : "");
+  const inner = (
+    <>
+      <span className="btn__shadow" aria-hidden="true" />
+      <span className="btn__edge" aria-hidden="true" />
+      <span className="btn__front">{children}</span>
+    </>
+  );
   const external = href.startsWith("http");
   if (external) {
     return (
       <a href={href} className={className} target="_blank" rel="noopener noreferrer">
-        {children}
+        {inner}
       </a>
     );
   }
   return (
     <Link href={href} className={className}>
-      {children}
+      {inner}
     </Link>
   );
 }
