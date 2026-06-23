@@ -190,6 +190,10 @@ body {
   background: var(--bg);
   transform: translateX(2px);
 }
+.ide-file-icon {
+  flex-shrink: 0;
+  color: var(--accent);
+}
 .ide-row[aria-current="page"] {
   background: var(--bg);
   color: var(--accent);
@@ -513,31 +517,35 @@ body {
   transform: translate3d(-100px, -100px, 0);
   will-change: transform;
   display: none;
+  opacity: 0;
+  transition: opacity 150ms ease-out;
 }
 .cursor-custom .cursor-arrow {
   display: block;
+}
+/* visible only while the pointer is inside the window */
+[data-cursor-hidden="false"] .cursor-arrow {
+  opacity: 1;
 }
 .cursor-custom,
 .cursor-custom * {
   cursor: none !important;
 }
 .cursor-arrow-svg {
+  position: absolute;
+  left: -2px; /* viewBox starts at -2, so this lands the path tip on the origin */
+  top: -2px;
   display: block;
   /* slight depth so it reads as a chunky pointer, not a flat glyph */
   filter: drop-shadow(0 2px 3px rgba(0, 0, 0, 0.28));
-  transform-origin: 4px 4px; /* near the tip */
-  transition:
-    transform 160ms cubic-bezier(0.2, 0.9, 0.3, 1.4),
-    opacity 160ms ease-out;
+  transform-origin: 2px 2px; /* the tip */
+  transition: transform 150ms cubic-bezier(0.2, 0.9, 0.3, 1.4);
 }
 [data-cursor-hover="true"] .cursor-arrow-svg {
-  transform: scale(1.18);
+  transform: scale(1.15);
 }
 [data-cursor-active="true"] .cursor-arrow-svg {
-  transform: scale(0.9);
-}
-[data-cursor-hidden="true"] .cursor-arrow-svg {
-  opacity: 0;
+  transform: scale(0.88);
 }
 
 /* ── Braille-dot loader (Phase 3) ────────────────────────────────────────────

@@ -8,6 +8,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
 import { TREE, type TreeNode } from "@/app/lib/nav";
+import { FileIcon, FolderIcon } from "./FileIcon";
 import { useSession } from "./store";
 
 export function Explorer({ className = "" }: { className?: string }) {
@@ -48,6 +49,7 @@ function Node({
         aria-current={active ? "page" : undefined}
         onClick={() => openTab(node.href)}
       >
+        <FileIcon name={node.name} className="ide-file-icon" />
         {node.name}
       </Link>
     );
@@ -75,6 +77,7 @@ function Node({
           style={childActive && pathname !== node.href ? { color: "var(--accent)" } : undefined}
           onClick={() => openTab(node.href)}
         >
+          <FolderIcon open={open} />
           {node.name}/
         </Link>
       </div>

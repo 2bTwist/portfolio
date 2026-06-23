@@ -20,6 +20,7 @@
     "doctor": "react-doctor --no-telemetry"
   },
   "dependencies": {
+    "@phosphor-icons/react": "^2.1.10",
     "@vercel/speed-insights": "^2.0.0",
     "motion": "^12.40.0",
     "next": "16.2.9",

@@ -1,11 +1,11 @@
 "use client";
 
-/* Minimalist arrow cursor with physics. A single rounded pointer replaces the
-   native arrow and trails the real pointer with spring-like friction, so you
-   feel weight/drag as it moves and catches up. Desktop pointers only
-   (pointer:fine). Under reduced-motion it still shows but snaps 1:1 (no
-   friction). Movement is written straight to the DOM via rAF (no React state),
-   and the loop self-suspends once the arrow has caught up. */
+/* Minimalist arrow cursor with physics. A solid, rounded navigation-style arrow
+   replaces the native pointer and trails the real pointer with light friction,
+   so you feel a bit of drag without it feeling sluggish. Desktop pointers only
+   (pointer:fine). Hides when the pointer leaves the window / the tab blurs.
+   Movement is written straight to the DOM via rAF (no React state); the loop
+   self-suspends once the arrow catches up. Under reduced-motion it snaps 1:1. */
 
 import { useEffect, useRef } from "react";
 
@@ -15,14 +15,14 @@ export function CustomCursor() {
   const elRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    const fine = window.matchMedia("(pointer: fine)");
-    if (!fine.matches) return;
+    if (!window.matchMedia("(pointer: fine)").matches) return;
     const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    // friction: lower = heavier/more drag. 1 = instant (reduced-motion).
-    const ease = reduced ? 1 : 0.2;
+    // friction: lower = heavier drag. 0.45 feels responsive with a touch of lag.
+    const ease = reduced ? 1 : 0.45;
 
     const root = document.documentElement;
     root.classList.add("cursor-custom");
+    root.dataset.cursorHidden = "true"; // hidden until the first move
     const el = elRef.current!;
 
     let tx = window.innerWidth / 2;
@@ -55,45 +55,45 @@ export function CustomCursor() {
     const onMove = (e: PointerEvent) => {
       tx = e.clientX;
       ty = e.clientY;
-      const hovering = !!(e.target as Element | null)?.closest?.(INTERACTIVE);
-      root.dataset.cursorHover = hovering ? "true" : "false";
+      root.dataset.cursorHidden = "false";
+      root.dataset.cursorHover = (e.target as Element | null)?.closest?.(INTERACTIVE) ? "true" : "false";
       start();
     };
     const onDown = () => (root.dataset.cursorActive = "true");
     const onUp = () => (root.dataset.cursorActive = "false");
-    const onLeave = () => (root.dataset.cursorHidden = "true");
-    const onEnter = () => (root.dataset.cursorHidden = "false");
+    const hide = () => (root.dataset.cursorHidden = "true");
 
     window.addEventListener("pointermove", onMove, { passive: true });
     window.addEventListener("pointerdown", onDown, { passive: true });
     window.addEventListener("pointerup", onUp, { passive: true });
-    document.addEventListener("pointerleave", onLeave);
-    document.addEventListener("pointerenter", onEnter);
-    start();
+    // leaving the window / blurring the tab hides the arrow (so it doesn't
+    // freeze at the last position)
+    document.documentElement.addEventListener("mouseleave", hide);
+    window.addEventListener("blur", hide);
 
     return () => {
       cancelAnimationFrame(raf);
       window.removeEventListener("pointermove", onMove);
       window.removeEventListener("pointerdown", onDown);
       window.removeEventListener("pointerup", onUp);
-      document.removeEventListener("pointerleave", onLeave);
-      document.removeEventListener("pointerenter", onEnter);
+      document.documentElement.removeEventListener("mouseleave", hide);
+      window.removeEventListener("blur", hide);
       root.classList.remove("cursor-custom");
+      delete root.dataset.cursorHidden;
       delete root.dataset.cursorHover;
       delete root.dataset.cursorActive;
-      delete root.dataset.cursorHidden;
     };
   }, []);
 
   return (
     <div ref={elRef} className="cursor-arrow" aria-hidden="true">
-      <svg className="cursor-arrow-svg" width="22" height="29" viewBox="0 0 22 29" fill="none">
-        {/* rounded pointer, tip anchored at (0,0) = the real pointer position */}
+      {/* solid rounded navigation arrow; path tip at (0,0) = the real pointer */}
+      <svg className="cursor-arrow-svg" width="30" height="30" viewBox="-2 -2 30 30" fill="none">
         <path
-          d="M1.2 1.2 L1.2 22.2 L6.9 16.9 L10.7 24.6 L14.1 23 L10.3 15.4 L17.8 15.4 Z"
+          d="M0 0 L19 8 L8.5 10.5 L8 20 Z"
           fill="var(--accent)"
-          stroke="var(--on-accent)"
-          strokeWidth="1.6"
+          stroke="var(--accent)"
+          strokeWidth="3.5"
           strokeLinejoin="round"
           strokeLinecap="round"
         />
