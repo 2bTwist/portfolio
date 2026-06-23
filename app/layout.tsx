@@ -5,6 +5,7 @@ import "./globals.css";
 import { ClientBoot } from "@/components/ClientBoot";
 import { IdeProvider } from "@/components/ide/store";
 import { SoundProvider } from "@/components/feel/SoundProvider";
+import { CustomCursor } from "@/components/feel/CustomCursor";
 import { Shell } from "@/components/ide/Shell";
 import { PALETTES, DEFAULT_PALETTE_INDEX } from "@/app/lib/palette";
 import { clashDisplay, satoshi } from "@/app/fonts/fonts";
@@ -31,6 +32,7 @@ export default function RootLayout({
             <Shell>{children}</Shell>
           </IdeProvider>
         </SoundProvider>
+        <CustomCursor />
         <ClientBoot />
         <SpeedInsights />
       </body>

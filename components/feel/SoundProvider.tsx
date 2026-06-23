@@ -10,7 +10,7 @@
    there's no setState-in-effect (matches the codebase's react-compiler
    discipline) and no hydration mismatch (server snapshot = sound on, not muted). */
 
-import { createContext, useContext, useCallback, useEffect, useSyncExternalStore, type ReactNode } from "react";
+import { createContext, useContext, useEffect, useSyncExternalStore, type ReactNode } from "react";
 import { sfx } from "./sound";
 
 type SoundCtx = { muted: boolean; toggleMuted: () => void };
@@ -87,7 +87,8 @@ export function SoundProvider({ children }: { children: ReactNode }) {
     };
   }, [allowed]);
 
-  const toggleMuted = useCallback(() => writeMuted(!readMuted()), []);
+  // React Compiler memoizes this; no useCallback needed.
+  const toggleMuted = () => writeMuted(!readMuted());
 
   return <Ctx.Provider value={{ muted, toggleMuted }}>{children}</Ctx.Provider>;
 }
