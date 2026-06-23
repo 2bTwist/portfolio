@@ -8,7 +8,7 @@
 import { useEffect, useRef, useState, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import { NAV } from "@/app/lib/nav";
-import { searchPosts } from "@/app/lib/search";
+import { searchStatic, searchPosts } from "@/app/lib/search";
 import { PALETTES } from "@/app/lib/palette";
 import { profile } from "@/data/profile";
 import { TerminalIcon } from "@/components/feel/animated-icons";
@@ -92,13 +92,13 @@ export default function Terminal() {
           print("usage: grep <term>");
           break;
         }
-        const fileHits = NAV.filter((n) => n.name.toLowerCase().includes(arg.toLowerCase()));
-        if (fileHits.length) print(fileHits.map((h) => `${h.name}  ${h.href}`).join("\n"));
+        const staticHits = searchStatic(arg);
+        if (staticHits.length) print(staticHits.map((r) => `${r.name}  ${r.href}`).join("\n"));
         // Full-text post search loads its index lazily, so results stream in.
         searchPosts(arg).then((postHits) => {
           if (postHits.length) {
-            print(postHits.map((p) => `${p.title}  /writing/${p.slug}`).join("\n"));
-          } else if (!fileHits.length) {
+            print(postHits.map((p) => `${p.name}  ${p.href}`).join("\n"));
+          } else if (!staticHits.length) {
             print(`no matches for "${arg}"`);
           }
         });

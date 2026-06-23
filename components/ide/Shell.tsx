@@ -66,12 +66,27 @@ export function Shell({ children }: { children: ReactNode }) {
 
       <div className="flex flex-col min-h-[100dvh] md:h-[100dvh] md:min-h-0 md:overflow-hidden">
         <div className="ide-titlebar hidden md:flex">
-          <span className="ide-dot" />
-          <span className="ide-dot" />
-          <span className="ide-dot" />
-          <span className="mono text-xs ml-2" style={{ color: "var(--muted)" }}>
-            {navLabel(pathname)} — edmond
-          </span>
+          <div className="ide-traffic" aria-hidden="true">
+            <span className="ide-dot ide-dot--close" />
+            <span className="ide-dot ide-dot--min" />
+            <span className="ide-dot ide-dot--max" />
+          </div>
+          <button
+            type="button"
+            className="ide-command-center"
+            onClick={toggleCmdk}
+            aria-label="Search files and posts"
+            aria-keyshortcuts="Meta+K Control+K"
+          >
+            <span className="ide-command-center-icon" aria-hidden="true">
+              <svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round">
+                <circle cx="7" cy="7" r="4.5" />
+                <line x1="11" y1="11" x2="14.5" y2="14.5" />
+              </svg>
+            </span>
+            <span className="ide-command-center-label">{navLabel(pathname)}</span>
+            <kbd className="ide-command-center-kbd">⌘K</kbd>
+          </button>
         </div>
 
         <div className="flex flex-1 min-h-0">

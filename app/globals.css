@@ -135,6 +135,7 @@ body {
    / no-JS fall back to <SiteNav> and the plain stacked site. */
 
 .ide-titlebar {
+  position: relative;
   align-items: center;
   gap: 0.45rem;
   height: 38px;
@@ -143,12 +144,81 @@ body {
   background: var(--surface);
   border-bottom: 1px solid var(--border);
 }
+.ide-traffic {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+}
 .ide-dot {
   width: 11px;
   height: 11px;
   border-radius: 50%;
-  background: var(--border-press);
   display: inline-block;
+}
+.ide-dot--close {
+  background: var(--dot-close);
+}
+.ide-dot--min {
+  background: var(--dot-min);
+}
+.ide-dot--max {
+  background: var(--dot-max);
+}
+
+/* VS Code-style command center: a centered search pill that opens ⌘K. Absolutely
+   centered on the whole title bar (not the leftover space) so it tracks the
+   window center like the editor it mimics. */
+.ide-command-center {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  width: clamp(220px, 38vw, 440px);
+  height: 24px;
+  padding: 0 0.35rem 0 0.6rem;
+  border: 1px solid var(--border);
+  border-radius: 7px;
+  background: var(--bg);
+  color: var(--muted);
+  font-family: var(--mono);
+  font-size: 0.74rem;
+  cursor: pointer;
+  transition:
+    border-color 140ms ease-out,
+    background 140ms ease-out,
+    color 140ms ease-out;
+}
+.ide-command-center:hover {
+  border-color: var(--border-press);
+  color: var(--text);
+}
+.ide-command-center:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 1px;
+}
+.ide-command-center-icon {
+  display: inline-flex;
+  flex-shrink: 0;
+}
+.ide-command-center-label {
+  flex: 1;
+  min-width: 0;
+  text-align: center;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.ide-command-center-kbd {
+  flex-shrink: 0;
+  font-size: 0.66rem;
+  color: var(--muted);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 0.05rem 0.3rem;
+  background: var(--surface);
 }
 
 .ide-explorer {
@@ -416,6 +486,33 @@ body {
 .ide-palette-item[data-active="true"] {
   background: var(--bg);
   color: var(--accent);
+}
+.ide-palette-name {
+  flex-shrink: 0;
+  font-weight: 500;
+}
+.ide-palette-sub {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: var(--muted);
+  font-size: 0.76rem;
+}
+.ide-palette-kind {
+  flex-shrink: 0;
+  font-size: 0.62rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--muted);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 0.03rem 0.3rem;
+}
+.ide-palette-kind[data-kind="post"] {
+  color: var(--accent);
+  border-color: color-mix(in srgb, var(--accent) 40%, var(--border));
 }
 .ide-palette-empty {
   font-family: var(--mono);

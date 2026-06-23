@@ -4,6 +4,9 @@ import withBundleAnalyzer from "@next/bundle-analyzer";
 
 const nextConfig: NextConfig = {
   reactCompiler: true,
+  // Dev-only: allow the LAN IP so the containerized browser used for agent
+  // smoke-testing can load dev resources (lazy chunks / HMR). No prod effect.
+  allowedDevOrigins: ["192.168.1.185"],
   // next-mdx-remote ships untranspiled ESM that must share Turbopack's React
   // instance, or compileMDX renders against a second copy of React.
   transpilePackages: ["next-mdx-remote"],

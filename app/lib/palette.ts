@@ -31,6 +31,9 @@ export const PALETTES: Palette[] = [
       "--term-text": "#ece0cd",
       "--term-muted": "#a1907a",
       "--term-accent": "#e0936f",
+      "--dot-close": "#cf5b4e",
+      "--dot-min": "#d9a441",
+      "--dot-max": "#6fa85f",
     },
   },
   {
@@ -49,6 +52,9 @@ export const PALETTES: Palette[] = [
       "--term-text": "#e6e1f4",
       "--term-muted": "#9892b0",
       "--term-accent": "#c6a8f0",
+      "--dot-close": "#d20f39",
+      "--dot-min": "#df8e1d",
+      "--dot-max": "#40a02b",
     },
   },
   {
@@ -67,6 +73,9 @@ export const PALETTES: Palette[] = [
       "--term-text": "#c6d0f5",
       "--term-muted": "#a5adce",
       "--term-accent": "#f0a884",
+      "--dot-close": "#e78284",
+      "--dot-min": "#e5c890",
+      "--dot-max": "#a6d189",
     },
   },
 ];
