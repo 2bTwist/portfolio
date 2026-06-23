@@ -65,9 +65,14 @@ function blip({ freq, dur, type = "triangle", gain = 0.05, sweep }: Tone) {
   osc.stop(now + dur + 0.02);
 }
 
+/* Distinct sounds per interaction kind. Open/reveal rise; close/dismiss fall;
+   view is a clean select blip; switch is a dry tick; press is the tactile tock.
+   Tune freely — these are deliberately subtle. */
 export const sfx = {
   press: () => blip({ freq: 220, dur: 0.07, type: "sine", gain: 0.07, sweep: -70 }),
-  soft: () => blip({ freq: 340, dur: 0.045, type: "triangle", gain: 0.04 }),
-  toggle: () => blip({ freq: 420, dur: 0.05, type: "square", gain: 0.035, sweep: 110 }),
+  open: () => blip({ freq: 330, dur: 0.085, type: "triangle", gain: 0.05, sweep: 210 }),
+  close: () => blip({ freq: 480, dur: 0.085, type: "triangle", gain: 0.05, sweep: -200 }),
+  view: () => blip({ freq: 440, dur: 0.04, type: "sine", gain: 0.045 }),
+  switch: () => blip({ freq: 620, dur: 0.035, type: "square", gain: 0.03, sweep: 80 }),
   key: () => blip({ freq: 170 + Math.random() * 50, dur: 0.022, type: "square", gain: 0.022 }),
 };

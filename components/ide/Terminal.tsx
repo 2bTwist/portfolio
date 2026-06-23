@@ -10,6 +10,7 @@ import { useRouter } from "next/navigation";
 import { NAV } from "@/app/lib/nav";
 import { PALETTES } from "@/app/lib/palette";
 import { profile } from "@/data/profile";
+import { TerminalIcon } from "@/components/feel/animated-icons";
 import { useOverlay, useSession } from "./store";
 
 type Line = { kind: "in" | "out"; text: string };
@@ -127,6 +128,9 @@ export default function Terminal() {
   return (
     <div className="ide-terminal" aria-label="Terminal">
       <div className="ide-terminal-bar">
+        <span className="ide-terminal-bar-icon" aria-hidden="true">
+          <TerminalIcon />
+        </span>
         <span className="mono text-xs" style={{ color: "var(--term-muted)" }}>
           zsh — ~/edmond
         </span>

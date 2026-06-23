@@ -70,9 +70,28 @@ export function SoundProvider({ children }: { children: ReactNode }) {
     function onPointerDown(e: PointerEvent) {
       const t = e.target as Element | null;
       if (!t?.closest) return;
-      if (t.closest(".btn")) sfx.press();
-      else if (t.closest(".ide-chevron")) sfx.toggle();
-      else if (t.closest(".ide-row, .ide-tab, .ide-pill, .ide-swatch, .ide-palette-item")) sfx.soft();
+      const chevron = t.closest<HTMLElement>(".ide-chevron");
+      if (t.closest(".btn")) {
+        sfx.press();
+      } else if (chevron) {
+        // state-aware: an open folder is about to collapse, and vice-versa
+        if (chevron.dataset.open === "true") sfx.close();
+        else sfx.open();
+      } else if (t.closest(".ide-tab-close")) {
+        sfx.close();
+      } else if (t.closest(".ide-swatch")) {
+        sfx.switch();
+      } else if (t.closest(".ide-row, .ide-tab, .ide-palette-item")) {
+        sfx.view();
+      } else if (t.closest(".ide-overlay")) {
+        // clicking the backdrop dismisses the palette
+        sfx.close();
+      } else if (t.closest<HTMLElement>(".ide-pill")) {
+        const pill = t.closest<HTMLElement>(".ide-pill")!;
+        // ⌘K / terminal pills open overlays; the mute pill is a switch
+        if (/mute|sound/i.test(pill.getAttribute("aria-label") || "")) sfx.switch();
+        else sfx.open();
+      }
     }
     function onKeyDown(e: KeyboardEvent) {
       const t = e.target as Element | null;

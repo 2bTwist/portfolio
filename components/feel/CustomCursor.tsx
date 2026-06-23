@@ -98,7 +98,7 @@ export function CustomCursor() {
           Near-vertical left edge so it reads as an upright cursor. */}
       <svg className="cursor-arrow-svg" width="30" height="30" viewBox="-2 -2 30 30" fill="none">
         <path
-          d="M0 0 L0 18 L5 13.5 L11.5 15 Z"
+          d="M0 0 L0.5 17 L4 13 L7.5 14.5 Z"
           fill="var(--accent)"
           stroke="var(--accent)"
           strokeWidth="3.5"

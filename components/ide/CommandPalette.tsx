@@ -7,6 +7,7 @@
 import { useEffect, useMemo, useRef, useState, type KeyboardEvent } from "react";
 import { useRouter } from "next/navigation";
 import { NAV } from "@/app/lib/nav";
+import { SearchIcon } from "@/components/feel/animated-icons";
 import { useOverlay, useSession } from "./store";
 
 export default function CommandPalette() {
@@ -64,17 +65,22 @@ export default function CommandPalette() {
         aria-label="Command palette"
         onClick={(e) => e.stopPropagation()}
       >
-        <input
-          ref={inputRef}
-          className="ide-palette-input"
-          value={query}
-          onChange={(e) => onChangeQuery(e.target.value)}
-          onKeyDown={onKeyDown}
-          placeholder="Go to file…"
-          aria-label="Search files"
-          autoComplete="off"
-          spellCheck={false}
-        />
+        <div className="ide-palette-input-row">
+          <span className="ide-palette-search" aria-hidden="true">
+            <SearchIcon />
+          </span>
+          <input
+            ref={inputRef}
+            className="ide-palette-input"
+            value={query}
+            onChange={(e) => onChangeQuery(e.target.value)}
+            onKeyDown={onKeyDown}
+            placeholder="Go to file…"
+            aria-label="Search files"
+            autoComplete="off"
+            spellCheck={false}
+          />
+        </div>
         <ul className="ide-palette-list" role="listbox" aria-label="Results">
           {results.map((r, i) => (
             <li key={r.href} role="option" aria-selected={i === current}>
