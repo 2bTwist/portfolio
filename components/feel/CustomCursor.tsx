@@ -1,46 +1,45 @@
 "use client";
 
-/* Minimal custom cursor: a small accent dot that snaps to the pointer plus a
-   ring that lags slightly behind and grows over interactive targets. Desktop
-   pointers only (pointer:fine) and never under reduced-motion — in those cases
-   it renders nothing and the native cursor is untouched. Movement is written
-   straight to the DOM via rAF (no React state), so it never costs an INP render. */
+/* Minimalist arrow cursor with physics. A single rounded pointer replaces the
+   native arrow and trails the real pointer with spring-like friction, so you
+   feel weight/drag as it moves and catches up. Desktop pointers only
+   (pointer:fine). Under reduced-motion it still shows but snaps 1:1 (no
+   friction). Movement is written straight to the DOM via rAF (no React state),
+   and the loop self-suspends once the arrow has caught up. */
 
 import { useEffect, useRef } from "react";
 
 const INTERACTIVE = "a, button, [role='button'], input, .ide-row, .ide-swatch, .ide-pill, .btn";
 
 export function CustomCursor() {
-  const dotRef = useRef<HTMLDivElement>(null);
-  const ringRef = useRef<HTMLDivElement>(null);
-  const enabledRef = useRef(false);
+  const elRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const fine = window.matchMedia("(pointer: fine)");
-    const reduced = window.matchMedia("(prefers-reduced-motion: reduce)");
-    if (!fine.matches || reduced.matches) return;
+    if (!fine.matches) return;
+    const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    // friction: lower = heavier/more drag. 1 = instant (reduced-motion).
+    const ease = reduced ? 1 : 0.2;
 
-    enabledRef.current = true;
     const root = document.documentElement;
     root.classList.add("cursor-custom");
+    const el = elRef.current!;
 
-    const dot = dotRef.current!;
-    const ring = ringRef.current!;
     let tx = window.innerWidth / 2;
     let ty = window.innerHeight / 2;
-    let rx = tx;
-    let ry = ty;
+    let x = tx;
+    let y = ty;
     let raf = 0;
     let running = false;
 
-    // The ring eases toward the pointer; the loop self-suspends once it has
-    // caught up, so there's no idle rAF burning CPU (and the page isn't held in
-    // perpetual animation). onMove restarts it.
     const loop = () => {
-      rx += (tx - rx) * 0.18;
-      ry += (ty - ry) * 0.18;
-      ring.style.transform = `translate3d(${rx}px, ${ry}px, 0)`;
-      if (Math.abs(tx - rx) < 0.3 && Math.abs(ty - ry) < 0.3) {
+      x += (tx - x) * ease;
+      y += (ty - y) * ease;
+      el.style.transform = `translate3d(${x}px, ${y}px, 0)`;
+      if (Math.abs(tx - x) < 0.3 && Math.abs(ty - y) < 0.3) {
+        x = tx;
+        y = ty;
+        el.style.transform = `translate3d(${x}px, ${y}px, 0)`;
         running = false;
         return;
       }
@@ -56,7 +55,6 @@ export function CustomCursor() {
     const onMove = (e: PointerEvent) => {
       tx = e.clientX;
       ty = e.clientY;
-      dot.style.transform = `translate3d(${tx}px, ${ty}px, 0)`;
       const hovering = !!(e.target as Element | null)?.closest?.(INTERACTIVE);
       root.dataset.cursorHover = hovering ? "true" : "false";
       start();
@@ -88,9 +86,18 @@ export function CustomCursor() {
   }, []);
 
   return (
-    <>
-      <div ref={ringRef} className="cursor-ring" aria-hidden="true" />
-      <div ref={dotRef} className="cursor-dot" aria-hidden="true" />
-    </>
+    <div ref={elRef} className="cursor-arrow" aria-hidden="true">
+      <svg className="cursor-arrow-svg" width="22" height="29" viewBox="0 0 22 29" fill="none">
+        {/* rounded pointer, tip anchored at (0,0) = the real pointer position */}
+        <path
+          d="M1.2 1.2 L1.2 22.2 L6.9 16.9 L10.7 24.6 L14.1 23 L10.3 15.4 L17.8 15.4 Z"
+          fill="var(--accent)"
+          stroke="var(--on-accent)"
+          strokeWidth="1.6"
+          strokeLinejoin="round"
+          strokeLinecap="round"
+        />
+      </svg>
+    </div>
   );
 }
