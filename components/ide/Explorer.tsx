@@ -82,7 +82,9 @@ export function Explorer({ className = "" }: { className?: string }) {
   const handleRef = useRef<HTMLDivElement>(null);
   const bubbleRef = useRef<HTMLDivElement>(null);
   const playRef = useRef(play);
-  playRef.current = play;
+  useEffect(() => {
+    playRef.current = play;
+  }, [play]);
   const draggingRef = useRef(false);
   const startX = useRef(0);
   const startW = useRef(0);
@@ -253,15 +255,13 @@ function Breadcrumb({
   onOpen: (href: string) => void;
 }) {
   const segs = pathname === "/" ? [] : pathname.slice(1).split("/");
-  let acc = "";
   return (
     <div className="ide-explorer-title">
       <Link href="/" prefetch className="ide-crumb" onClick={() => onOpen("/")}>
         ~/edmond
       </Link>
-      {segs.map((seg) => {
-        acc += `/${seg}`;
-        const href = acc;
+      {segs.map((seg, i) => {
+        const href = `/${segs.slice(0, i + 1).join("/")}`;
         const current = href === pathname;
         const navigable = current || NAV_HREFS.has(href);
         return (

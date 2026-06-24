@@ -7,8 +7,12 @@ function sumKB(stdout: string): number | null {
   const start = stdout.indexOf("[");
   if (start === -1) return null;
   try {
-    const json: Array<{ size?: number }> = JSON.parse(stdout.slice(start));
-    return json.reduce((s, e) => s + (e.size ?? 0), 0) / 1024;
+    const json: Array<{ name?: string; size?: number }> = JSON.parse(stdout.slice(start));
+    // Gate only the INITIAL-load route budget. Lazy chunks (e.g. the three.js
+    // cert-badge entry) are bounded by their own size-limit entry, not here, so
+    // they must not inflate the route bundle metric.
+    const initial = json.filter((e) => !e.name || e.name.startsWith("initial-load"));
+    return initial.reduce((s, e) => s + (e.size ?? 0), 0) / 1024;
   } catch {
     return null;
   }

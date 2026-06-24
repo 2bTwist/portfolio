@@ -1418,3 +1418,131 @@ button.ide-row {
     content: "⠿";
   }
 }
+
+/* ── Cert badges (Phase 5) ───────────────────────────────────────────────────
+   CSS fallback / loading / no-WebGL badge. A two-faced card on a perspective
+   stage; rotation is written imperatively by BadgeFallback. Shares its box with
+   the R3F canvas so swapping fallback ↔ 3D causes no layout shift (CLS-safe). */
+.cert-grid {
+  list-style: none;
+  margin: 1.6rem 0 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 1.6rem;
+}
+.cert-grid-item {
+  margin: 0;
+}
+/* Lazy-mount box: both the fallback layer and the R3F canvas fill it absolutely,
+   so the 3D upgrade never shifts layout. */
+.badge-mount {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 3 / 4;
+}
+.badge-fallback-layer {
+  position: absolute;
+  inset: 0;
+}
+.badge-canvas {
+  touch-action: pan-y;
+}
+.badge-stage {
+  width: 100%;
+  aspect-ratio: 3 / 4;
+  perspective: 900px;
+  display: grid;
+  place-items: center;
+  touch-action: pan-y; /* let the page scroll vertically; we spin on horizontal */
+}
+.badge-card {
+  position: relative;
+  width: 78%;
+  height: 88%;
+  transform-style: preserve-3d;
+  cursor: grab;
+  transition: transform 600ms cubic-bezier(0.2, 0.8, 0.2, 1);
+  will-change: transform;
+}
+.badge-card:active {
+  cursor: grabbing;
+}
+.badge-face {
+  position: absolute;
+  inset: 0;
+  border-radius: 16px;
+  backface-visibility: hidden;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  padding: 1.4rem;
+  text-align: center;
+  overflow: hidden;
+  border: 1px solid color-mix(in srgb, var(--badge-accent) 45%, var(--border));
+}
+.badge-face--front {
+  background:
+    radial-gradient(120% 90% at 50% 0%, color-mix(in srgb, var(--badge-accent) 22%, var(--surface)), var(--surface));
+  box-shadow: 0 10px 30px -12px rgba(0, 0, 0, 0.35);
+}
+.badge-face--back {
+  background: linear-gradient(160deg, color-mix(in srgb, var(--badge-accent) 30%, var(--surface)), var(--bg));
+  transform: rotateY(180deg);
+}
+.badge-ribbon {
+  width: 46px;
+  height: 46px;
+  border-radius: 50%;
+  background: var(--badge-accent);
+  box-shadow: 0 0 0 4px color-mix(in srgb, var(--badge-accent) 25%, transparent);
+  margin-bottom: 0.5rem;
+  flex-shrink: 0;
+}
+.badge-name {
+  font-family: var(--display);
+  font-weight: 600;
+  font-size: 1.05rem;
+  line-height: 1.2;
+  color: var(--text);
+}
+.badge-issuer {
+  font-family: var(--mono);
+  font-size: 0.72rem;
+  color: var(--muted);
+}
+.badge-year {
+  font-family: var(--mono);
+  font-size: 0.7rem;
+  color: var(--text);
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  padding: 0.05rem 0.5rem;
+  margin-top: 0.3rem;
+}
+.badge-monogram {
+  font-family: var(--display);
+  font-weight: 700;
+  font-size: 3rem;
+  color: color-mix(in srgb, var(--badge-accent) 70%, var(--text));
+}
+/* Sheen sweeps with the card's Y rotation (--sheen set imperatively). */
+.badge-sheen {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: linear-gradient(
+    105deg,
+    transparent 30%,
+    rgba(255, 255, 255, 0.35) var(--sheen, 50%),
+    transparent 70%
+  );
+  mix-blend-mode: soft-light;
+}
+@media (prefers-reduced-motion: reduce) {
+  .badge-card {
+    transition: none;
+  }
+}
