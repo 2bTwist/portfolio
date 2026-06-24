@@ -8,7 +8,7 @@
    hi-DPI screens don't render 4x pixels. */
 
 import { Canvas } from "@react-three/fiber";
-import { PresentationControls, RoundedBox, Decal } from "@react-three/drei";
+import { PresentationControls, RoundedBox } from "@react-three/drei";
 import { useEffect, useMemo } from "react";
 import * as THREE from "three";
 import type { Cert } from "@/data/certs";
@@ -93,8 +93,13 @@ function Badge({ cert }: { cert: Cert }) {
     >
       <RoundedBox args={[3, 4, 0.28]} radius={0.16} smoothness={4}>
         <meshStandardMaterial color={cert.accent ?? "#c9a23a"} roughness={0.5} metalness={0.15} />
-        <Decal position={[0, 0, 0.145]} scale={[2.74, 3.74, 1]} map={texture} />
       </RoundedBox>
+      {/* Flat textured plane just proud of the front face — predictable, crisp,
+          unlit text (Decal projection came out mirrored/flipped). */}
+      <mesh position={[0, 0, 0.151]}>
+        <planeGeometry args={[2.74, 3.74]} />
+        <meshBasicMaterial map={texture} toneMapped={false} />
+      </mesh>
     </PresentationControls>
   );
 }
