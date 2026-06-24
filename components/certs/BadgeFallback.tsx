@@ -13,7 +13,7 @@ import type { Cert } from "@/data/certs";
 const REST_Y = -22;
 const REST_X = 8;
 
-export function BadgeFallback({ cert }: { cert: Cert }) {
+export function BadgeFallback({ cert, faceSvg }: { cert: Cert; faceSvg: string }) {
   const cardRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -73,11 +73,16 @@ export function BadgeFallback({ cert }: { cert: Cert }) {
         className="badge-card"
         style={{ ["--badge-accent" as string]: cert.accent ?? "var(--accent)" }}
       >
-        <div className="badge-face badge-face--front">
-          <span className="badge-ribbon" aria-hidden="true" />
-          <span className="badge-name">{cert.name}</span>
-          <span className="badge-issuer">{cert.issuer}</span>
-          {cert.year ? <span className="badge-year">{cert.year}</span> : null}
+        <div
+          className="badge-face badge-face--front"
+          role="img"
+          aria-label={`${cert.name} — ${cert.issuer}${cert.year ? `, ${cert.year}` : ""}`}
+        >
+          <div
+            className="badge-svg"
+            aria-hidden="true"
+            dangerouslySetInnerHTML={{ __html: faceSvg }}
+          />
           <span className="badge-sheen" aria-hidden="true" />
         </div>
         <div className="badge-face badge-face--back" aria-hidden="true">

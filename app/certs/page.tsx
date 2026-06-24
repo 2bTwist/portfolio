@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { PageShell } from "@/components/site/PageShell";
 import { PageHeader, Body } from "@/components/content/ui";
 import { CERTS } from "@/data/certs";
+import { badgeFaceSvg } from "@/components/certs/badgeFace";
 import { BadgeLazy } from "@/components/certs/BadgeLazy";
 
 export const metadata: Metadata = {
@@ -17,7 +18,7 @@ export default function CertsPage() {
       <ul className="cert-grid" aria-label="Certifications">
         {CERTS.map((cert) => (
           <li key={cert.id} className="cert-grid-item">
-            <BadgeLazy cert={cert} />
+            <BadgeLazy cert={cert} faceSvg={badgeFaceSvg(cert)} />
           </li>
         ))}
       </ul>

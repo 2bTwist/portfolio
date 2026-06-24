@@ -25,7 +25,7 @@ function canUpgrade(): boolean {
   }
 }
 
-export function BadgeLazy({ cert }: { cert: Cert }) {
+export function BadgeLazy({ cert, faceSvg }: { cert: Cert; faceSvg: string }) {
   const ref = useRef<HTMLDivElement>(null);
   const [mount3D, setMount3D] = useState(false);
   const [ready, setReady] = useState(false);
@@ -48,10 +48,12 @@ export function BadgeLazy({ cert }: { cert: Cert }) {
 
   return (
     <div ref={ref} className="badge-mount">
-      {mount3D ? <BadgeScene cert={cert} onReady={() => setReady(true)} /> : null}
+      {mount3D ? (
+        <BadgeScene cert={cert} faceSvg={faceSvg} onReady={() => setReady(true)} />
+      ) : null}
       {!ready ? (
         <div className="badge-fallback-layer">
-          <BadgeFallback cert={cert} />
+          <BadgeFallback cert={cert} faceSvg={faceSvg} />
         </div>
       ) : null}
     </div>
