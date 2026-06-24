@@ -32,6 +32,7 @@ export const TREE: TreeNode[] = [
   { type: "folder", name: "projects", href: "/projects", children: projectFiles },
   { type: "file", name: "about.md", href: "/about" },
   { type: "file", name: "experience.md", href: "/experience" },
+  { type: "file", name: "certs.pdf", href: "/certs" },
   { type: "file", name: "writing.md", href: "/writing" },
   { type: "file", name: "contact.md", href: "/contact" },
 ];
@@ -45,6 +46,7 @@ export const NAV: NavItem[] = [
   ...projectFiles.map((f) => ({ name: f.name, href: f.href })),
   { name: "about.md", href: "/about" },
   { name: "experience.md", href: "/experience" },
+  { name: "certs.pdf", href: "/certs" },
   { name: "writing.md", href: "/writing" },
   { name: "contact.md", href: "/contact" },
 ];

@@ -8,9 +8,8 @@ const nextConfig: NextConfig = {
   // smoke-testing can load dev resources (lazy chunks / HMR). No prod effect.
   allowedDevOrigins: ["192.168.1.185"],
   // next-mdx-remote ships untranspiled ESM that must share Turbopack's React
-  // instance, or compileMDX renders against a second copy of React. three /
-  // @react-three ship modern ESM that Next transpiles for the bundler.
-  transpilePackages: ["next-mdx-remote", "three", "@react-three/fiber", "@react-three/drei"],
+  // instance, or compileMDX renders against a second copy of React.
+  transpilePackages: ["next-mdx-remote"],
   // Pin the workspace root so Turbopack never mis-infers it (it briefly
   // resolved `app/` as the root and failed to find the `next` package).
   turbopack: {

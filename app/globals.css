@@ -1434,91 +1434,53 @@ button.ide-row {
 .cert-grid-item {
   margin: 0;
 }
-/* Lazy-mount box: both the fallback layer and the R3F canvas fill it absolutely,
-   so the 3D upgrade never shifts layout. */
-.badge-mount {
-  position: relative;
+/* Static badge: server-rendered art that floats on the page (soft shadow +
+   gentle idle bob), hover lifts it a touch. The two badges bob out of phase so
+   they don't move in lockstep. */
+.cert-badge {
+  margin: 0;
+}
+.cert-badge-art {
+  display: block;
   width: 100%;
   aspect-ratio: 3 / 4;
-}
-.badge-fallback-layer {
-  position: absolute;
-  inset: 0;
-}
-.badge-canvas {
-  touch-action: pan-y;
-}
-.badge-stage {
-  width: 100%;
-  aspect-ratio: 3 / 4;
-  perspective: 900px;
-  display: grid;
-  place-items: center;
-  touch-action: pan-y; /* let the page scroll vertically; we spin on horizontal */
-}
-.badge-card {
-  position: relative;
-  /* 84% of both stage dimensions keeps the card at the stage's 3:4, so the 3:4
-     SVG face fills it with no letterboxing. */
-  width: 84%;
-  height: 84%;
-  transform-style: preserve-3d;
-  cursor: grab;
-  transition: transform 600ms cubic-bezier(0.2, 0.8, 0.2, 1);
+  animation: cert-float 6s ease-in-out infinite;
+  transition: transform 280ms cubic-bezier(0.2, 0.8, 0.2, 1);
   will-change: transform;
 }
-.badge-card:active {
-  cursor: grabbing;
+.cert-grid-item:nth-child(even) .cert-badge-art {
+  animation-delay: -3s;
 }
-.badge-face {
-  position: absolute;
-  inset: 0;
-  border-radius: 16px;
-  backface-visibility: hidden;
-  overflow: hidden;
-  border: 1px solid color-mix(in srgb, var(--badge-accent) 55%, var(--border));
+.cert-badge:hover .cert-badge-art {
+  transform: translateY(-6px) scale(1.012);
 }
-.badge-face--front {
-  background: var(--surface);
-  box-shadow: 0 12px 34px -14px rgba(0, 0, 0, 0.4);
-}
-.badge-face--back {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: linear-gradient(160deg, color-mix(in srgb, var(--badge-accent) 30%, var(--surface)), var(--bg));
-  transform: rotateY(180deg);
-}
-/* The shared SVG face fills the card front. */
-.badge-svg,
-.badge-svg svg {
-  position: absolute;
-  inset: 0;
+/* SVG placeholder: opaque card, so clip + box-shadow give the rounded float. */
+.cert-badge-art svg {
+  display: block;
   width: 100%;
   height: 100%;
-  display: block;
+  border-radius: 16px;
+  box-shadow: 0 22px 38px -16px rgba(0, 0, 0, 0.38);
 }
-.badge-monogram {
-  font-family: var(--display);
-  font-weight: 700;
-  font-size: 3rem;
-  color: color-mix(in srgb, var(--badge-accent) 70%, var(--text));
+/* Real art (likely a transparent PNG): alpha-aware shadow so it floats by shape. */
+img.cert-badge-art {
+  object-fit: contain;
+  filter: drop-shadow(0 20px 26px rgba(0, 0, 0, 0.24));
 }
-/* Sheen sweeps with the card's Y rotation (--sheen set imperatively). */
-.badge-sheen {
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  background: linear-gradient(
-    105deg,
-    transparent 30%,
-    rgba(255, 255, 255, 0.35) var(--sheen, 50%),
-    transparent 70%
-  );
-  mix-blend-mode: soft-light;
+@keyframes cert-float {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-8px);
+  }
 }
 @media (prefers-reduced-motion: reduce) {
-  .badge-card {
-    transition: none;
+  .cert-badge-art {
+    animation: none;
+  }
+  .cert-badge:hover .cert-badge-art {
+    transform: none;
   }
 }

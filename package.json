@@ -21,8 +21,6 @@
   },
   "dependencies": {
     "@phosphor-icons/react": "^2.1.10",
-    "@react-three/drei": "10.7.7",
-    "@react-three/fiber": "9.6.1",
     "@vercel/speed-insights": "^2.0.0",
     "fuse.js": "^7.4.2",
     "gray-matter": "^4.0.3",
@@ -32,8 +30,7 @@
     "next-mdx-remote": "^5.0.0",
     "prism-react-renderer": "^2.4.1",
     "react": "19.2.7",
-    "react-dom": "19.2.7",
-    "three": "0.184.0"
+    "react-dom": "19.2.7"
   },
   "devDependencies": {
     "@axe-core/playwright": "^4.11.3",
@@ -47,7 +44,6 @@
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
-    "@types/three": "^0.184.1",
     "@vitejs/plugin-react": "^6.0.2",
     "babel-plugin-react-compiler": "1.0.0",
     "commander": "^15.0.0",
