@@ -13,7 +13,7 @@ export async function generateStaticParams() {
 export async function generateMetadata({ params }: Params): Promise<Metadata> {
   const { tag } = await params;
   return {
-    title: `#${tag} — Writing`,
+    title: `#${tag} - Writing`,
     description: `Posts tagged #${tag}.`,
   };
 }
@@ -24,7 +24,7 @@ export default async function TagPage({ params }: Params) {
 
   return (
     <PageShell>
-      <PageHeader filename={`writing/tag/${tag}`} title={`#${tag}`} />
+      <PageHeader title={`#${tag}`} />
       {posts.length === 0 ? (
         <p style={{ color: "var(--muted)" }}>No posts with this tag.</p>
       ) : (

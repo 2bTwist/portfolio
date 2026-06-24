@@ -4,14 +4,14 @@ import { PageShell } from "@/components/site/PageShell";
 import { PageHeader, Body, ActionLink } from "@/components/content/ui";
 
 export const metadata: Metadata = {
-  title: "Contact — Edmond Ndanji",
+  title: "Contact - Edmond Ndanji",
   description: "Get in touch with Edmond Ndanji.",
 };
 
 export default function ContactPage() {
   return (
     <PageShell>
-      <PageHeader filename="contact.md" title="Contact" />
+      <PageHeader title="Contact" />
       <Body>Open to interesting work and conversations.</Body>
       <div className="mt-6 flex flex-wrap gap-4">
         <ActionLink href={`mailto:${profile.email}`}>Email</ActionLink>

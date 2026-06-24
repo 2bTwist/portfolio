@@ -153,7 +153,9 @@ body {
   width: 11px;
   height: 11px;
   border-radius: 50%;
-  display: inline-block;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
 }
 .ide-dot--close {
   background: var(--dot-close);
@@ -164,21 +166,63 @@ body {
 .ide-dot--max {
   background: var(--dot-max);
 }
+/* macOS-style glyphs: hidden until the cluster is hovered, then each dot fades
+   its symbol in. The glyph is a dark wash so it reads on any palette's dots. */
+.ide-dot svg {
+  width: 11px;
+  height: 11px;
+  color: rgba(0, 0, 0, 0.55);
+  opacity: 0;
+  transform: scale(0.5);
+  transition: opacity 130ms ease-out, transform 130ms cubic-bezier(0.2, 0.9, 0.3, 1.5);
+}
+.ide-traffic:hover .ide-dot svg {
+  opacity: 1;
+  transform: none;
+}
+@media (prefers-reduced-motion: reduce) {
+  .ide-dot svg {
+    transform: none;
+    transition: opacity 130ms ease-out;
+  }
+}
 
-/* VS Code-style command center: a centered search pill that opens ⌘K. Absolutely
-   centered on the whole title bar (not the leftover space) so it tracks the
-   window center like the editor it mimics. */
-.ide-command-center {
+/* Back/forward + command center, centered as one group on the title bar (the
+   nav arrows sit just left of the search, VS Code-style). */
+.ide-titlebar-center {
   position: absolute;
   left: 50%;
   top: 50%;
   transform: translate(-50%, -50%);
   display: flex;
   align-items: center;
+  gap: 0.3rem;
+}
+.ide-nav-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  border: none;
+  background: none;
+  border-radius: 6px;
+  color: var(--muted);
+  cursor: pointer;
+  transition: color 140ms ease-out, background 140ms ease-out;
+}
+.ide-nav-btn:hover {
+  color: var(--text);
+  background: var(--surface);
+}
+/* VS Code-style command center: a search pill that opens ⌘K. */
+.ide-command-center {
+  display: flex;
+  align-items: center;
   gap: 0.45rem;
   width: clamp(220px, 38vw, 440px);
   height: 24px;
-  padding: 0 0.35rem 0 0.6rem;
+  padding: 0 0.2rem 0 0.6rem;
   border: 1px solid var(--border);
   border-radius: 7px;
   background: var(--bg);
@@ -222,6 +266,7 @@ body {
 }
 
 .ide-explorer {
+  position: relative;
   flex-direction: column;
   width: 220px;
   flex-shrink: 0;
@@ -233,11 +278,130 @@ body {
 }
 .ide-explorer-title {
   font-family: var(--mono);
-  font-size: 0.66rem;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
+  font-size: 0.7rem;
+  letter-spacing: 0.01em;
   color: var(--muted);
   padding: 0.25rem 0.6rem 0.45rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+/* clickable path crumbs in the explorer header */
+.ide-crumb {
+  color: var(--muted);
+  text-decoration: none;
+  border-radius: 3px;
+  transition: color 120ms ease-out;
+}
+.ide-crumb:hover {
+  color: var(--text);
+}
+.ide-crumb--current {
+  color: var(--text); /* the page you're on, emphasized */
+}
+.ide-crumb-sep {
+  margin: 0 0.12em;
+  color: var(--muted);
+  opacity: 0.5;
+}
+.ide-crumb-static {
+  color: var(--muted);
+}
+
+/* Drag-to-resize handle on the panel's right edge. (Sits inside the panel; the
+   file tree is short enough that the panel doesn't scroll. If the tree ever
+   outgrows the panel height, hoist this into the Shell so it can't scroll away.) */
+.ide-resize-handle {
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 8px;
+  height: 100%;
+  cursor: col-resize;
+  touch-action: none;
+  z-index: 5;
+}
+.ide-resize-handle::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 2px;
+  height: 100%;
+  background: transparent;
+  transition: background 140ms ease-out;
+}
+.ide-resize-handle:hover::after,
+.ide-resize-handle[data-dragging="true"]::after {
+  background: var(--accent);
+}
+
+/* Shove-past-the-limit feedback: a quick shake + a dark speech bubble. */
+.ide-explorer--shake {
+  animation: ideExplorerShake 0.4s cubic-bezier(0.36, 0.07, 0.19, 0.97);
+}
+@keyframes ideExplorerShake {
+  10%,
+  90% {
+    transform: translateX(-1px);
+  }
+  20%,
+  80% {
+    transform: translateX(2px);
+  }
+  30%,
+  50%,
+  70% {
+    transform: translateX(-3px);
+  }
+  40%,
+  60% {
+    transform: translateX(3px);
+  }
+}
+.ide-nudge {
+  position: fixed;
+  z-index: 9998;
+  transform: translate(-50%, calc(-100% - 14px));
+  background: var(--term-bg);
+  color: var(--term-text);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 11px;
+  padding: 0.4rem 0.7rem;
+  font-family: var(--mono);
+  font-size: 0.78rem;
+  white-space: nowrap;
+  pointer-events: none;
+  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.28);
+  animation: ideNudgePop 220ms cubic-bezier(0.2, 0.9, 0.3, 1.5);
+}
+.ide-nudge::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  bottom: -5px;
+  width: 10px;
+  height: 10px;
+  background: var(--term-bg);
+  border-right: 1px solid rgba(255, 255, 255, 0.1);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  transform: translateX(-50%) rotate(45deg);
+}
+@keyframes ideNudgePop {
+  from {
+    opacity: 0;
+    transform: translate(-50%, calc(-100% - 14px)) scale(0.82);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, calc(-100% - 14px)) scale(1);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .ide-explorer--shake,
+  .ide-nudge {
+    animation: none;
+  }
 }
 
 .ide-row {
@@ -269,26 +433,54 @@ body {
   color: var(--text);
   font-weight: 600;
 }
-.ide-chevron {
-  width: 1rem;
-  display: inline-flex;
-  justify-content: center;
+/* Folder rows are toggle buttons; reset native button chrome to match the links. */
+button.ide-row {
+  width: 100%;
   border: none;
   background: none;
   cursor: pointer;
-  color: var(--muted);
-  font-size: 0.7rem;
-  padding: 0;
-  transition:
-    transform 240ms cubic-bezier(0.2, 0.9, 0.3, 1.3),
-    color 140ms ease-out;
-}
-.ide-chevron:hover {
+  text-align: left;
   color: var(--text);
 }
-/* single ▾ glyph rotated to ▸ when collapsed */
-.ide-chevron[data-open="false"] {
-  transform: rotate(-90deg);
+/* Fixed-width gutters so every row's icon + name line up deterministically and
+   nothing shifts when the client-only file icons mount. */
+.ide-twistie {
+  flex-shrink: 0;
+  width: 1.05rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--muted);
+}
+/* chevron click target on folder rows (toggles the subtree without navigating);
+   wraps the fixed-width twistie so tree alignment is unchanged. */
+.ide-twistie-hit {
+  display: inline-flex;
+  align-items: center;
+  align-self: stretch;
+  cursor: pointer;
+}
+.ide-twistie-icon {
+  transition: transform 200ms cubic-bezier(0.2, 0.9, 0.3, 1.3);
+}
+.ide-twistie-icon[data-open="true"] {
+  transform: rotate(90deg);
+}
+.ide-row:hover .ide-twistie {
+  color: var(--text);
+}
+.ide-row-icon {
+  flex-shrink: 0;
+  width: 1.05rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+.ide-row-name {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 /* Folder accordion — animate via grid-template-rows 1fr<->0fr so children
@@ -361,10 +553,67 @@ body {
   width: 1.15rem;
   height: 1.15rem;
   line-height: 1;
+  /* center the × glyph in its box (the bare text baseline sits off-center) */
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
 }
 .ide-tab-close:hover {
   background: var(--border);
   color: var(--text);
+}
+/* Right-click tab menu (VS Code-style). Portaled to <body>, positioned fixed. */
+.ide-tab-menu {
+  position: fixed;
+  z-index: 10000;
+  min-width: 210px;
+  padding: 0.25rem;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.3);
+  font-family: var(--mono);
+  font-size: 0.78rem;
+  animation: ideMenuIn 120ms cubic-bezier(0.2, 0.9, 0.3, 1.2);
+}
+@keyframes ideMenuIn {
+  from {
+    opacity: 0;
+    transform: translateY(-4px) scale(0.97);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+.ide-tab-menu-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1.5rem;
+  width: 100%;
+  border: none;
+  background: none;
+  cursor: pointer;
+  color: var(--text);
+  text-align: left;
+  font: inherit;
+  padding: 0.4rem 0.55rem;
+  border-radius: 5px;
+}
+.ide-tab-menu-item:hover:not(:disabled) {
+  background: var(--bg);
+  color: var(--accent);
+}
+.ide-tab-menu-item:disabled {
+  color: var(--muted);
+  cursor: default;
+  opacity: 0.55;
+}
+.ide-tab-menu-key {
+  color: var(--muted);
+  font-size: 0.72rem;
 }
 
 .ide-statusbar {
@@ -375,6 +624,49 @@ body {
   background: var(--surface);
   border-top: 1px solid var(--border);
 }
+/* Bottom-left git widget: branch + short hash, links to the commit on GitHub. */
+.ide-git {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.34rem;
+  color: var(--muted);
+  text-decoration: none;
+  font-family: var(--mono);
+  font-size: 0.72rem;
+  padding: 0.08rem 0.34rem;
+  border-radius: 5px;
+}
+/* the branch glyph's art is centered in its box, leaving whitespace on the
+   right — pull the branch name back so the icon↔name gap reads even. */
+.ide-git svg {
+  margin-right: -0.28rem;
+}
+.ide-git:hover {
+  color: var(--text);
+  background: var(--bg);
+}
+.ide-git svg {
+  width: 13px;
+  height: 13px;
+}
+/* No opacity de-emphasis: dimming --muted below ~0.93 drops the short hash
+   under the 4.5:1 contrast floor. The branch glyph + gap already separate it. */
+.ide-git-sha {
+  color: var(--muted);
+}
+
+/* VS Code-style editor position readout (Ln/Col, selection, indent). */
+.ide-editor-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.9rem;
+  margin-right: 0.5rem;
+  font-family: var(--mono);
+  font-size: 0.7rem;
+  color: var(--muted);
+  white-space: nowrap;
+}
+
 .ide-pill {
   border: 1px solid var(--border);
   background: none;
@@ -388,6 +680,20 @@ body {
 .ide-pill:hover {
   color: var(--text);
   border-color: var(--border-press);
+}
+/* icon-only pill (terminal / sound / RSS): square, centered glyph, no underline
+   when it's an <a> (the RSS feed link). */
+.ide-pill--icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.65rem;
+  height: 1.5rem;
+  padding: 0;
+  text-decoration: none;
+}
+.ide-pill--icon svg {
+  display: block;
 }
 .ide-swatch {
   width: 14px;
@@ -529,6 +835,18 @@ body {
   color: var(--term-text);
   font-family: var(--mono);
 }
+/* drag strip along the top edge to resize the terminal height */
+.ide-terminal-resize {
+  height: 7px;
+  margin-top: -1px;
+  cursor: row-resize;
+  background: transparent;
+  transition: background 120ms ease-out;
+}
+.ide-terminal-resize:hover,
+.ide-terminal-resize[data-dragging="true"] {
+  background: var(--accent);
+}
 .ide-terminal-bar {
   display: flex;
   align-items: center;
@@ -566,23 +884,99 @@ body {
 .ide-terminal-form {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
+  gap: 0.4rem;
   padding: 0.5rem 0.85rem;
   /* Elevated, clearly-divided input row so it reads as a distinct prompt
      rather than blending into the output log above. */
   border-top: 1px solid rgba(255, 255, 255, 0.14);
   background: rgba(255, 255, 255, 0.04);
   color: var(--term-accent);
-}
-.ide-terminal-input {
-  flex: 1;
-  border: none;
-  background: none;
-  outline: none;
-  color: var(--term-text);
-  caret-color: var(--term-accent);
-  font-family: var(--mono);
+  /* Match the prompt `$` to the typed text size so they sit on one line (the
+     `$` would otherwise inherit the 1rem body size and tower over the 0.8rem
+     output). */
   font-size: 0.8rem;
+  line-height: 1.3;
+}
+/* Visible prompt line: typed text + block caret, in normal inline flow. */
+.ide-terminal-live {
+  flex: 1;
+  min-width: 0;
+  display: inline-flex;
+  align-items: center;
+  line-height: 1;
+  white-space: pre;
+  overflow: hidden;
+  color: var(--term-text);
+  font-family: var(--mono);
+}
+.ide-terminal-prompt {
+  flex: none;
+  margin-right: 0.45rem;
+  color: var(--term-accent);
+}
+.ide-terminal-ghost {
+  color: var(--term-muted);
+  opacity: 0.6;
+}
+/* the block cursor sitting on the first suggested char (fish-style): no gap,
+   blinks between a solid block and the dim ghost char. */
+.ide-terminal-caret-char {
+  flex: none;
+  border-radius: 1px;
+  background: var(--term-accent);
+  color: var(--term-bg);
+  animation: ideCaretCharBlink 1.05s steps(1) infinite;
+}
+@keyframes ideCaretCharBlink {
+  0%,
+  49.9% {
+    background: var(--term-accent);
+    color: var(--term-bg);
+  }
+  50%,
+  100% {
+    background: transparent;
+    color: var(--term-muted);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .ide-terminal-caret-char {
+    animation: none;
+  }
+}
+.ide-terminal-caret {
+  flex: none;
+  width: 0.5em;
+  height: 1em;
+  margin-left: 1px;
+  background: var(--term-accent);
+  animation: ideCaretBlink 1.05s steps(1) infinite;
+}
+@keyframes ideCaretBlink {
+  0%,
+  49.9% {
+    opacity: 1;
+  }
+  50%,
+  100% {
+    opacity: 0;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .ide-terminal-caret {
+    animation: none;
+  }
+}
+/* The real input is an invisible, focusable keystroke sink (block caret above
+   replaces the native one). */
+.ide-terminal-input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  border: 0;
+  opacity: 0;
+  pointer-events: none;
 }
 
 /* Editor-pane route enter — CSS keyframe (no motion dep), LCP-safe: only runs on
@@ -606,7 +1000,7 @@ body {
     animation: none;
   }
   .ide-row,
-  .ide-chevron,
+  .ide-twistie-icon,
   .ide-folder,
   .ide-folder-inner {
     transition: none;
@@ -629,7 +1023,9 @@ body {
   top: 0;
   left: 0;
   pointer-events: none;
-  z-index: 9999;
+  /* It stands in for the OS cursor, so it must sit above every overlay
+     (context menu / palette are at 10000). Max int = always topmost. */
+  z-index: 2147483647;
   transform: translate3d(-100px, -100px, 0);
   will-change: transform;
   display: none;
@@ -647,6 +1043,52 @@ body {
 .cursor-custom * {
   cursor: none !important;
 }
+/* dim the rail while privileges are revoked */
+.ide-resize-handle[data-locked="true"]::after {
+  background: var(--border-press);
+}
+/* Over the resize handle, swap the arrow for a custom grab hand (the OS cursor
+   can't be oriented; this can). Driven by data-cursor-grab (hover the handle)
+   and data-cursor-grabbing (active drag); the hand tightens while grabbing. */
+.cursor-hand {
+  position: absolute;
+  left: -13px;
+  top: -13px;
+  display: none;
+  color: var(--accent);
+  /* Phosphor hands point fingers-up; rotate to the horizontal grab orientation. */
+  transform: rotate(-90deg);
+  transform-origin: center;
+}
+/* the pointing hand keeps its natural fingers-up orientation; the fingertip
+   sits on the pointer (the container origin), so no rotation. */
+.cursor-hand--point {
+  left: -13px;
+  top: -3px;
+  transform: none;
+  transform-origin: 13px 3px; /* the fingertip */
+  transition: transform 150ms cubic-bezier(0.2, 0.9, 0.3, 1.4);
+}
+.cursor-custom[data-cursor-grab="true"] .cursor-arrow-svg,
+.cursor-custom[data-cursor-grabbing="true"] .cursor-arrow-svg {
+  display: none;
+}
+.cursor-custom[data-cursor-grab="true"] .cursor-hand--grab {
+  display: block;
+}
+.cursor-custom[data-cursor-grabbing="true"] .cursor-hand--grabbing {
+  display: block;
+}
+/* the terminal handle resizes vertically — face the grab hand up (natural
+   fingers-up; the explorer handle keeps the default left-facing orientation). */
+.cursor-custom[data-cursor-axis="y"] .cursor-hand--grab,
+.cursor-custom[data-cursor-axis="y"] .cursor-hand--grabbing {
+  transform: none;
+}
+/* while dragging, the grabbing hand wins over the hover hand */
+.cursor-custom[data-cursor-grabbing="true"] .cursor-hand--grab {
+  display: none;
+}
 .cursor-arrow-svg {
   position: absolute;
   /* path tip (0,0) renders at svg pixel (2,2) given viewBox "-2 -2 …";
@@ -657,11 +1099,24 @@ body {
   transform-origin: 2px 2px; /* the tip */
   transition: transform 150ms cubic-bezier(0.2, 0.9, 0.3, 1.4);
 }
-[data-cursor-hover="true"] .cursor-arrow-svg {
-  transform: scale(1.15);
+/* Over a clickable element, swap the arrow for the pointing hand (the click
+   affordance). The grab hand over the resize handle still wins over it. */
+.cursor-custom[data-cursor-hover="true"] .cursor-arrow-svg {
+  display: none;
 }
+.cursor-custom[data-cursor-hover="true"] .cursor-hand--point {
+  display: block;
+}
+.cursor-custom[data-cursor-grab="true"] .cursor-hand--point,
+.cursor-custom[data-cursor-grabbing="true"] .cursor-hand--point {
+  display: none;
+}
+/* press feedback: the arrow dips on plain surfaces, the hand on clickables. */
 [data-cursor-active="true"] .cursor-arrow-svg {
   transform: scale(0.88);
+}
+[data-cursor-active="true"] .cursor-hand--point {
+  transform: scale(0.9);
 }
 
 /* ── Reading surface (Phase 4: writing/MDX) ──────────────────────────────────

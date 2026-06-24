@@ -18,7 +18,7 @@ export async function generateMetadata({ params }: Params): Promise<Metadata> {
   const post = getPost(slug);
   if (!post) return { title: "Post not found" };
   return {
-    title: `${post.title} — Edmond Ndanji`,
+    title: `${post.title} - Edmond Ndanji`,
     description: post.summary,
     openGraph: { title: post.title, description: post.summary, type: "article" },
     twitter: { card: "summary_large_image", title: post.title, description: post.summary },

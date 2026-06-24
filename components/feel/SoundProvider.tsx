@@ -11,9 +11,9 @@
    discipline) and no hydration mismatch (server snapshot = sound on, not muted). */
 
 import { createContext, useContext, useEffect, useSyncExternalStore, type ReactNode } from "react";
-import { sfx } from "./sound";
+import { sfx, warmupSound } from "./sound";
 
-type SoundCtx = { muted: boolean; toggleMuted: () => void };
+type SoundCtx = { muted: boolean; toggleMuted: () => void; play: (kind: keyof typeof sfx) => void };
 const Ctx = createContext<SoundCtx | null>(null);
 
 const STORAGE_KEY = "sound-muted";
@@ -67,15 +67,31 @@ export function SoundProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     if (!allowed) return;
 
+    // Warm the AudioContext on the FIRST real gesture, not on mount. Creating it
+    // at mount cost ~200ms TBT under throttle (new AudioContext() does hardware
+    // audio init) and consumed the entire page-load blocking budget. The first
+    // pointermove precedes the first click, so warming there still has the ctx
+    // ready before any sound plays — while staying off the load critical path.
+    // pointerdown/keydown are belt-and-suspenders for keyboard-first users.
+    let warmed = false;
+    const warmEvents = ["pointermove", "pointerdown", "keydown"] as const;
+    const warm = () => {
+      if (warmed) return;
+      warmed = true;
+      warmupSound();
+      for (const ev of warmEvents) window.removeEventListener(ev, warm);
+    };
+    for (const ev of warmEvents) window.addEventListener(ev, warm, { passive: true });
+
     function onPointerDown(e: PointerEvent) {
       const t = e.target as Element | null;
       if (!t?.closest) return;
-      const chevron = t.closest<HTMLElement>(".ide-chevron");
+      const folder = t.closest<HTMLElement>(".ide-row[aria-expanded]");
       if (t.closest(".btn")) {
         sfx.press();
-      } else if (chevron) {
+      } else if (folder) {
         // state-aware: an open folder is about to collapse, and vice-versa
-        if (chevron.dataset.open === "true") sfx.close();
+        if (folder.getAttribute("aria-expanded") === "true") sfx.close();
         else sfx.open();
       } else if (t.closest(".ide-tab-close")) {
         sfx.close();
@@ -101,15 +117,21 @@ export function SoundProvider({ children }: { children: ReactNode }) {
     document.addEventListener("pointerdown", onPointerDown);
     document.addEventListener("keydown", onKeyDown);
     return () => {
+      for (const ev of warmEvents) window.removeEventListener(ev, warm);
       document.removeEventListener("pointerdown", onPointerDown);
       document.removeEventListener("keydown", onKeyDown);
     };
   }, [allowed]);
 
-  // React Compiler memoizes this; no useCallback needed.
+  // React Compiler memoizes these; no useCallback needed.
   const toggleMuted = () => writeMuted(!readMuted());
+  // Imperative one-shot for sounds not tied to a delegated click (e.g. the
+  // sidebar limit bonk). Respects the same mute / reduced gates.
+  const play = (kind: keyof typeof sfx) => {
+    if (allowed) sfx[kind]();
+  };
 
-  return <Ctx.Provider value={{ muted, toggleMuted }}>{children}</Ctx.Provider>;
+  return <Ctx.Provider value={{ muted, toggleMuted, play }}>{children}</Ctx.Provider>;
 }
 
 export function useSound() {

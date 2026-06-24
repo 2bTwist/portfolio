@@ -5,14 +5,14 @@ import { PageShell } from "@/components/site/PageShell";
 import { PageHeader, Prose, Body } from "@/components/content/ui";
 
 export const metadata: Metadata = {
-  title: "About — Edmond Ndanji",
+  title: "About - Edmond Ndanji",
   description: profile.blurb,
 };
 
 export default function AboutPage() {
   return (
     <PageShell>
-      <PageHeader filename="about.md" title="About" />
+      <PageHeader title="About" />
       <Prose>
         <Body>{profile.blurb}</Body>
         <Body>

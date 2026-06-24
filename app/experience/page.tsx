@@ -4,14 +4,14 @@ import { PageShell } from "@/components/site/PageShell";
 import { PageHeader } from "@/components/content/ui";
 
 export const metadata: Metadata = {
-  title: "Experience — Edmond Ndanji",
+  title: "Experience - Edmond Ndanji",
   description: "Work history: full-stack and mobile engineering.",
 };
 
 export default function ExperiencePage() {
   return (
     <PageShell>
-      <PageHeader filename="experience.md" title="Experience" />
+      <PageHeader title="Experience" />
       <ol className="space-y-8">
         {EXPERIENCE.map((entry, i) => (
           <li key={i} className="relative pl-5" style={{ borderLeft: "2px solid var(--border)" }}>

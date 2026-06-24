@@ -7,7 +7,7 @@ import { ActionLink } from "@/components/content/ui";
 import { ProjectCard } from "@/components/content/ProjectCard";
 
 export const metadata: Metadata = {
-  title: "Edmond Ndanji — Full-stack & mobile engineer",
+  title: "Edmond Ndanji - Full-stack & mobile engineer",
   description: profile.tagline,
 };
 
@@ -15,9 +15,6 @@ export default function HomePage() {
   const featured = PROJECTS.filter((p) => p.featured);
   return (
     <PageShell>
-      <p className="mono text-sm mb-2" style={{ color: "var(--muted)" }}>
-        README.md
-      </p>
       <h1 className="display text-5xl sm:text-6xl font-bold" style={{ color: "var(--text)" }}>
         {profile.name}
       </h1>

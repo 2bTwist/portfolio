@@ -25,7 +25,7 @@ export function generateRss(): string {
   return `<?xml version="1.0" encoding="UTF-8"?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
-    <title>${profile.name} — Writing</title>
+    <title>${profile.name} - Writing</title>
     <link>${SITE_URL}</link>
     <description>Software engineering, product development, and building in public</description>
     <language>en</language>

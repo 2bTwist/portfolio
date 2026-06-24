@@ -6,19 +6,14 @@ import type { ReactNode } from "react";
 import Link from "next/link";
 
 export function PageHeader({
-  filename,
   title,
   lead,
 }: {
-  filename: string;
   title: string;
   lead?: ReactNode;
 }) {
   return (
     <header className="mb-8">
-      <p className="mono text-sm mb-2" style={{ color: "var(--muted)" }}>
-        {filename}
-      </p>
       <h1 className="display text-4xl sm:text-5xl font-bold" style={{ color: "var(--text)" }}>
         {title}
       </h1>

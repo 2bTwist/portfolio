@@ -41,11 +41,11 @@ test("homepage interaction perf (INP proxy + CPU profile)", async ({ page }) => 
   // so Event Timing records them — while skipping Playwright's actionability /
   // stability waits, which race under CPU throttle. Coordinates come from a
   // one-shot boundingBox.
-  const controls = page.locator(".ide-swatch, .ide-chevron");
+  const controls = page.locator(".ide-swatch, .ide-twistie-hit");
   const boxes: ({ x: number; y: number; width: number; height: number } | null)[] = [];
   const total = Math.min(await controls.count(), 8);
   for (let i = 0; i < total; i++) boxes.push(await controls.nth(i).boundingBox());
-  const chevronBox = await page.locator(".ide-chevron").first().boundingBox();
+  const chevronBox = await page.locator(".ide-twistie-hit").first().boundingBox();
   for (let i = 0; i < 4; i++) boxes.push(chevronBox);
 
   for (const box of boxes) {

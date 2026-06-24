@@ -1,78 +1,228 @@
 "use client";
 
 /* Terminal drawer. Lazy-loaded (next/dynamic, ssr:false) and kept mounted after
-   first open so history survives toggling. Commands map onto the shared NAV
-   index: cd/open/cat navigate, theme switches palette, grep matches filenames
-   (full-text post search lands in Phase 4). */
+   first open so history survives toggling.
 
-import { useEffect, useRef, useState, type FormEvent } from "react";
+   It models a real cwd over the file tree (nav.ts): `cd` walks folders, the
+   prompt is zsh-style `<dir> %`, `ls` lists the current directory, and Tab
+   completes commands / entries. Folders map to routes, so `cd`/`open` also
+   navigate the IDE. */
+
+import { useEffect, useRef, useState, type FormEvent, type KeyboardEvent } from "react";
 import { useRouter } from "next/navigation";
-import { NAV } from "@/app/lib/nav";
+import { TREE, type TreeNode, type TreeFolder } from "@/app/lib/nav";
 import { searchStatic, searchPosts } from "@/app/lib/search";
 import { PALETTES } from "@/app/lib/palette";
 import { profile } from "@/data/profile";
 import { TerminalIcon } from "@/components/feel/animated-icons";
 import { useOverlay, useSession } from "./store";
 
-type Line = { kind: "in" | "out"; text: string };
+type Line = { kind: "in" | "out"; text: string; prompt?: string };
 
 const STRIP_EXT = /\.(tsx?|md)$/;
+const TERM_MIN_H = 90;
+const TERM_STORAGE = "ide.terminal-height";
+const GREETING: Line = { kind: "out", text: "type `help` to get started" };
+const COMMANDS = ["help", "ls", "cd", "open", "cat", "pwd", "grep", "theme", "whoami", "clear"];
+
+// The terminal is a singleton drawer. Hold its session (history + cwd) at module
+// scope so it survives any remount of the lazy component — navigating, toggling,
+// or a Suspense bounce can never wipe the scrollback.
+let sessionLines: Line[] = [GREETING];
+let sessionCwd: string[] = [];
+
+// ── tiny filesystem over the nav tree, indexed by cwd (array of folder names) ──
+function entriesAt(cwd: string[]): TreeNode[] {
+  let nodes: TreeNode[] = TREE;
+  for (const seg of cwd) {
+    const f = nodes.find((n) => n.type === "folder" && n.name === seg) as TreeFolder | undefined;
+    if (!f) return [];
+    nodes = f.children;
+  }
+  return nodes;
+}
+function routeForCwd(cwd: string[]): string {
+  let nodes: TreeNode[] = TREE;
+  let href = "/";
+  for (const seg of cwd) {
+    const f = nodes.find((n) => n.type === "folder" && n.name === seg) as TreeFolder | undefined;
+    if (!f) break;
+    href = f.href;
+    nodes = f.children;
+  }
+  return href;
+}
+// zsh `%1~`-style prompt: the basename of the cwd (root is the `edmond` workspace).
+function promptFor(cwd: string[]): string {
+  return `${cwd.length ? cwd[cwd.length - 1] : "edmond"} %`;
+}
+function listing(cwd: string[]): string[] {
+  return entriesAt(cwd).map((n) => (n.type === "folder" ? `${n.name}/` : n.name));
+}
+function matchFile(cwd: string[], arg: string): TreeNode | undefined {
+  const a = arg.replace(/^\.?\//, "").replace(/\/$/, "").toLowerCase();
+  const bare = a.replace(STRIP_EXT, "");
+  return entriesAt(cwd).find(
+    (n) => n.name.toLowerCase() === a || n.name.toLowerCase().replace(STRIP_EXT, "") === bare,
+  );
+}
+function candidatesFor(value: string, cwd: string[]): string[] {
+  const tokens = value.split(" ");
+  const cur = (tokens[tokens.length - 1] ?? "").toLowerCase();
+  const pool = tokens.length === 1 ? COMMANDS : listing(cwd);
+  return pool.filter((c) => c.toLowerCase().startsWith(cur));
+}
+function commonPrefix(xs: string[]): string {
+  if (!xs.length) return "";
+  let p = xs[0];
+  for (const s of xs) {
+    let i = 0;
+    while (i < p.length && i < s.length && p[i].toLowerCase() === s[i].toLowerCase()) i++;
+    p = p.slice(0, i);
+  }
+  return p;
+}
 
 export default function Terminal() {
   const router = useRouter();
-  const { closeTerm } = useOverlay();
+  const { closeTerm, termOpen } = useOverlay();
   const { setPaletteIndex, openTab } = useSession();
-  const [lines, setLines] = useState<Line[]>([
-    { kind: "out", text: "type `help` to get started" },
-  ]);
+  // Seed from the persisted session so a remount restores the scrollback + cwd.
+  const [lines, setLines] = useState<Line[]>(sessionLines);
   const [value, setValue] = useState("");
+  const [cwd, setCwd] = useState<string[]>(sessionCwd);
   const inputRef = useRef<HTMLInputElement>(null);
   const outRef = useRef<HTMLDivElement>(null);
+  const handleRef = useRef<HTMLDivElement>(null);
+  const dragRef = useRef({ active: false, startY: 0, startH: 0, h: 0 });
 
+  // Focus the input on mount AND every time the drawer opens, so it's always
+  // ready for input the moment it appears.
   useEffect(() => {
-    inputRef.current?.focus();
-  }, []);
+    if (termOpen) requestAnimationFrame(() => inputRef.current?.focus());
+  }, [termOpen]);
   useEffect(() => {
     outRef.current?.scrollTo(0, outRef.current.scrollHeight);
   }, [lines]);
+  // Mirror state into the module-scope session so it outlives a remount.
+  useEffect(() => {
+    sessionLines = lines;
+  }, [lines]);
+  useEffect(() => {
+    sessionCwd = cwd;
+  }, [cwd]);
+
+  // Drag-to-resize the output height. Imperative (refs + direct DOM writes),
+  // never React state, so the drag tracks the pointer 1:1 — same pattern as the
+  // explorer handle. Height persists in localStorage.
+  useEffect(() => {
+    const handle = handleRef.current;
+    const out = outRef.current;
+    if (!handle || !out) return;
+    const maxH = () => Math.round(window.innerHeight * 0.7);
+    const saved = Number(localStorage.getItem(TERM_STORAGE));
+    if (saved >= TERM_MIN_H) out.style.height = `${Math.min(saved, maxH())}px`;
+
+    const d = dragRef.current;
+    function onDown(e: PointerEvent) {
+      e.preventDefault();
+      d.active = true;
+      d.startY = e.clientY;
+      d.startH = out!.offsetHeight;
+      handle!.dataset.dragging = "true";
+      // Show the (face-up) grabbing hand for the whole drag, even once the
+      // pointer leaves the thin handle.
+      const root = document.documentElement;
+      root.dataset.cursorGrabbing = "true";
+      root.dataset.cursorAxis = "y";
+    }
+    function onMove(e: PointerEvent) {
+      if (!d.active) return;
+      d.h = Math.max(TERM_MIN_H, Math.min(maxH(), d.startH + (d.startY - e.clientY)));
+      out!.style.height = `${d.h}px`;
+    }
+    function onUp() {
+      if (!d.active) return;
+      d.active = false;
+      delete handle!.dataset.dragging;
+      delete document.documentElement.dataset.cursorGrabbing;
+      localStorage.setItem(TERM_STORAGE, String(Math.round(out!.offsetHeight)));
+    }
+    handle.addEventListener("pointerdown", onDown);
+    window.addEventListener("pointermove", onMove, { passive: true });
+    window.addEventListener("pointerup", onUp, { passive: true });
+    return () => {
+      handle.removeEventListener("pointerdown", onDown);
+      window.removeEventListener("pointermove", onMove);
+      window.removeEventListener("pointerup", onUp);
+    };
+  }, []);
 
   function print(text: string) {
     setLines((l) => [...l, { kind: "out", text }]);
   }
 
-  function resolve(arg: string) {
-    const a = arg.replace(/^\.?\//, "").toLowerCase();
-    const bare = a.replace(STRIP_EXT, "");
-    return NAV.find(
-      (n) =>
-        n.name.toLowerCase() === a ||
-        n.name.toLowerCase().replace(STRIP_EXT, "") === bare ||
-        n.href.toLowerCase() === `/${bare}` ||
-        n.href.toLowerCase() === a,
-    );
+  function navigate(route: string) {
+    openTab(route);
+    router.push(route);
   }
 
   function run(raw: string) {
-    const [cmd, ...rest] = raw.trim().split(/\s+/);
-    const arg = rest.join(" ");
+    const parts = raw.trim().split(/\s+/);
+    const cmd = parts[0] ?? "";
+    const arg = parts.slice(1).join(" ");
     switch (cmd) {
       case "":
         break;
       case "help":
-        print("commands: ls, open <file>, cd <path>, cat <file>, grep <term>, theme [name], whoami, pwd, clear");
+        print("commands: ls, cd <dir>, open <file>, cat <file>, pwd, grep <term>, theme [name], whoami, clear");
         break;
       case "ls":
-        print(NAV.map((n) => n.name).join("   "));
+        print(listing(cwd).join("   "));
         break;
       case "pwd":
-        print(window.location.pathname);
+        print(`~/edmond${cwd.length ? "/" + cwd.join("/") : ""}`);
         break;
       case "whoami":
         print(`${profile.name} — ${profile.role}`);
         break;
       case "clear":
-        setLines([]);
+        setLines([GREETING]);
         return;
+      case "cd": {
+        // resolve the destination; the new prompt is the only feedback (no echo).
+        let next: string[] | null = null;
+        if (!arg || arg === "~" || arg === "/") next = [];
+        else if (arg === ".") next = cwd;
+        else if (arg === "..") next = cwd.slice(0, -1);
+        else {
+          const name = arg.replace(/\/$/, "");
+          const node = entriesAt(cwd).find((n) => n.name.toLowerCase() === name.toLowerCase());
+          if (!node) {
+            print(`cd: no such file or directory: ${arg}`);
+            break;
+          }
+          if (node.type !== "folder") {
+            print(`cd: not a directory: ${arg}`);
+            break;
+          }
+          next = [...cwd, node.name];
+        }
+        sessionCwd = next; // sync, before navigate may remount
+        setCwd(next);
+        navigate(routeForCwd(next));
+        break;
+      }
+      case "open":
+      case "cat": {
+        const file = matchFile(cwd, arg);
+        if (!file) {
+          print(`${cmd}: no such file: ${arg || "(nothing)"}`);
+          break;
+        }
+        navigate(file.href);
+        break;
+      }
       case "theme": {
         if (!arg) {
           print(`themes: ${PALETTES.map((p) => p.name).join(", ")}`);
@@ -94,50 +244,71 @@ export default function Terminal() {
         }
         const staticHits = searchStatic(arg);
         if (staticHits.length) print(staticHits.map((r) => `${r.name}  ${r.href}`).join("\n"));
-        // Full-text post search loads its index lazily, so results stream in.
         searchPosts(arg).then((postHits) => {
-          if (postHits.length) {
-            print(postHits.map((p) => `${p.name}  ${p.href}`).join("\n"));
-          } else if (!staticHits.length) {
-            print(`no matches for "${arg}"`);
-          }
+          if (postHits.length) print(postHits.map((p) => `${p.name}  ${p.href}`).join("\n"));
+          else if (!staticHits.length) print(`no matches for "${arg}"`);
         });
         break;
       }
-      case "open":
-      case "cd":
-      case "cat": {
-        const target = resolve(arg);
-        if (!target) {
-          print(`not found: ${arg || "(nothing)"}`);
-          break;
-        }
-        print(`→ ${target.href}`);
-        openTab(target.href);
-        router.push(target.href);
-        closeTerm();
-        break;
-      }
       default:
-        print(`command not found: ${cmd} (try help)`);
+        print(`zsh: command not found: ${cmd}`);
     }
   }
 
   function onSubmit(e: FormEvent) {
     e.preventDefault();
-    setLines((l) => [...l, { kind: "in", text: value }]);
-    run(value);
+    const entered = value;
+    // Record the echo into the persisted session SYNCHRONOUSLY, before run() may
+    // navigate — so a navigation-triggered remount can never drop the command.
+    const echoed: Line[] = [...lines, { kind: "in", text: entered, prompt: promptFor(cwd) }];
+    sessionLines = echoed;
+    setLines(echoed);
+    run(entered);
     setValue("");
   }
 
+  // Tab → complete the current token to the longest common prefix (or fully, if
+  // unique). Right/End → accept the ghost suggestion.
+  function onKeyDown(e: KeyboardEvent<HTMLInputElement>) {
+    if (e.key === "Tab") {
+      e.preventDefault();
+      const tokens = value.split(" ");
+      const cur = tokens[tokens.length - 1] ?? "";
+      const cands = candidatesFor(value, cwd);
+      if (!cands.length) return;
+      const target = cands.length === 1 ? cands[0] : commonPrefix(cands);
+      if (target.length > cur.length) {
+        tokens[tokens.length - 1] = target;
+        setValue(tokens.join(" "));
+      }
+    } else if ((e.key === "ArrowRight" || e.key === "End") && ghost) {
+      e.preventDefault();
+      setValue(value + ghost);
+    }
+  }
+
+  // Ghost completion: the remainder of the best match, shown dimmed after the
+  // caret (fish-style). Empty when there's nothing to suggest.
+  const tokens = value.split(" ");
+  const cur = tokens[tokens.length - 1] ?? "";
+  const cands = value && !value.endsWith(" ") ? candidatesFor(value, cwd) : [];
+  const ghost = cands.length ? cands[0].slice(cur.length) : "";
+
   return (
     <div className="ide-terminal" aria-label="Terminal">
+      <div
+        ref={handleRef}
+        className="ide-terminal-resize"
+        role="separator"
+        aria-orientation="horizontal"
+        aria-label="Resize terminal"
+      />
       <div className="ide-terminal-bar">
         <span className="ide-terminal-bar-icon" aria-hidden="true">
           <TerminalIcon />
         </span>
         <span className="mono text-xs" style={{ color: "var(--term-muted)" }}>
-          zsh — ~/edmond
+          zsh — ~/edmond{cwd.length ? "/" + cwd.join("/") : ""}
         </span>
         <button
           type="button"
@@ -151,17 +322,37 @@ export default function Terminal() {
       <div ref={outRef} className="ide-terminal-out">
         {lines.map((l, i) => (
           <div key={i} className="ide-terminal-line" data-kind={l.kind}>
-            {l.kind === "in" ? `$ ${l.text}` : l.text}
+            {l.kind === "in" ? `${l.prompt} ${l.text}` : l.text}
           </div>
         ))}
       </div>
-      <form onSubmit={onSubmit} className="ide-terminal-form">
-        <span aria-hidden>$</span>
+      <form
+        onSubmit={onSubmit}
+        className="ide-terminal-form"
+        onClick={() => inputRef.current?.focus()}
+      >
+        {/* Visible prompt: `<dir> %` + typed text + block caret + ghost, all on
+            one inline line so they share a baseline. The input is the invisible
+            keystroke sink (the block replaces the native caret). */}
+        <span className="ide-terminal-live" aria-hidden="true">
+          <span className="ide-terminal-prompt">{promptFor(cwd)}</span>
+          <span className="ide-terminal-typed">{value}</span>
+          {ghost ? (
+            // cursor sits ON the first suggested char (no gap), rest dimmed
+            <>
+              <span className="ide-terminal-caret-char">{ghost.slice(0, 1)}</span>
+              <span className="ide-terminal-ghost">{ghost.slice(1)}</span>
+            </>
+          ) : (
+            <span className="ide-terminal-caret" />
+          )}
+        </span>
         <input
           ref={inputRef}
           className="ide-terminal-input"
           value={value}
           onChange={(e) => setValue(e.target.value)}
+          onKeyDown={onKeyDown}
           aria-label="Terminal input"
           autoComplete="off"
           spellCheck={false}

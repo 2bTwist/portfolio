@@ -5,7 +5,7 @@ import { PageHeader } from "@/components/content/ui";
 import { ProjectCard } from "@/components/content/ProjectCard";
 
 export const metadata: Metadata = {
-  title: "Projects — Edmond Ndanji",
+  title: "Projects - Edmond Ndanji",
   description: "Web and mobile projects: problem, role, tech, live demo and source.",
 };
 
@@ -15,7 +15,6 @@ export default function ProjectsPage() {
   return (
     <PageShell>
       <PageHeader
-        filename="projects/"
         title="Projects"
         lead="Things I have built, split by where they run."
       />

@@ -5,7 +5,7 @@ import { PageShell } from "@/components/site/PageShell";
 import { PageHeader } from "@/components/content/ui";
 
 export const metadata: Metadata = {
-  title: "Writing — Edmond Ndanji",
+  title: "Writing - Edmond Ndanji",
   description: "Notes on software engineering, product, and building in public.",
 };
 
@@ -40,7 +40,7 @@ export default function WritingPage() {
   const posts = getAllPosts();
   return (
     <PageShell>
-      <PageHeader filename="writing/" title="Writing" lead="Notes from building things, in public." />
+      <PageHeader title="Writing" lead="Notes from building things, in public." />
       {posts.length === 0 ? (
         <p style={{ color: "var(--muted)" }}>No posts yet. Check back soon.</p>
       ) : (

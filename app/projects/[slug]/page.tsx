@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import Link from "next/link";
 import { notFound } from "next/navigation";
 import { PROJECTS, getProject } from "@/data/projects";
 import { PageShell } from "@/components/site/PageShell";
@@ -16,7 +15,7 @@ export async function generateMetadata({ params }: Params): Promise<Metadata> {
   const project = getProject(slug);
   if (!project) return { title: "Project not found" };
   return {
-    title: `${project.title} — Edmond Ndanji`,
+    title: `${project.title} - Edmond Ndanji`,
     description: project.blurb,
   };
 }
@@ -28,14 +27,6 @@ export default async function ProjectPage({ params }: Params) {
 
   return (
     <PageShell>
-      <p className="mono text-sm mb-2" style={{ color: "var(--muted)" }}>
-        <Link href="/projects" className="no-underline hover:opacity-80" style={{ color: "var(--muted)" }}>
-          projects
-        </Link>
-        {" / "}
-        {project.id}.tsx
-      </p>
-
       <div className="mb-3">
         <span
           className="mono text-xs px-2 py-0.5 rounded-full"

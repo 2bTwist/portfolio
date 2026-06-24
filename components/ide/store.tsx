@@ -36,6 +36,8 @@ type Session = {
   tabs: Tab[];
   openTab: (href: string) => void;
   closeTab: (href: string) => void;
+  closeOthers: (href: string) => void;
+  closeAll: () => void;
 };
 
 type Overlay = {
@@ -137,8 +139,30 @@ function SessionProvider({ children }: { children: ReactNode }) {
     [pathname, router],
   );
 
+  // Keep only `href`, dropping every other tab; navigate to it if it isn't the
+  // current route (it's about to be the only thing open).
+  const closeOthers = useCallback(
+    (href: string) => {
+      setTabs((prev) => {
+        const keep = prev.find((t) => t.href === href);
+        return keep ? [keep] : prev;
+      });
+      if (href !== pathname) router.push(href);
+    },
+    [pathname, router],
+  );
+
+  // Close every tab and return to the README home (mirrors closeTab's "/"
+  // fallback when no tab is left to focus).
+  const closeAll = useCallback(() => {
+    setTabs([]);
+    router.push("/");
+  }, [router]);
+
   return (
-    <SessionContext.Provider value={{ paletteIndex, setPaletteIndex, tabs, openTab, closeTab }}>
+    <SessionContext.Provider
+      value={{ paletteIndex, setPaletteIndex, tabs, openTab, closeTab, closeOthers, closeAll }}
+    >
       {children}
     </SessionContext.Provider>
   );

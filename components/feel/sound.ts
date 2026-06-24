@@ -37,6 +37,14 @@ function getCtx(): AudioContext | null {
   return ctx;
 }
 
+// Warm the AudioContext up at mount (off any click's critical path) so it
+// already exists by the first interaction — otherwise the very first sound is
+// dropped while the context is still being created. Still costs nothing on the
+// click itself; creation runs in the deferred task scheduled here.
+export function warmupSound() {
+  ensureCtx();
+}
+
 type Tone = {
   freq: number;
   dur: number;
@@ -75,4 +83,6 @@ export const sfx = {
   view: () => blip({ freq: 440, dur: 0.04, type: "sine", gain: 0.045 }),
   switch: () => blip({ freq: 620, dur: 0.035, type: "square", gain: 0.03, sweep: 80 }),
   key: () => blip({ freq: 170 + Math.random() * 50, dur: 0.022, type: "square", gain: 0.022 }),
+  // a low "nope" thud for hitting a limit (e.g. shoving the sidebar past its range)
+  bonk: () => blip({ freq: 150, dur: 0.12, type: "square", gain: 0.06, sweep: -55 }),
 };

@@ -5,8 +5,9 @@ import "./globals.css";
 import { ClientBoot } from "@/components/ClientBoot";
 import { IdeProvider } from "@/components/ide/store";
 import { SoundProvider } from "@/components/feel/SoundProvider";
-import { CustomCursor } from "@/components/feel/CustomCursor";
+import { CursorMount } from "@/components/feel/CursorMount";
 import { Shell } from "@/components/ide/Shell";
+import { getGitInfo } from "@/app/lib/git";
 import { PALETTES, DEFAULT_PALETTE_INDEX } from "@/app/lib/palette";
 import { clashDisplay, satoshi } from "@/app/fonts/fonts";
 
@@ -24,15 +25,16 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const git = getGitInfo();
   return (
     <html lang="en" className={`${clashDisplay.variable} ${satoshi.variable}`}>
       <body style={{ ...paletteVars, background: "var(--bg)", color: "var(--text)" }}>
         <SoundProvider>
           <IdeProvider>
-            <Shell>{children}</Shell>
+            <Shell git={git}>{children}</Shell>
           </IdeProvider>
         </SoundProvider>
-        <CustomCursor />
+        <CursorMount />
         <ClientBoot />
         <SpeedInsights />
       </body>
