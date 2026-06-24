@@ -97,6 +97,8 @@ export function SoundProvider({ children }: { children: ReactNode }) {
         sfx.close();
       } else if (t.closest(".ide-swatch")) {
         sfx.switch();
+      } else if (t.closest(".ide-social")) {
+        sfx.pop(); // cute boop on the social buttons
       } else if (t.closest(".ide-row, .ide-tab, .ide-palette-item")) {
         sfx.view();
       } else if (t.closest(".ide-overlay")) {

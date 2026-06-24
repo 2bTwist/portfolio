@@ -899,6 +899,18 @@ button.ide-row {
   font-size: 0.8rem;
   color: var(--term-text);
 }
+/* figlet-style header banner. Small mono so it fits the drawer width; scrolls
+   if the viewport is very narrow. Decorative (aria-hidden). */
+.ide-terminal-banner {
+  margin: 0 0 0.55rem;
+  white-space: pre;
+  overflow-x: auto;
+  font-family: var(--mono);
+  font-size: 0.6rem;
+  line-height: 1.2;
+  color: var(--term-accent);
+  opacity: 0.85;
+}
 .ide-terminal-line {
   white-space: pre-wrap;
   line-height: 1.55;
@@ -1482,5 +1494,243 @@ img.cert-badge-art {
   }
   .cert-badge:hover .cert-badge-art {
     transform: none;
+  }
+}
+
+/* ── Home hero (Phase 6) ─────────────────────────────────────────────────────
+   Text + mascot. Stacks on mobile (mascot on top), side-by-side from sm. The
+   mascot PNG already carries a baked contact shadow; we just add a gentle bob. */
+.hero {
+  display: flex;
+  flex-direction: column-reverse;
+  align-items: center;
+  gap: 1rem;
+}
+@media (min-width: 640px) {
+  .hero {
+    flex-direction: row;
+    align-items: center;
+    gap: 1.75rem;
+  }
+}
+.hero-copy {
+  flex: 1;
+  min-width: 0;
+  /* Let the mascot's light-pool overlap the copy column so figure and text
+     interlock as one composition instead of two isolated columns. */
+  position: relative;
+  z-index: 1;
+}
+/* The mascot's wrap. Two warm AMBER layers (matched to the PNG's baked gold
+   glow, not the terracotta accent, so the hues agree) plus a grounded contact
+   shadow make it read as lit by and standing in the cream space, not pasted on.
+   The wrap pulls left into the copy column so the two blocks connect. */
+.hero-mascot-wrap {
+  position: relative;
+  flex-shrink: 0;
+  display: grid;
+  place-items: center;
+}
+@media (min-width: 640px) {
+  .hero-mascot-wrap {
+    margin-left: -2.5rem;
+  }
+}
+/* Wide ambient amber wash — soft page light wrapping the figure (no hard edge). */
+.hero-mascot-wrap::before {
+  content: "";
+  position: absolute;
+  inset: -22%;
+  background: radial-gradient(
+    circle at 50% 44%,
+    color-mix(in srgb, var(--dot-min) 14%, transparent) 0%,
+    color-mix(in srgb, var(--dot-min) 5%, transparent) 42%,
+    transparent 66%
+  );
+  z-index: 0;
+}
+/* Elliptical ground shadow on the cream surface so he stands ON something.
+   Sits at the feet, warm-tinted (not flat grey) to belong to the paper space. */
+.hero-mascot-wrap::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  bottom: 6%;
+  width: 56%;
+  height: 7%;
+  transform: translateX(-50%);
+  /* Fixed warm-dark, NOT var(--text): on dark palettes --text is light, which
+     would turn the contact shadow into a light smudge. A dark shadow reads
+     correctly on every theme (subtle on dark backgrounds, grounded on cream). */
+  background: radial-gradient(
+    ellipse at center,
+    rgba(34, 25, 17, 0.3) 0%,
+    rgba(34, 25, 17, 0.12) 46%,
+    transparent 72%
+  );
+  filter: blur(3px);
+  z-index: 0;
+  animation: hero-shadow 5s ease-in-out infinite;
+}
+/* The mascot itself. A tighter warm core glow behind it (drop-shadow, gold)
+   thickens the baked outline into believable rim light. The bottom is feathered
+   into the cream with a mask so the baked dark contact-shadow blob dissolves
+   into the page rather than reading as a separate dark sticker edge. */
+.hero-mascot {
+  position: relative;
+  z-index: 1;
+  width: 200px;
+  height: auto;
+  /* Subtle neutral grounding shadow only. We deliberately DON'T add a gold glow
+     halo here — the PNG already has a baked gold outline, and amplifying it made
+     the figure read as a glowing sticker instead of blending. */
+  filter: drop-shadow(0 5px 8px rgba(0, 0, 0, 0.16));
+  -webkit-mask-image: linear-gradient(
+    to bottom,
+    #000 86%,
+    rgba(0, 0, 0, 0.35) 96%,
+    transparent 100%
+  );
+  mask-image: linear-gradient(
+    to bottom,
+    #000 86%,
+    rgba(0, 0, 0, 0.35) 96%,
+    transparent 100%
+  );
+  animation: hero-bob 5s ease-in-out infinite;
+}
+@media (min-width: 640px) {
+  .hero-mascot {
+    width: 330px;
+  }
+}
+@keyframes hero-bob {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+/* Shadow reacts to the bob: smaller and fainter as he rises, so the lift reads
+   as a real light cue rather than the whole sticker sliding up the page. */
+@keyframes hero-shadow {
+  0%,
+  100% {
+    transform: translateX(-50%) scaleX(1);
+    opacity: 1;
+  }
+  50% {
+    transform: translateX(-50%) scaleX(0.86);
+    opacity: 0.7;
+  }
+}
+
+.hero-more {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  margin-top: 1.25rem;
+  font-size: 0.85rem;
+  color: var(--muted);
+  text-decoration: none;
+  transition: color 140ms ease-out;
+}
+.hero-more:hover {
+  color: var(--text);
+}
+.hero-more svg {
+  transition: transform 200ms cubic-bezier(0.2, 0.9, 0.3, 1.3);
+}
+.hero-more:hover svg {
+  transform: translateX(3px);
+}
+
+.hero-blurb {
+  max-width: 34rem;
+}
+
+/* Social icon buttons — tactile "key" with depth (a static bottom edge the
+   button sits above and presses down onto). transform/box-shadow only, so hover
+   and press never reflow neighbouring content. */
+.ide-social {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  height: 38px;
+  padding: 0 0.9rem;
+  border-radius: 10px;
+  font-family: var(--mono);
+  font-size: 0.8rem;
+  font-weight: 500;
+  text-decoration: none;
+  color: var(--text);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  box-shadow: 0 2px 0 var(--border-press);
+  transform: translateY(-1px);
+  transition:
+    transform 120ms cubic-bezier(0.3, 0.7, 0.4, 1),
+    box-shadow 120ms cubic-bezier(0.3, 0.7, 0.4, 1),
+    color 140ms ease-out;
+}
+.ide-social:hover {
+  color: var(--accent);
+  transform: translateY(-3px);
+  box-shadow: 0 4px 0 var(--border-press);
+}
+.ide-social:active {
+  transform: translateY(1px);
+  box-shadow: 0 0 0 var(--border-press);
+  transition:
+    transform 40ms,
+    box-shadow 40ms;
+}
+.ide-social:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+/* Location + live local time */
+.ide-localtime {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-family: var(--mono);
+  font-size: 0.75rem;
+  color: var(--muted);
+}
+.ide-localtime-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--accent);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 25%, transparent);
+  animation: localtime-pulse 2.4s ease-in-out infinite;
+}
+.ide-localtime-sep {
+  opacity: 0.5;
+}
+.ide-localtime-zone {
+  font-size: 0.62rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  opacity: 0.6;
+}
+@keyframes localtime-pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.45;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .hero-mascot,
+  .hero-mascot-wrap::after,
+  .ide-localtime-dot {
+    animation: none;
   }
 }

@@ -1,10 +1,13 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import Image from "next/image";
 import { profile } from "@/data/profile";
 import { PROJECTS } from "@/data/projects";
 import { PageShell } from "@/components/site/PageShell";
 import { ActionLink } from "@/components/content/ui";
 import { ProjectCard } from "@/components/content/ProjectCard";
+import { SocialLinks } from "@/components/site/SocialLinks";
+import { LocalTime } from "@/components/site/LocalTime";
 
 export const metadata: Metadata = {
   title: "Edmond Ndanji - Full-stack & mobile engineer",
@@ -14,27 +17,49 @@ export const metadata: Metadata = {
 export default function HomePage() {
   const featured = PROJECTS.filter((p) => p.featured);
   return (
-    <PageShell>
-      <h1 className="display text-5xl sm:text-6xl font-bold" style={{ color: "var(--text)" }}>
-        {profile.name}
-      </h1>
-      <p className="mono mt-2" style={{ color: "var(--accent)" }}>
-        {profile.role}
-      </p>
-      <p className="mt-6 text-lg leading-relaxed" style={{ color: "var(--text)" }}>
-        {profile.tagline}
-      </p>
-      <p className="mt-4 leading-relaxed" style={{ color: "var(--muted)" }}>
-        This site is a filesystem. Browse from the explorer, or read it as a plain page — every
-        section is a real link.
-      </p>
+    <PageShell width="wide">
+      <header className="hero">
+        <div className="hero-copy">
+          <h1 className="display text-5xl sm:text-6xl font-bold" style={{ color: "var(--text)" }}>
+            {profile.name}
+          </h1>
+          <p className="mono mt-2" style={{ color: "var(--accent)" }}>
+            {profile.role}
+          </p>
+          <LocalTime className="mt-3" />
 
-      <div className="mt-7 flex flex-wrap gap-4">
-        <ActionLink href={profile.links.resume}>Resume</ActionLink>
-        <ActionLink href={profile.links.github} variant="ghost">
-          GitHub
-        </ActionLink>
-      </div>
+          <p className="hero-blurb mt-6 leading-relaxed" style={{ color: "var(--text)" }}>
+            {profile.blurb}
+          </p>
+
+          {/* Socials on their own left-aligned line so they never push the
+              primary action; fixed-size tactile buttons. */}
+          <SocialLinks className="mt-6" />
+
+          <div className="mt-5 flex flex-wrap items-center gap-3">
+            <ActionLink href={profile.links.resume}>Resume</ActionLink>
+          </div>
+
+          <Link href="/about" className="hero-more mono">
+            more about me
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+              <path d="M5 12h14" />
+              <path d="M13 6l6 6-6 6" />
+            </svg>
+          </Link>
+        </div>
+
+        <div className="hero-mascot-wrap">
+          <Image
+            className="hero-mascot"
+            src="/images/mascot.png"
+            alt="Edmond's pixel-art mascot: a cheerful developer holding a glowing laptop and phone"
+            width={380}
+            height={380}
+            priority
+          />
+        </div>
+      </header>
 
       <section className="mt-14">
         <div className="flex items-baseline justify-between mb-4">

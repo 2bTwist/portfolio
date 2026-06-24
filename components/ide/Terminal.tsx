@@ -23,6 +23,18 @@ const STRIP_EXT = /\.(tsx?|md)$/;
 const TERM_MIN_H = 90;
 const TERM_STORAGE = "ide.terminal-height";
 const GREETING: Line = { kind: "out", text: "type `help` to get started" };
+
+// Persistent header banner drawn at the top of the terminal (figlet-style).
+// String.raw so the backslashes in the ASCII aren't read as escapes.
+const BANNER = String.raw`
+ _____   ____   __  __   ___   _   _   ____
+| ____| |  _ \ |  \/  | / _ \ | \ | | |  _ \
+|  _|   | | | || |\/| || | | ||  \| | | | | |
+| |___  | |_| || |  | || |_| || |\  | | |_| |
+|_____| |____/ |_|  |_| \___/ |_| \_| |____/
+
+  full-stack & mobile engineer · ~/portfolio
+`;
 const COMMANDS = ["help", "ls", "cd", "open", "cat", "pwd", "grep", "theme", "whoami", "clear"];
 
 // The terminal is a singleton drawer. Hold its session (history + cwd) at module
@@ -320,6 +332,7 @@ export default function Terminal() {
         </button>
       </div>
       <div ref={outRef} className="ide-terminal-out">
+        <pre className="ide-terminal-banner" aria-hidden="true">{BANNER}</pre>
         {lines.map((l, i) => (
           <div key={i} className="ide-terminal-line" data-kind={l.kind}>
             {l.kind === "in" ? `${l.prompt} ${l.text}` : l.text}

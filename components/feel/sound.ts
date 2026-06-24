@@ -85,4 +85,9 @@ export const sfx = {
   key: () => blip({ freq: 170 + Math.random() * 50, dur: 0.022, type: "square", gain: 0.022 }),
   // a low "nope" thud for hitting a limit (e.g. shoving the sidebar past its range)
   bonk: () => blip({ freq: 150, dur: 0.12, type: "square", gain: 0.06, sweep: -55 }),
+  // a cute two-note "boop" (rising fifth, C5 -> G5) for the social buttons
+  pop: () => {
+    blip({ freq: 523, dur: 0.06, type: "sine", gain: 0.05, sweep: 40 });
+    setTimeout(() => blip({ freq: 784, dur: 0.07, type: "sine", gain: 0.045, sweep: 70 }), 60);
+  },
 };
