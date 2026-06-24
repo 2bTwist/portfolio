@@ -617,12 +617,37 @@ button.ide-row {
 }
 
 .ide-statusbar {
+  position: relative;
   align-items: center;
   gap: 0.6rem;
   flex-shrink: 0;
   padding: 0.3rem 0.85rem;
   background: var(--surface);
   border-top: 1px solid var(--border);
+}
+/* Centered legal links — absolutely centered on the whole bar (like the title
+   bar's command center) so they sit dead-middle regardless of the left/right
+   widget widths. --muted clears 4.5:1 on --surface; underline kept minimal. */
+.ide-legal {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  display: inline-flex;
+  align-items: center;
+  gap: 0.75rem;
+  font-family: var(--mono);
+  font-size: 0.7rem;
+}
+.ide-legal a {
+  color: var(--muted);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  text-decoration-thickness: 1px;
+  transition: color 140ms ease-out;
+}
+.ide-legal a:hover {
+  color: var(--text);
 }
 /* Bottom-left git widget: branch + short hash, links to the commit on GitHub. */
 .ide-git {

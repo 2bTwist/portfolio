@@ -86,6 +86,14 @@ export function StatusBar({ className = "", git }: { className?: string; git: Gi
         </span>
         {git.shortSha ? <span className="ide-git-sha">{git.shortSha}</span> : null}
       </a>
+      <nav className="ide-legal" aria-label="Legal">
+        <Link href="/terms" prefetch={false}>
+          Terms
+        </Link>
+        <Link href="/privacy" prefetch={false}>
+          Privacy Policy
+        </Link>
+      </nav>
       <div className="ml-auto flex items-center gap-2">
         <span className="ide-editor-status">
           <span>
