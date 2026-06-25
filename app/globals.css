@@ -2680,3 +2680,23 @@ body[data-dragging] iframe {
   opacity: 1;
   transform: translateX(-50%) translateY(0) scale(1);
 }
+
+/* ── Text selection (theme-aware, replaces the native blue) ──────────────────
+   Warm accent wash on the cream page; the terminal gets its own dark-surface
+   selection. Firefox needs ::-moz-selection declared separately. */
+::selection {
+  background: color-mix(in srgb, var(--accent) 30%, var(--surface));
+  color: var(--text);
+}
+::-moz-selection {
+  background: color-mix(in srgb, var(--accent) 30%, var(--surface));
+  color: var(--text);
+}
+.ide-terminal ::selection {
+  background: color-mix(in srgb, var(--term-accent) 40%, var(--term-bg));
+  color: var(--term-text);
+}
+.ide-terminal ::-moz-selection {
+  background: color-mix(in srgb, var(--term-accent) 40%, var(--term-bg));
+  color: var(--term-text);
+}
