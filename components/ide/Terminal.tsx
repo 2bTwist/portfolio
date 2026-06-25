@@ -16,7 +16,7 @@ import { searchStatic, searchPosts } from "@/app/lib/search";
 import { PALETTES } from "@/app/lib/palette";
 import { profile } from "@/data/profile";
 import { TerminalIcon } from "@/components/feel/animated-icons";
-import { playNote, applause, FUR_ELISE } from "@/components/feel/sound";
+import { playNote, FUR_ELISE } from "@/components/feel/sound";
 import { BANNER } from "./banner";
 import { useOverlay, useSession } from "./store";
 
@@ -102,31 +102,38 @@ export default function Terminal() {
   const handleRef = useRef<HTMLDivElement>(null);
   const dragRef = useRef({ active: false, startY: 0, startH: 0, h: 0 });
 
-  // ── Typing-as-piano + a non-repeating quip conversation + a finale ────────
-  // Each printable keystroke plays the next Für Elise note. Quips fire ONCE in
-  // order (not on a metronome) and reset after a pause; finishing the whole tune
-  // triggers a celebration, then a cooldown. The bubble follows the cursor.
+  // ── Typing-as-piano + spaced, varied quips + a finale ─────────────────────
+  // Each printable keystroke plays the next Für Elise note. Quips are spaced out
+  // (min gap), varied (random, no immediate repeat), and only build up while you
+  // PLAY continuously — running a command (Enter) resets it, so normal terminal
+  // use shows no bubbles. Finishing the whole tune triggers the celebration +
+  // a cooldown. The bubble follows the cursor.
   const [quip, setQuip] = useState<{ msg: string; gif?: string } | null>(null);
   const [celebrating, setCelebrating] = useState(false);
   const noteIdx = useRef(0);
   const streak = useRef(0);
-  const convoPtr = useRef(0);
+  const nextQuipAt = useRef(30);
+  const shownQuips = useRef<number[]>([]);
   const fastRun = useRef(0);
-  const mashShown = useRef(false);
   const spaceShown = useRef(false);
   const lastKey = useRef(0);
+  const lastQuipAt = useRef(0);
   const cooldownUntil = useRef(0);
   const quipTimer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
   const finaleTimer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
+  const applauseRef = useRef<HTMLAudioElement | null>(null);
   const quipPos = useRef({ x: 0, y: 0 });
   const quipRef = useRef<HTMLDivElement>(null);
 
-  // Each line shows once, in order, at rising note counts.
-  const CONVO: { at: number; msg: string; gif?: string }[] = [
-    { at: 10, msg: "ooh, someone can play", gif: PIANO_GIF },
-    { at: 26, msg: "Beethoven would be proud", gif: PIANO_GIF },
-    { at: 46, msg: "you're enjoying this way too much!", gif: PIANO_GIF },
-    { at: 72, msg: "alright, show-off", gif: PIANO_GIF },
+  const PLAY_QUIPS = [
+    "ooh, someone can play",
+    "Beethoven would be proud",
+    "you're enjoying this way too much!",
+    "is this a recital now?",
+    "the neighbours can hear you",
+    "Liszt is shaking",
+    "ok, virtuoso",
+    "save some for the encore",
   ];
 
   useEffect(() => {
@@ -147,20 +154,44 @@ export default function Terminal() {
     };
   }, []);
 
-  function showQuip(msg: string, gif?: string) {
+  // Show a bubble, but keep them well spaced: skip if one fired recently (unless
+  // forced, for the finale / time-out).
+  function showQuip(msg: string, gif?: string, force = false) {
+    const now = performance.now();
+    if (!force && now - lastQuipAt.current < 5000) return;
+    lastQuipAt.current = now;
     setQuip({ msg, gif });
     clearTimeout(quipTimer.current);
     quipTimer.current = setTimeout(() => setQuip(null), 2800);
   }
-
-  function finale() {
-    applause();
-    setCelebrating(true);
-    showQuip("congratulations!", MEOW_GIF);
-    cooldownUntil.current = performance.now() + 25000;
+  function playQuip() {
+    if (shownQuips.current.length >= PLAY_QUIPS.length) shownQuips.current = [];
+    let i = Math.floor(Math.random() * PLAY_QUIPS.length);
+    while (shownQuips.current.includes(i)) i = Math.floor(Math.random() * PLAY_QUIPS.length);
+    shownQuips.current.push(i);
+    showQuip(PLAY_QUIPS[i], PIANO_GIF);
+  }
+  function resetPerformance() {
     noteIdx.current = 0;
     streak.current = 0;
-    convoPtr.current = 0;
+    nextQuipAt.current = 30;
+    shownQuips.current = [];
+    fastRun.current = 0;
+  }
+
+  function finale() {
+    try {
+      if (!applauseRef.current) applauseRef.current = new Audio("/sounds/applause.mp3");
+      applauseRef.current.currentTime = 0;
+      applauseRef.current.volume = 0.7;
+      void applauseRef.current.play();
+    } catch {
+      /* audio blocked — visual finale still runs */
+    }
+    setCelebrating(true);
+    showQuip("congratulations!", MEOW_GIF, true);
+    cooldownUntil.current = performance.now() + 25000;
+    resetPerformance();
     clearTimeout(finaleTimer.current);
     finaleTimer.current = setTimeout(() => {
       setCelebrating(false);
@@ -170,40 +201,29 @@ export default function Terminal() {
     }, 4200);
   }
 
-  // Runs on each printable keystroke: plays the note, advances the conversation,
-  // and fires the finale at the end of the tune.
+  // Runs on each printable keystroke: plays the note + spaced/varied quips, and
+  // fires the finale at the end of the tune.
   function onPlay() {
     const t = performance.now();
     if (t < cooldownUntil.current) {
-      showQuip("nope, you're on a time out!");
+      showQuip("nope, you're on a time out!", undefined, true);
       return;
     }
     const gap = t - lastKey.current;
     lastKey.current = t;
-    if (gap > 2200) {
-      noteIdx.current = 0;
-      streak.current = 0;
-      convoPtr.current = 0;
-      fastRun.current = 0;
-      mashShown.current = false;
-    }
+    if (gap > 2200) resetPerformance(); // paused -> fresh performance
     if (gap < 70) {
       fastRun.current += 1;
-      if (fastRun.current >= 8 && !mashShown.current) {
-        showQuip("heeeyyy!");
-        mashShown.current = true;
-      }
+      if (fastRun.current >= 8) showQuip("heeeyyy!");
     } else {
       fastRun.current = 0;
-      mashShown.current = false;
     }
     playNote(FUR_ELISE[noteIdx.current]);
     noteIdx.current += 1;
     streak.current += 1;
-    if (convoPtr.current < CONVO.length && streak.current >= CONVO[convoPtr.current].at) {
-      const q = CONVO[convoPtr.current];
-      showQuip(q.msg, q.gif);
-      convoPtr.current += 1;
+    if (streak.current >= nextQuipAt.current) {
+      playQuip();
+      nextQuipAt.current = streak.current + 30 + Math.floor(Math.random() * 18);
     }
     if (noteIdx.current >= FUR_ELISE.length) finale();
   }
@@ -394,6 +414,7 @@ export default function Terminal() {
     setLines(echoed);
     run(entered);
     setValue("");
+    resetPerformance(); // running a command ends a "performance" -> no stray quips
   }
 
   // Tab → complete the current token to the longest common prefix (or fully, if
@@ -425,7 +446,18 @@ export default function Terminal() {
   const ghost = cands.length ? cands[0].slice(cur.length) : "";
 
   return (
-    <div className="ide-terminal" aria-label="Terminal">
+    <div
+      className="ide-terminal"
+      aria-label="Terminal"
+      onClick={(e) => {
+        // Click anywhere in the terminal focuses the input — unless it's a
+        // button/link or the user is selecting text.
+        const t = e.target as HTMLElement;
+        if (t.closest("button, a")) return;
+        if (!window.getSelection()?.isCollapsed) return;
+        inputRef.current?.focus();
+      }}
+    >
       <div
         ref={handleRef}
         className="ide-terminal-resize"
@@ -457,8 +489,12 @@ export default function Terminal() {
         : null}
       {celebrating ? (
         <div className="term-finale" aria-hidden="true">
-          {Array.from({ length: 20 }).map((_, i) => (
-            <span key={i} className="term-spark" style={{ ["--a" as string]: `${(360 / 20) * i}deg` }} />
+          {Array.from({ length: 9 }).map((_, i) => (
+            <span
+              key={i}
+              className="fw-rocket"
+              style={{ left: `${6 + i * 11}%`, animationDelay: `${(i % 5) * 0.32}s` }}
+            />
           ))}
           {/* eslint-disable-next-line @next/next/no-img-element -- animated gif must stay unoptimized */}
           <img className="term-finale-gif" src={MEOW_GIF} alt="" width={76} height={76} />

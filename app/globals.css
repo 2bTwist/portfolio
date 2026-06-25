@@ -1953,37 +1953,52 @@ body[data-dragging] iframe {
   color: var(--term-accent);
   animation: quip-pop 300ms cubic-bezier(0.2, 0.9, 0.3, 1.4);
 }
-.term-spark {
+/* Fireworks: a dot shoots up from the bottom, then bursts into an expanding
+   glow at its apex. Several, staggered, looping for the length of the finale. */
+.fw-rocket {
   position: absolute;
-  left: 50%;
-  top: 50%;
-  width: 9px;
-  height: 9px;
+  bottom: 6px;
+  width: 7px;
+  height: 7px;
   border-radius: 50%;
-  background: var(--term-accent);
-  animation: spark 1100ms ease-out forwards;
+  color: var(--term-accent);
+  background: currentColor;
+  animation: fw-rise 1.5s ease-out infinite;
 }
-.term-spark:nth-child(4n) {
-  background: var(--dot-close);
+.fw-rocket:nth-child(4n) {
+  color: var(--dot-close);
 }
-.term-spark:nth-child(4n + 1) {
-  background: var(--dot-min);
+.fw-rocket:nth-child(4n + 1) {
+  color: var(--dot-min);
 }
-.term-spark:nth-child(4n + 2) {
-  background: var(--dot-max);
+.fw-rocket:nth-child(4n + 2) {
+  color: var(--dot-max);
 }
-@keyframes spark {
+@keyframes fw-rise {
   0% {
+    transform: translateY(0) scale(1);
+    opacity: 0;
+  }
+  10% {
     opacity: 1;
-    transform: rotate(var(--a)) translateY(0) scale(1);
+  }
+  55% {
+    transform: translateY(-30vh) scale(1);
+    opacity: 1;
+    box-shadow: 0 0 0 0 currentColor;
+  }
+  60% {
+    transform: translateY(-30vh) scale(0.5);
+    opacity: 1;
   }
   100% {
+    transform: translateY(-30vh) scale(6);
     opacity: 0;
-    transform: rotate(var(--a)) translateY(-170px) scale(0.4);
+    box-shadow: 0 0 24px 7px currentColor;
   }
 }
 @media (prefers-reduced-motion: reduce) {
-  .term-spark {
+  .fw-rocket {
     display: none;
   }
   .term-finale-title {

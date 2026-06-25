@@ -3,6 +3,8 @@
    bundle. The AudioContext is created lazily on the first user gesture (autoplay
    policy), which is exactly the "audible after first interaction" behaviour. */
 
+import { FUR_ELISE_NOTES } from "./furElise";
+
 let ctx: AudioContext | null = null;
 let creating = false;
 
@@ -73,24 +75,20 @@ function blip({ freq, dur, type = "triangle", gain = 0.05, sweep }: Tone) {
   osc.stop(now + dur + 0.02);
 }
 
-/* Für Elise (Beethoven), A theme + B section. The Terminal drives playback (one
-   note per keystroke) so it can also detect completion for the finale. */
-const HZ: Record<string, number> = {
-  C4: 261.63, "C#4": 277.18, D4: 293.66, "D#4": 311.13, E4: 329.63, F4: 349.23,
-  "F#4": 369.99, G4: 392.0, "G#4": 415.3, A4: 440.0, "A#4": 466.16, B4: 493.88,
-  C5: 523.25, "C#5": 554.37, D5: 587.33, "D#5": 622.25, E5: 659.25, F5: 698.46,
-  "F#5": 739.99, G5: 783.99, "G#5": 830.61, A5: 880.0,
+/* Für Elise (Beethoven) — the FULL piece (rondo A-B-A-C-A, 539 melody notes),
+   sourced from robsoncouto/arduino-songs and stored as note names in
+   ./furElise. The Terminal plays one note per keystroke and detects the end for
+   the finale. Note names -> Hz via equal temperament (A4 = 440, MIDI 69). */
+const SEMITONE: Record<string, number> = {
+  C: 0, "C#": 1, D: 2, "D#": 3, E: 4, F: 5, "F#": 6, G: 7, "G#": 8, A: 9, "A#": 10, B: 11,
 };
-export const FUR_ELISE = (
-  // A section
-  "E5 D#5 E5 D#5 E5 B4 D5 C5 A4 C4 E4 A4 B4 E4 G#4 B4 C5 E4 " +
-  "E5 D#5 E5 D#5 E5 B4 D5 C5 A4 C4 E4 A4 B4 E4 C5 B4 A4 " +
-  // B section
-  "B4 C5 D5 E5 G4 F5 E5 D5 F4 E5 D5 C5 E4 D5 C5 B4 E4 E5 E5 E5 " +
-  "E5 D#5 E5 D#5 E5 B4 D5 C5 A4 C4 E4 A4 B4 E4 C5 B4 A4"
-)
-  .split(" ")
-  .map((n) => HZ[n]);
+function noteToFreq(name: string): number {
+  const m = /^([A-G]#?)(\d)$/.exec(name);
+  if (!m) return 440;
+  const midi = (Number(m[2]) + 1) * 12 + SEMITONE[m[1]];
+  return 440 * Math.pow(2, (midi - 69) / 12);
+}
+export const FUR_ELISE = FUR_ELISE_NOTES.map(noteToFreq);
 
 // A soft "music box" note: a triangle fundamental + a quiet octave shimmer, with
 // a gentle pluck envelope. Used for the melodic terminal typing.
@@ -137,32 +135,3 @@ export const sfx = {
   },
 };
 
-// One clap = a short burst of band-passed noise. applause() fires a quick,
-// slightly irregular volley for the finale.
-function clapOnce(ac: AudioContext, when: number) {
-  const dur = 0.05;
-  const buf = ac.createBuffer(1, Math.ceil(ac.sampleRate * dur), ac.sampleRate);
-  const data = buf.getChannelData(0);
-  for (let i = 0; i < data.length; i++) data[i] = (Math.random() * 2 - 1) * (1 - i / data.length);
-  const src = ac.createBufferSource();
-  src.buffer = buf;
-  const bp = ac.createBiquadFilter();
-  bp.type = "bandpass";
-  bp.frequency.value = 1600;
-  bp.Q.value = 0.6;
-  const g = ac.createGain();
-  g.gain.setValueAtTime(0.14, when);
-  g.gain.exponentialRampToValueAtTime(0.0008, when + dur);
-  src.connect(bp).connect(g).connect(ac.destination);
-  src.start(when);
-  src.stop(when + dur + 0.02);
-}
-export function applause() {
-  const ac = getCtx();
-  if (!ac) return;
-  const now = ac.currentTime;
-  // a building volley of ~16 claps over ~1.4s
-  for (let i = 0; i < 16; i++) {
-    clapOnce(ac, now + i * 0.08 + Math.random() * 0.03);
-  }
-}
