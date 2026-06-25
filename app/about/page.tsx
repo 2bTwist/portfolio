@@ -4,6 +4,7 @@ import Image from "next/image";
 import { profile } from "@/data/profile";
 import { PageShell } from "@/components/site/PageShell";
 import { HoverWord } from "@/components/site/HoverWord";
+import { CopyEmail } from "@/components/site/CopyEmail";
 
 export const metadata: Metadata = {
   title: "About - Edmond Ndanji",
@@ -90,7 +91,8 @@ export default function AboutPage() {
 
           <p>
             I&apos;m always open to a conversation about opportunities, project ideas, or your
-            product. If you&apos;d like me to try something you&apos;re building, I&apos;m down.
+            product. If you&apos;d like me to try something you&apos;re building, I&apos;m down. The
+            best way to reach me is <CopyEmail email={profile.email} />.
           </p>
         </div>
       </div>
