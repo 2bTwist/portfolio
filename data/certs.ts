@@ -1,36 +1,35 @@
-/* Certifications / credential badges. Rendered as 3D badges (Phase 5) with a
-   CSS/SVG fallback. The badge FACE is drawn procedurally from these fields
-   (name / issuer / year) — no artwork asset required — so `artwork` stays
-   optional until real credential art is dropped in for Phase 6.
-
-   The entries below are clearly-labelled PLACEHOLDERS so the 3D infra is
-   buildable and verifiable. Swap in real certs in Phase 6. */
+/* Certifications. Each renders as a card with the official credential artwork,
+   the issuer + date, and a verify link when the issuer exposes a public one.
+   `accent` / `artwork` stay optional so a card can fall back to a procedurally
+   drawn seal if artwork is ever missing. */
 
 export type Cert = {
   id: string;
   name: string;
   issuer: string;
   year?: string;
-  /* Accent color for the procedurally-drawn badge face. */
+  /* Accent color for the procedurally-drawn fallback seal. */
   accent?: string;
-  /* Artwork applied to the badge face (texture); real art lands in Phase 6. */
+  /* Official badge artwork (in /public). */
   artwork?: string;
+  /* Public verification URL, when the issuer offers one. */
   url?: string;
 };
 
 export const CERTS: Cert[] = [
   {
-    id: "placeholder-cloud",
-    name: "Sample Credential",
-    issuer: "Placeholder Authority",
-    year: "2026",
-    accent: "#c9a23a",
+    id: "aws-ai-practitioner",
+    name: "AWS Certified AI Practitioner",
+    issuer: "Amazon Web Services",
+    year: "May 2026",
+    artwork: "/images/certs/aws-ai-practitioner.png",
+    url: "https://www.credly.com/go/wkRlcaP0skm8IK5H6PRzZQ",
   },
   {
-    id: "placeholder-security",
-    name: "Example Certification",
-    issuer: "Placeholder Institute",
-    year: "2026",
-    accent: "#7a9e74",
+    id: "apple-search-ads",
+    name: "Apple Search Ads Certification",
+    issuer: "Apple",
+    year: "Mar 2026",
+    artwork: "/images/certs/apple-search-ads.png",
   },
 ];

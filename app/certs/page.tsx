@@ -13,7 +13,7 @@ export default function CertsPage() {
   return (
     <PageShell>
       <PageHeader title="Certifications" />
-      <Body>Placeholder credentials for now.</Body>
+      <Body>Credentials I have earned. The AWS badge links out to verify it.</Body>
       <ul className="cert-grid" aria-label="Certifications">
         {CERTS.map((cert) => (
           <li key={cert.id} className="cert-grid-item">
