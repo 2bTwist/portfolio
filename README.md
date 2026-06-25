@@ -180,7 +180,10 @@ pnpm start
 
 ## 📄 License
 
-MIT License - feel free to use this as a template for your own portfolio!
+**All Rights Reserved.** This source is published publicly for viewing and
+educational reference only. You may **not** copy, clone, reuse, redistribute, or
+deploy this website (code or content) in whole or in substantial part without
+explicit written permission. See [LICENSE](./LICENSE) for the full terms.
 
 ## 🔗 Links
 
