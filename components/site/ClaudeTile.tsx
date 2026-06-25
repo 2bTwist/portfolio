@@ -8,8 +8,12 @@
 
 import { useEffect, useRef, useState } from "react";
 import type { CSSProperties } from "react";
-import { STACK_LOGOS } from "./stackLogos";
 import { ClaudeBurst } from "./ClaudeBurst";
+
+// Inlined so this client tile doesn't pull the whole stackLogos module (every
+// brand SVG path) into the client bundle just for Claude's colour + label.
+const CLAUDE_COLOR = "#D97757";
+const CLAUDE_NAME = "Claude";
 
 const THINKING = [
   "Reticulating",
@@ -29,7 +33,8 @@ const THINKING = [
 ];
 
 export function ClaudeTile() {
-  const { color, name } = STACK_LOGOS.claude;
+  const color = CLAUDE_COLOR;
+  const name = CLAUDE_NAME;
   const [word, setWord] = useState<string | null>(null);
   const timer = useRef<ReturnType<typeof setInterval> | null>(null);
   const idx = useRef(0);

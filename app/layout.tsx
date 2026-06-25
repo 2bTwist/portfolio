@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
 import type { CSSProperties } from "react";
-import { SpeedInsights } from "@vercel/speed-insights/next";
 import "./globals.css";
 import { ClientBoot } from "@/components/ClientBoot";
 import { IdeProvider } from "@/components/ide/store";
@@ -47,7 +46,6 @@ export default function RootLayout({
         </SoundProvider>
         <CursorMount />
         <ClientBoot />
-        <SpeedInsights />
       </body>
     </html>
   );
