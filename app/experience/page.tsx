@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { EXPERIENCE, EDUCATION, LEADERSHIP } from "@/data/experience";
+import { EXPERIENCE, LEADERSHIP } from "@/data/experience";
 import { PageShell } from "@/components/site/PageShell";
 
 export const metadata: Metadata = {
@@ -61,27 +61,6 @@ export default function ExperiencePage() {
           </li>
         ))}
 
-        <li className="xp-entry">
-          <div className="xp-node">
-            {EDUCATION.logo ? (
-              // eslint-disable-next-line @next/next/no-img-element -- inline brand mark, sized by CSS
-              <img className="xp-logo xp-logo--square" src={EDUCATION.logo} alt={EDUCATION.org} />
-            ) : null}
-          </div>
-          <div className="xp-content">
-            <div className="xp-org-row">
-              <span className="xp-org">{EDUCATION.org}</span>
-              {EDUCATION.location ? <span className="xp-loc mono">{EDUCATION.location}</span> : null}
-            </div>
-            <div className="xp-role">
-              <div className="xp-role-head">
-                <span className="xp-title">{EDUCATION.degree}</span>
-                <span className="xp-period mono">{EDUCATION.period}</span>
-              </div>
-              <p className="xp-summary">{EDUCATION.summary}</p>
-            </div>
-          </div>
-        </li>
       </ol>
 
       <section className="xp-community">
@@ -89,8 +68,29 @@ export default function ExperiencePage() {
         <ul className="xp-activities">
           {LEADERSHIP.map((a) => (
             <li key={a.role + (a.org ?? "")} className="xp-activity">
-              <span className="xp-activity-role">{a.role}</span>
-              {a.org ? <span className="xp-activity-org"> · {a.org}</span> : null}
+              <span className="xp-activity-icon" aria-hidden="true">
+                {a.logo ? (
+                  // eslint-disable-next-line @next/next/no-img-element -- inline brand mark, sized by CSS
+                  <img className="xp-activity-logo" src={a.logo} alt="" />
+                ) : (
+                  <span className="xp-activity-mono mono">{(a.org ?? a.role).slice(0, 1)}</span>
+                )}
+              </span>
+              <span className="xp-activity-text">
+                <span className="xp-activity-role">{a.role}</span>
+                {a.org ? (
+                  <span className="xp-activity-org">
+                    {" · "}
+                    {a.url ? (
+                      <a className="xp-activity-link" href={a.url} target="_blank" rel="noreferrer noopener">
+                        {a.org}
+                      </a>
+                    ) : (
+                      a.org
+                    )}
+                  </span>
+                ) : null}
+              </span>
             </li>
           ))}
         </ul>

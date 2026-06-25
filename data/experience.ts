@@ -1,5 +1,5 @@
 /* Work history, education, and community roles for the Experience timeline.
-   Sourced from the resume (eddyb.dev). Each role carries a short prose summary;
+   Sourced from the resume + LinkedIn. Each role carries a short prose summary;
    the longer illustrated story lives on the per-experience `story` page. */
 
 export type Role = {
@@ -21,6 +21,21 @@ export type ExperienceEntry = {
 };
 
 export const EXPERIENCE: ExperienceEntry[] = [
+  {
+    org: "UMBC · DoIT",
+    location: "Baltimore, MD · Remote",
+    url: "https://doit.umbc.edu",
+    logo: "/images/umbc.png",
+    logoClass: "xp-logo--square",
+    roles: [
+      {
+        title: "IT Support Specialist",
+        period: "Dec 2023 – Present",
+        summary:
+          "Part of the Division of IT support team, helping students and staff work through technical issues. Along the way I have built small Python tools to automate routine fixes and used a bit of data analysis to shape an FAQ system that brought response times down.",
+      },
+    ],
+  },
   {
     org: "Cisco Systems",
     location: "RTP, NC",
@@ -66,11 +81,22 @@ export const EDUCATION: Education = {
 export type Activity = {
   role: string;
   org?: string;
+  url?: string;
+  logo?: string;
 };
 
 export const LEADERSHIP: Activity[] = [
-  { role: "Marketing Director", org: "National Society of Black Engineers" },
-  { role: "Resident Assistant", org: "UMBC Residential Life" },
-  { role: "Member", org: "ColorStack" },
+  {
+    role: "Marketing Director",
+    org: "National Society of Black Engineers",
+    url: "https://www.nsbe.org",
+    logo: "/images/nsbe.png",
+  },
+  {
+    role: "Member",
+    org: "ColorStack",
+    url: "https://www.colorstack.org",
+    logo: "/images/colorstack.png",
+  },
   { role: "Restaurant Manager" },
 ];

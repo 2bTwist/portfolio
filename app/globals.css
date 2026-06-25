@@ -2855,7 +2855,33 @@ a.xp-org:hover {
   gap: 0.5rem;
 }
 .xp-activity {
-  line-height: 1.5;
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  line-height: 1.4;
+}
+.xp-activity-icon {
+  flex-shrink: 0;
+  width: 30px;
+  height: 30px;
+  display: grid;
+  place-items: center;
+  border-radius: 8px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  overflow: hidden;
+}
+.xp-activity-logo {
+  display: block;
+  width: 22px;
+  height: 22px;
+  object-fit: contain;
+  max-width: none;
+}
+.xp-activity-mono {
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--accent);
 }
 .xp-activity-role {
   font-weight: 600;
@@ -2863,6 +2889,15 @@ a.xp-org:hover {
 }
 .xp-activity-org {
   color: var(--muted);
+}
+.xp-activity-link {
+  color: var(--muted);
+  text-decoration: none;
+  border-bottom: 1px solid color-mix(in srgb, var(--accent) 35%, transparent);
+  transition: color 140ms ease-out;
+}
+.xp-activity-link:hover {
+  color: var(--accent);
 }
 
 /* Experience story (read-more) page */

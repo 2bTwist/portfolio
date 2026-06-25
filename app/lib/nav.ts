@@ -4,6 +4,7 @@
    importable, no client code. */
 
 import { PROJECTS } from "@/data/projects";
+import { EXPERIENCE } from "@/data/experience";
 
 export type TreeFile = { type: "file"; name: string; href: string };
 export type TreeFolder = {
@@ -24,6 +25,14 @@ const projectFiles: TreeFile[] = PROJECTS.map((p) => ({
   href: `/projects/${p.id}`,
 }));
 
+/* Experience entries that have a "read more" story become files under the
+   experience/ folder. */
+const experienceFiles: TreeFile[] = EXPERIENCE.filter((e) => e.story).map((e) => ({
+  type: "file",
+  name: `${e.story!.replace("/experience/", "")}.md`,
+  href: e.story!,
+}));
+
 /* Hierarchical view for the Explorer. (Individual posts aren't listed here:
    nav.ts is imported by client components, so it can't pull the fs-based posts
    module. Posts are reachable via the writing/ index, ⌘K, and terminal grep.) */
@@ -31,7 +40,7 @@ export const TREE: TreeNode[] = [
   { type: "file", name: "README.md", href: "/" },
   { type: "folder", name: "projects", href: "/projects", children: projectFiles },
   { type: "file", name: "about.md", href: "/about" },
-  { type: "file", name: "experience.md", href: "/experience" },
+  { type: "folder", name: "experience", href: "/experience", children: experienceFiles },
   { type: "file", name: "certs.pdf", href: "/certs" },
   { type: "file", name: "writing.md", href: "/writing" },
   { type: "file", name: "contact.md", href: "/contact" },
@@ -45,7 +54,8 @@ export const NAV: NavItem[] = [
   { name: "projects/", href: "/projects" },
   ...projectFiles.map((f) => ({ name: f.name, href: f.href })),
   { name: "about.md", href: "/about" },
-  { name: "experience.md", href: "/experience" },
+  { name: "experience/", href: "/experience" },
+  ...experienceFiles.map((f) => ({ name: f.name, href: f.href })),
   { name: "certs.pdf", href: "/certs" },
   { name: "writing.md", href: "/writing" },
   { name: "contact.md", href: "/contact" },
