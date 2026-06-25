@@ -39,11 +39,11 @@ const experienceFiles: TreeFile[] = EXPERIENCE.filter((e) => e.story).map((e) =>
    posts module itself. */
 export const TREE: TreeNode[] = [
   { type: "file", name: "README.md", href: "/" },
-  { type: "folder", name: "projects", href: "/projects", children: projectFiles },
   { type: "file", name: "about.md", href: "/about" },
+  { type: "folder", name: "projects", href: "/projects", children: projectFiles },
   { type: "folder", name: "experience", href: "/experience", children: experienceFiles },
-  { type: "file", name: "certs.pdf", href: "/certs" },
   { type: "folder", name: "writing", href: "/writing", children: [] },
+  { type: "file", name: "certs.pdf", href: "/certs" },
 ];
 
 export type NavItem = { name: string; href: string };
@@ -51,13 +51,13 @@ export type NavItem = { name: string; href: string };
 /* Flat view for the palette / terminal / tabs. */
 export const NAV: NavItem[] = [
   { name: "README.md", href: "/" },
+  { name: "about.md", href: "/about" },
   { name: "projects/", href: "/projects" },
   ...projectFiles.map((f) => ({ name: f.name, href: f.href })),
-  { name: "about.md", href: "/about" },
   { name: "experience/", href: "/experience" },
   ...experienceFiles.map((f) => ({ name: f.name, href: f.href })),
+  { name: "writing/", href: "/writing" },
   { name: "certs.pdf", href: "/certs" },
-  { name: "writing.md", href: "/writing" },
   // Not in the explorer TREE (would get the cert/medal .pdf icon); listed here
   // so it opens a real "resume.pdf" tab + label and is ⌘K-searchable.
   { name: "resume.pdf", href: "/resume" },
