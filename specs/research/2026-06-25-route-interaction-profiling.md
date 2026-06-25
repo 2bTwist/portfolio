@@ -40,8 +40,9 @@ Remaining ~14-15 scripts/route are the app + IDE-shell JS chunks (expected for a
 
 ## Other findings
 
-### CLS 0.064 (real bug) — FIXED
-The location minimap rendered the Stadia tile as an `<img>` with an `onError` fallback that **collapsed the card** from a fixed 300×187 box to an auto-width pill. In CI / on any host where the tile fails (no Stadia key, un-allowlisted domain), `onError` fired and the collapse caused CLS 0.064. Fix: render the tile as a **`background-image` on a fixed box** and drop the collapsing fallback. Box dimensions are now identical whether the tile loads or not → **CLS 0**.
+### CLS — TWO sources, both fixed
+1. **Map fallback collapse (0.064 → 0.058):** the minimap rendered the Stadia tile as an `<img>` with an `onError` fallback that **collapsed the card** from a fixed 300×187 box to an auto-width pill. Where the tile fails (no key / un-allowlisted domain, e.g. CI), `onError` fired and the collapse shifted layout. Fix: render the tile as a **`background-image` on a fixed box**; dimensions are identical whether it loads or not.
+2. **Font-swap rewrap (the remaining 0.058):** CI still failed CLS. The culprit (from the CI report) was `div.hero-blurb` with the **font woff2 files** as sub-items. `adjustFontFallback` (default "Arial") matches the fallback's vertical box but **not glyph widths**, so the multi-line hero blurb **rewrapped to a different line count** when Satoshi/Clash swapped in → height change → CLS. Only visible on the slow CI runner (Lantern can't simulate this; local gather loads fonts before paint, so it's unreproducible locally even with `--throttling-method=devtools`). Fix: **`display: "optional"`** on both fonts — the font is locked after a short block window, so no swap and no rewrap → CLS 0. Tradeoff: genuinely slow first loads show the system fallback; fonts are tiny/subset/same-origin so most loads still show the brand faces, and cached loads always do.
 
 ### Mobile LCP — element fixed, simulation caveat
 On mobile (stacked hero) the minimap was the largest in-viewport element, so the slow third-party tile was the LCP. Fixed by sizing the mascot (240px) above the minimap (260px) so the **mascot — first-party, `priority`, ~32KB webp — is the LCP element**. This removes the third party from the LCP path.
