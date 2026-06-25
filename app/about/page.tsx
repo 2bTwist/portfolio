@@ -69,9 +69,10 @@ export default function AboutPage() {
           </p>
 
           <p>
-            Most of my work is about crafting systems that are reliable and intuitive, on the
-            frontend or the backend, though these days I lean toward the backend. Right now I&apos;m
-            also teaching myself Go.
+            Most of my work is about crafting systems that are reliable and intuitive. I spend a lot
+            of time thinking about the intersection between product and engineering. Right now
+            I&apos;m building another app focused on using AI agents to run a car rental business
+            right from your phone, while responding to user complaints on my current one.
           </p>
 
           <p>
