@@ -31,5 +31,6 @@ export const CERTS: Cert[] = [
     issuer: "Apple",
     year: "Mar 2026",
     artwork: "/images/certs/apple-search-ads.png",
+    url: "https://certification-ads.apple.com",
   },
 ];

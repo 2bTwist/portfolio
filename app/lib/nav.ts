@@ -43,7 +43,6 @@ export const TREE: TreeNode[] = [
   { type: "folder", name: "experience", href: "/experience", children: experienceFiles },
   { type: "file", name: "certs.pdf", href: "/certs" },
   { type: "file", name: "writing.md", href: "/writing" },
-  { type: "file", name: "contact.md", href: "/contact" },
 ];
 
 export type NavItem = { name: string; href: string };
@@ -58,7 +57,6 @@ export const NAV: NavItem[] = [
   ...experienceFiles.map((f) => ({ name: f.name, href: f.href })),
   { name: "certs.pdf", href: "/certs" },
   { name: "writing.md", href: "/writing" },
-  { name: "contact.md", href: "/contact" },
   // Not in the explorer TREE (would get the cert/medal .pdf icon); listed here
   // so it opens a real "resume.pdf" tab + label and is ⌘K-searchable.
   { name: "resume.pdf", href: "/resume" },
