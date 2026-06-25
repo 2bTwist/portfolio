@@ -30,7 +30,7 @@ export default async function TagPage({ params }: Params) {
       ) : (
         <div className="space-y-8">
           {posts.map((post) => (
-            <Link key={post.slug} href={`/writing/${post.slug}`} className="block group no-underline">
+            <Link key={post.slug} href={`/writing/${post.slug}`} prefetch={false} className="block group no-underline">
               <h2 className="display text-2xl font-semibold transition-opacity group-hover:opacity-70" style={{ color: "var(--text)" }}>
                 {post.title}
               </h2>
@@ -44,7 +44,7 @@ export default async function TagPage({ params }: Params) {
           ))}
         </div>
       )}
-      <Link href="/writing" className="mono text-sm no-underline mt-12 inline-block transition-opacity hover:opacity-70" style={{ color: "var(--accent)" }}>
+      <Link href="/writing" prefetch={false} className="mono text-sm no-underline mt-12 inline-block transition-opacity hover:opacity-70" style={{ color: "var(--accent)" }}>
         ← all writing
       </Link>
     </PageShell>

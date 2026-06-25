@@ -9,7 +9,7 @@ import { TagIcon } from "./tagIcons";
 
 export function ProjectCard({ project }: { project: Project }) {
   return (
-    <Link href={`/projects/${project.id}`} className="proj-card">
+    <Link href={`/projects/${project.id}`} prefetch={false} className="proj-card">
       {/* The lift-on-hover lives on this inner wrapper, not the <a>, so the
           hover hit-area never moves — otherwise the edge slips out from under
           the cursor and flickers up/down. */}

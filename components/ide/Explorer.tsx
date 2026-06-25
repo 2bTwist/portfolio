@@ -274,28 +274,35 @@ function Breadcrumb({
   const segs = pathname === "/" ? [] : pathname.slice(1).split("/");
   return (
     <div className="ide-explorer-title">
-      <Link href="/" prefetch className="ide-crumb" onClick={() => onOpen("/")}>
+      <Link href="/" prefetch={false} className="ide-crumb" onClick={() => onOpen("/")}>
         ~/edmond
       </Link>
       {segs.map((seg, i) => {
         const href = `/${segs.slice(0, i + 1).join("/")}`;
         const current = href === pathname;
-        const navigable = current || NAV_HREFS.has(href);
+        // The current crumb is NOT a link — you're already here. This also stops
+        // it from prefetching its own route, which on a 404 (force-dynamic) left a
+        // hanging RSC request. Other crumbs use hover prefetch.
+        const navigable = !current && NAV_HREFS.has(href);
         return (
           <span key={href}>
             <span className="ide-crumb-sep">/</span>
             {navigable ? (
               <Link
                 href={href}
-                prefetch
-                className={`ide-crumb${current ? " ide-crumb--current" : ""}`}
-                aria-current={current ? "page" : undefined}
+                prefetch={false}
+                className="ide-crumb"
                 onClick={() => onOpen(href)}
               >
                 {seg}
               </Link>
             ) : (
-              <span className="ide-crumb-static">{seg}</span>
+              <span
+                className={current ? "ide-crumb ide-crumb--current" : "ide-crumb-static"}
+                aria-current={current ? "page" : undefined}
+              >
+                {seg}
+              </span>
             )}
           </span>
         );
@@ -324,7 +331,11 @@ function Node({
     return (
       <Link
         href={node.href}
-        prefetch
+        // prefetch={false}: the whole file tree is in-viewport, so forced
+        // prefetch fired a route RSC fetch for every row on load (~20+ requests).
+        // false keeps Next's hover/touch prefetch — instant nav once you point at
+        // a file — without the upfront request storm.
+        prefetch={false}
         className="ide-row"
         style={pad}
         aria-current={active ? "page" : undefined}
@@ -345,7 +356,11 @@ function Node({
           disclosure state (and the folder sound) still read. */}
       <Link
         href={node.href}
-        prefetch
+        // prefetch={false}: the whole file tree is in-viewport, so forced
+        // prefetch fired a route RSC fetch for every row on load (~20+ requests).
+        // false keeps Next's hover/touch prefetch — instant nav once you point at
+        // a file — without the upfront request storm.
+        prefetch={false}
         className="ide-row"
         style={pad}
         aria-expanded={open}

@@ -1783,7 +1783,11 @@ button.ide-row {
 .hero-mascot {
   position: relative;
   z-index: 1;
-  width: 200px;
+  /* Mobile: the mascot must out-size the location minimap below it so IT is the
+     hero's LCP (first-party, priority-loaded) rather than the slow third-party
+     map tile. A square at 240px (57.6k px²) clearly beats the 260px-wide 16:10
+     map (~42k px²). Desktop bumps to 330px below. */
+  width: 240px;
   height: auto;
   /* Subtle neutral grounding shadow only. We deliberately DON'T add a gold glow
      halo here — the PNG already has a baked gold outline, and amplifying it made
@@ -2248,8 +2252,10 @@ button.ide-row {
   position: relative;
   display: block;
   /* Fixed width so the card never collapses to the mascot's width above it
-     (which would wrap the label); caps to the viewport on tiny screens. */
-  width: 300px;
+     (which would wrap the label); caps to the viewport on tiny screens.
+     Mobile trims to 260px so the mascot stays the larger (LCP) element; the
+     label still fits. Desktop restores 300px below. */
+  width: 260px;
   max-width: 100%;
   aspect-ratio: 16 / 10;
   margin: 0;
@@ -2262,12 +2268,19 @@ button.ide-row {
     0 10px 24px -14px rgba(0, 0, 0, 0.28);
   user-select: none;
 }
+@media (min-width: 640px) {
+  .ide-minimap {
+    width: 300px;
+  }
+}
+/* The map tile, painted as a background-image so it loads at low priority and
+   never delays the mascot's first-party paint. */
 .ide-minimap-img {
   position: absolute;
   inset: 0;
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
   /* Calm the neutral basemap and nudge it warm so it belongs to the page. */
   filter: saturate(0.85) contrast(0.97);
 }
@@ -2330,29 +2343,6 @@ button.ide-row {
   letter-spacing: 0.08em;
   opacity: 0.7;
 }
-/* Fallback when the tile can't load (no dev key / offline): a plain text badge
-   in the muted palette so the hero never shows a broken image. */
-.ide-minimap.is-fallback {
-  display: inline-flex;
-  width: auto;
-  max-width: none;
-  aspect-ratio: auto;
-  border-radius: 999px;
-  box-shadow: none;
-}
-.ide-minimap.is-fallback .ide-minimap-label {
-  position: static;
-  inset: auto;
-  background: none;
-  color: var(--muted);
-  text-shadow: none;
-  padding: 0.3rem 0.7rem;
-}
-.ide-minimap.is-fallback .ide-minimap-dot {
-  background: var(--accent);
-  box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 25%, transparent);
-  animation: localtime-pulse 2.4s ease-in-out infinite;
-}
 @keyframes localtime-pulse {
   0%,
   100% {
@@ -2365,8 +2355,7 @@ button.ide-row {
 @media (prefers-reduced-motion: reduce) {
   .hero-mascot,
   .hero-mascot-wrap::after,
-  .ide-minimap-pin,
-  .ide-minimap.is-fallback .ide-minimap-dot {
+  .ide-minimap-pin {
     animation: none;
   }
 }

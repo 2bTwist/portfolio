@@ -47,6 +47,7 @@ export default async function WritingPost({ params }: Params) {
       <PageShell>
         <Link
           href="/writing"
+          prefetch={false}
           className="mono text-sm no-underline transition-opacity hover:opacity-70"
           style={{ color: "var(--muted)" }}
         >
@@ -65,6 +66,7 @@ export default async function WritingPost({ params }: Params) {
             <Link
               key={tag}
               href={`/writing/tag/${tag}`}
+              prefetch={false}
               className="mono text-xs no-underline transition-opacity hover:opacity-70"
               style={{ color: "var(--accent)" }}
             >
@@ -78,7 +80,7 @@ export default async function WritingPost({ params }: Params) {
         <nav className="mt-16 pt-8 flex flex-col gap-4 sm:flex-row sm:justify-between" style={{ borderTop: "1px solid var(--border)" }}>
           <div className="sm:flex-1">
             {prev ? (
-              <Link href={`/writing/${prev.slug}`} className="no-underline transition-opacity hover:opacity-70">
+              <Link href={`/writing/${prev.slug}`} prefetch={false} className="no-underline transition-opacity hover:opacity-70">
                 <div className="mono text-xs uppercase tracking-wide mb-1" style={{ color: "var(--muted)" }}>
                   Previous
                 </div>
@@ -90,7 +92,7 @@ export default async function WritingPost({ params }: Params) {
           </div>
           <div className="sm:flex-1 sm:text-right">
             {next ? (
-              <Link href={`/writing/${next.slug}`} className="no-underline transition-opacity hover:opacity-70">
+              <Link href={`/writing/${next.slug}`} prefetch={false} className="no-underline transition-opacity hover:opacity-70">
                 <div className="mono text-xs uppercase tracking-wide mb-1" style={{ color: "var(--muted)" }}>
                   Next
                 </div>

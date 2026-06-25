@@ -88,7 +88,7 @@ export function Tabs({ className = "" }: { className?: string }) {
                 setMenu({ href: tab.href, name: tab.name, x: e.clientX, y: e.clientY });
               }}
             >
-              <Link href={tab.href} prefetch aria-current={active ? "page" : undefined}>
+              <Link href={tab.href} prefetch={false} aria-current={active ? "page" : undefined}>
                 <FileIcon name={tab.name} className="ide-file-icon" />
                 {tab.name}
               </Link>

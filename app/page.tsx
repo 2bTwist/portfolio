@@ -86,7 +86,7 @@ export default function HomePage() {
           {/* Socials on their own left-aligned line; "more about me" sits in the
               same row, just after the LinkedIn button, then the Resume action. */}
           <SocialLinks className="mt-6">
-            <Link href="/about" className="hero-more mono">
+            <Link href="/about" prefetch={false} className="hero-more mono">
               more about me
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
                 <path d="M5 12h14" />
@@ -117,6 +117,10 @@ export default function HomePage() {
               alt="Edmond's pixel-art mascot: a cheerful developer holding a glowing laptop and phone"
               width={380}
               height={380}
+              // Displayed at 240px (mobile) / 330px (desktop) via CSS. Without
+              // this, next/image assumed full-width and served an 828w candidate
+              // for the LCP image; sizes trims it to the real display width.
+              sizes="(min-width: 640px) 330px, 240px"
               priority
             />
           </div>
@@ -137,7 +141,7 @@ export default function HomePage() {
           <h2 className="mono text-xl font-semibold" style={{ color: "var(--text)" }}>
             Featured work
           </h2>
-          <Link href="/projects" className="mono text-sm no-underline hover:opacity-80" style={{ color: "var(--muted)" }}>
+          <Link href="/projects" prefetch={false} className="mono text-sm no-underline hover:opacity-80" style={{ color: "var(--muted)" }}>
             all projects →
           </Link>
         </div>

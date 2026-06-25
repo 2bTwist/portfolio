@@ -89,7 +89,7 @@ export function ActionLink({
     );
   }
   return (
-    <Link href={href} className={className}>
+    <Link href={href} prefetch={false} className={className}>
       {inner}
     </Link>
   );
