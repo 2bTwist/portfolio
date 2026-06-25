@@ -83,7 +83,7 @@ export default function AboutPage() {
               href="https://apps.apple.com/app/id6760330166"
               logo={
                 // eslint-disable-next-line @next/next/no-img-element -- app icon
-                <img className="company-logo company-logo--app" src="/images/beseen.png" alt="BeSeen" width={56} height={56} />
+                <img className="company-logo company-logo--app" src="/images/beseen.webp" alt="BeSeen" width={56} height={56} />
               }
             />
             .

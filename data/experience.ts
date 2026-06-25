@@ -25,7 +25,7 @@ export const EXPERIENCE: ExperienceEntry[] = [
     org: "UMBC · DoIT",
     location: "Baltimore, MD · Remote",
     url: "https://doit.umbc.edu",
-    logo: "/images/umbc.png",
+    logo: "/images/umbc.webp",
     logoClass: "xp-logo--square",
     roles: [
       {
@@ -73,7 +73,7 @@ export const EDUCATION: Education = {
   degree: "B.S. in Computer Science",
   period: "Expected Dec 2026",
   location: "Baltimore, MD",
-  logo: "/images/umbc.png",
+  logo: "/images/umbc.webp",
   summary:
     "Studying computer science, graduating December 2026. Along the way I have made the President's List and Dean's List and hold a 35% merit scholarship.",
 };
@@ -90,13 +90,13 @@ export const LEADERSHIP: Activity[] = [
     role: "Marketing Director",
     org: "National Society of Black Engineers",
     url: "https://www.nsbe.org",
-    logo: "/images/nsbe.png",
+    logo: "/images/nsbe.webp",
   },
   {
     role: "Member",
     org: "ColorStack",
     url: "https://www.colorstack.org",
-    logo: "/images/colorstack.png",
+    logo: "/images/colorstack.webp",
   },
   { role: "Restaurant Manager" },
 ];

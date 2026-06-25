@@ -22,7 +22,7 @@ export const CERTS: Cert[] = [
     name: "AWS Certified AI Practitioner",
     issuer: "Amazon Web Services",
     year: "May 2026",
-    artwork: "/images/certs/aws-ai-practitioner.png",
+    artwork: "/images/certs/aws-ai-practitioner.webp",
     url: "https://www.credly.com/go/wkRlcaP0skm8IK5H6PRzZQ",
   },
   {
@@ -30,7 +30,7 @@ export const CERTS: Cert[] = [
     name: "Apple Ads Certification",
     issuer: "Apple",
     year: "Mar 2026",
-    artwork: "/images/certs/apple-search-ads.png",
+    artwork: "/images/certs/apple-search-ads.webp",
     url: "https://certification-ads.apple.com/certificate/HapAk3kzap",
   },
 ];

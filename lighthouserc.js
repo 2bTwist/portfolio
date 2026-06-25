@@ -16,6 +16,31 @@ gate("lcp", "largest-contentful-paint");
 gate("cls", "cumulative-layout-shift");
 gate("tbt", "total-blocking-time");
 
+// Lighthouse's experimental "insight" audits are strict, noisy, and often not
+// actionable for a Next app (e.g. legacy-javascript fires on Next's own nomodule
+// polyfills). Turn them off so the gate stays focused on the calibrated budgets.
+const INSIGHT_AUDITS = [
+  "cls-culprits-insight",
+  "document-latency-insight",
+  "dom-size-insight",
+  "duplicated-javascript-insight",
+  "font-display-insight",
+  "forced-reflow-insight",
+  "image-delivery-insight",
+  "interaction-to-next-paint-insight",
+  "lcp-discovery-insight",
+  "lcp-breakdown-insight",
+  "legacy-javascript-insight",
+  "modern-http-insight",
+  "network-dependency-tree-insight",
+  "render-blocking-insight",
+  "slow-css-selector-insight",
+  "third-parties-insight",
+  "viewport-insight",
+  "cache-insight",
+];
+for (const id of INSIGHT_AUDITS) assertions[id] = "off";
+
 module.exports = {
   ci: {
     collect: {

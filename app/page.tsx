@@ -71,7 +71,7 @@ export default function HomePage() {
                 href="https://apps.apple.com/app/id6760330166"
                 logo={
                   // eslint-disable-next-line @next/next/no-img-element -- app icon
-                  <img className="company-logo company-logo--app" src="/images/beseen.png" alt="BeSeen" width={56} height={56} />
+                  <img className="company-logo company-logo--app" src="/images/beseen.webp" alt="BeSeen" width={56} height={56} />
                 }
               />
               , a consumer app for connecting couples, now sitting at 200+ users.
@@ -113,7 +113,7 @@ export default function HomePage() {
           <div className="hero-mascot-wrap">
             <Image
               className="hero-mascot"
-              src="/images/mascot.png"
+              src="/images/mascot.webp"
               alt="Edmond's pixel-art mascot: a cheerful developer holding a glowing laptop and phone"
               width={380}
               height={380}
