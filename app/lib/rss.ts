@@ -1,10 +1,9 @@
-/* RSS feed (Phase 4). Base URL comes from NEXT_PUBLIC_SITE_URL so the feed is
-   correct across local / preview / prod, rather than a hardcoded domain. */
+/* RSS feed (Phase 4). Base URL comes from the shared SITE_URL (NEXT_PUBLIC_SITE_URL
+   or the eddyb.dev fallback) so the feed is correct across local / preview / prod. */
 
 import { getAllPosts } from "./posts";
 import { profile } from "@/data/profile";
-
-const SITE_URL = (process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000").replace(/\/$/, "");
+import { SITE_URL } from "./site";
 
 export function generateRss(): string {
   const posts = getAllPosts();

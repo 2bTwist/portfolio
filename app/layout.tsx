@@ -11,10 +11,35 @@ import { getAllPosts } from "@/app/lib/posts";
 import type { TreeFile } from "@/app/lib/nav";
 import { PALETTES, DEFAULT_PALETTE_INDEX } from "@/app/lib/palette";
 import { clashDisplay, satoshi } from "@/app/fonts/fonts";
+import { SITE_URL } from "@/app/lib/site";
+import { profile } from "@/data/profile";
+
+const TITLE = "Edmond Ndanji - Full-stack & mobile engineer";
 
 export const metadata: Metadata = {
-  title: "Edmond Ndanji",
-  description: "Full-stack & mobile engineer.",
+  metadataBase: new URL(SITE_URL),
+  title: TITLE,
+  description: profile.tagline,
+  applicationName: "Edmond Ndanji",
+  authors: [{ name: profile.name, url: SITE_URL }],
+  creator: profile.name,
+  alternates: {
+    types: { "application/rss+xml": "/rss.xml" },
+  },
+  openGraph: {
+    type: "website",
+    siteName: "Edmond Ndanji",
+    title: TITLE,
+    description: profile.tagline,
+    url: SITE_URL,
+    locale: "en_US",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: TITLE,
+    description: profile.tagline,
+  },
+  robots: { index: true, follow: true },
 };
 
 // Default palette injected as inline CSS vars (server-rendered, no JS, not

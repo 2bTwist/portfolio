@@ -10,16 +10,32 @@ import { SocialLinks } from "@/components/site/SocialLinks";
 import { LocationCard } from "@/components/site/LocationCard";
 import { TechStack } from "@/components/site/TechStack";
 import { CompanyLink } from "@/components/site/CompanyLink";
+import { SITE_URL } from "@/app/lib/site";
 
 export const metadata: Metadata = {
   title: "Edmond Ndanji - Full-stack & mobile engineer",
   description: profile.tagline,
+  alternates: {
+    canonical: "/",
+    types: { "application/rss+xml": "/rss.xml" },
+  },
+};
+
+const personLd = {
+  "@context": "https://schema.org",
+  "@type": "Person",
+  name: profile.name,
+  url: SITE_URL,
+  jobTitle: "Full-stack & mobile engineer",
+  description: profile.tagline,
+  sameAs: [profile.links.github, profile.links.linkedin],
 };
 
 export default function HomePage() {
   const featured = PROJECTS.filter((p) => p.featured);
   return (
     <PageShell width="wide">
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(personLd) }} />
       <header className="hero">
         <div className="hero-copy">
           <h1 className="display text-5xl sm:text-6xl font-bold" style={{ color: "var(--text)" }}>
