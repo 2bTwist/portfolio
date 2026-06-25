@@ -20,7 +20,10 @@ export function SiteNav() {
       className="sticky top-0 z-30 flex items-center gap-4 px-4 sm:px-6 py-3 mono text-sm"
       style={{ borderBottom: "1px solid var(--border)", background: "var(--surface)" }}
     >
-      <Link href="/" className="no-underline shrink-0" style={{ color: "var(--muted)" }}>
+      {/* prefetch={false}: this is the mobile / no-JS fallback nav, hidden behind
+          the IDE shell on desktop, whose Explorer already prefetches routes.
+          Leaving it on double-fetched every route's RSC payload on load. */}
+      <Link href="/" prefetch={false} className="no-underline shrink-0" style={{ color: "var(--muted)" }}>
         ~/edmond
       </Link>
       <nav aria-label="Primary" className="flex items-center gap-3 sm:gap-4 overflow-x-auto">
@@ -28,6 +31,7 @@ export function SiteNav() {
           <Link
             key={l.href}
             href={l.href}
+            prefetch={false}
             className="no-underline whitespace-nowrap hover:opacity-80"
             style={{ color: "var(--text)" }}
           >
