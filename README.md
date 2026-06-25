@@ -1,19 +1,18 @@
 # eddyb.dev
 
-My personal portfolio and blog: real, server-rendered pages with an additive
-editor-shell layer on top, so it reads like a code editor but stays fast,
-crawlable, and usable with JavaScript off.
+My personal portfolio and blog, built to feel like a code editor. Underneath the
+editor chrome it's just plain, fast web pages, so it still works for search
+engines and with JavaScript turned off.
 
 ![Portfolio home page](docs/screenshot.png)
 
 ## What it is
 
-A personal site that doubles as a small product. It is a set of normal App
-Router routes (home, projects, about, experience, certifications, writing), and
-a client "IDE shell" wraps those routes as chrome only: a file-tree explorer, a
-command palette, a tab bar, a status bar, and a terminal drawer with a couple of
-easter eggs. The shell is purely additive, so search engines and no-JS visitors
-get the plain stacked site underneath.
+The pages are ordinary routes: home, projects, about, experience, certifications,
+and writing. On top of them sits an editor-style interface, a file-tree explorer,
+a command palette, tabs, a status bar, and a terminal with a few easter eggs.
+That interface is only a layer, so search engines and visitors without
+JavaScript get the plain pages underneath.
 
 ## What inspired it
 
