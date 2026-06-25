@@ -102,17 +102,29 @@ export function Tabs({ className = "" }: { className?: string }) {
           );
         })}
 
-        {/* Editor action, right-aligned: download the real file on the resume page. */}
+        {/* Right-aligned resume actions: a fixed "hire me" bubble + the download. */}
         {pathname === "/resume" ? (
-          <a className="ide-tab-action" href="/resume/download">
-
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-              <path d="M12 3v12" />
-              <path d="M7 11l5 5 5-5" />
-              <path d="M5 21h14" />
-            </svg>
-            Download PDF
-          </a>
+          <div className="ide-tab-cta">
+            <span className="ide-hire" aria-hidden="true">
+              {/* eslint-disable-next-line @next/next/no-img-element -- animated gif must stay unoptimized */}
+              <img
+                className="ide-hire-gif"
+                src="/images/shaking-fist.gif"
+                alt=""
+                width={22}
+                height={22}
+              />
+              <span className="ide-hire-text">you better hire me!</span>
+            </span>
+            <a className="ide-tab-action" href="/resume/download">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                <path d="M12 3v12" />
+                <path d="M7 11l5 5 5-5" />
+                <path d="M5 21h14" />
+              </svg>
+              Download PDF
+            </a>
+          </div>
         ) : null}
       </div>
 

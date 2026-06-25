@@ -9,6 +9,7 @@
    navigate the IDE. */
 
 import { useEffect, useRef, useState, type ChangeEvent, type FormEvent, type KeyboardEvent } from "react";
+import { createPortal } from "react-dom";
 import { useRouter } from "next/navigation";
 import { TREE, type TreeNode, type TreeFolder } from "@/app/lib/nav";
 import { searchStatic, searchPosts } from "@/app/lib/search";
@@ -104,6 +105,23 @@ export default function Terminal() {
   const fastRun = useRef(0);
   const lastKey = useRef(0);
   const quipTimer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
+  // The quip bubble appears at the cursor and follows it (like the explorer
+  // bouncer). We track the pointer and write the bubble's position imperatively.
+  const quipPos = useRef({ x: 0, y: 0 });
+  const quipRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    const onMove = (e: PointerEvent) => {
+      quipPos.current.x = e.clientX;
+      quipPos.current.y = e.clientY;
+      const el = quipRef.current;
+      if (el) {
+        el.style.left = `${e.clientX}px`;
+        el.style.top = `${e.clientY}px`;
+      }
+    };
+    window.addEventListener("pointermove", onMove, { passive: true });
+    return () => window.removeEventListener("pointermove", onMove);
+  }, []);
   function showQuip(msg: string) {
     setQuip(msg);
     clearTimeout(quipTimer.current);
@@ -356,11 +374,24 @@ export default function Terminal() {
         aria-orientation="horizontal"
         aria-label="Resize terminal"
       />
-      {quip ? (
-        <div className="ide-terminal-quip" role="status">
-          {quip}
-        </div>
-      ) : null}
+      {quip
+        ? createPortal(
+            <div
+              ref={(el) => {
+                quipRef.current = el;
+                if (el) {
+                  el.style.left = `${quipPos.current.x}px`;
+                  el.style.top = `${quipPos.current.y}px`;
+                }
+              }}
+              className="cursor-bubble"
+              role="status"
+            >
+              {quip}
+            </div>,
+            document.body,
+          )
+        : null}
       <div className="ide-terminal-bar">
         <span className="ide-terminal-bar-icon" aria-hidden="true">
           <TerminalIcon />
