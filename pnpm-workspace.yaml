@@ -1,0 +1,9 @@
+# Build scripts allowed to run during install (pnpm denies them by default).
+# Trusted native packages that need their postinstall:
+#   sharp         -> next/image optimization
+#   esbuild       -> vite/vitest toolchain
+#   unrs-resolver -> eslint import resolver
+onlyBuiltDependencies:
+  - esbuild
+  - sharp
+  - unrs-resolver
