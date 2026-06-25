@@ -7,6 +7,7 @@
 
 import type { CSSProperties } from "react";
 import { STACK_LOGOS, STACK_ORDER } from "./stackLogos";
+import { ClaudeTile } from "./ClaudeTile";
 
 // front id → back id for the flip tiles
 const FLIP: Record<string, string> = {
@@ -45,6 +46,9 @@ export function TechStack({ className = "" }: { className?: string }) {
   return (
     <ul className={`stack-grid ${className}`}>
       {STACK_ORDER.map((id) => {
+        // Claude is its own client tile (hover cycles playful "thinking" words).
+        if (id === "claude") return <ClaudeTile key={id} />;
+
         const front = STACK_LOGOS[id];
         const backId = FLIP[id];
         const back = backId ? STACK_LOGOS[backId] : null;
@@ -53,7 +57,7 @@ export function TechStack({ className = "" }: { className?: string }) {
           <li key={id} className="stack-item">
             {back ? (
               <>
-                <span className="stack-tile stack-tile--flip" tabIndex={0}>
+                <span className="stack-tile stack-tile--flip">
                   <span className="stack-flip">
                     <Face id={id} side="front" />
                     <Face id={backId!} side="back" />

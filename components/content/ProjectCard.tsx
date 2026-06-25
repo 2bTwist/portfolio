@@ -3,6 +3,7 @@
    component. Until a project's `image` is set, a tinted placeholder stands in. */
 
 import Link from "next/link";
+import Image from "next/image";
 import type { Project } from "@/data/projects";
 import { TagRow } from "./ui";
 
@@ -11,8 +12,13 @@ export function ProjectCard({ project }: { project: Project }) {
     <Link href={`/projects/${project.id}`} className="proj-card">
       <div className="proj-card-media">
         {project.image ? (
-          // eslint-disable-next-line @next/next/no-img-element -- on-brand art, sized by CSS
-          <img className="proj-card-img" src={project.image} alt="" loading="lazy" />
+          <Image
+            className="proj-card-img"
+            src={project.image}
+            alt=""
+            fill
+            sizes="(min-width: 640px) 50vw, 100vw"
+          />
         ) : (
           <span className="proj-card-ph mono" aria-hidden="true">
             {project.title.toLowerCase()}
