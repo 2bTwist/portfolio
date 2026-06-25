@@ -8,13 +8,14 @@
    completes commands / entries. Folders map to routes, so `cd`/`open` also
    navigate the IDE. */
 
-import { useEffect, useRef, useState, type FormEvent, type KeyboardEvent } from "react";
+import { useEffect, useRef, useState, type ChangeEvent, type FormEvent, type KeyboardEvent } from "react";
 import { useRouter } from "next/navigation";
 import { TREE, type TreeNode, type TreeFolder } from "@/app/lib/nav";
 import { searchStatic, searchPosts } from "@/app/lib/search";
 import { PALETTES } from "@/app/lib/palette";
 import { profile } from "@/data/profile";
 import { TerminalIcon } from "@/components/feel/animated-icons";
+import { BANNER } from "./banner";
 import { useOverlay, useSession } from "./store";
 
 type Line = { kind: "in" | "out"; text: string; prompt?: string };
@@ -23,25 +24,6 @@ const STRIP_EXT = /\.(tsx?|md)$/;
 const TERM_MIN_H = 90;
 const TERM_STORAGE = "ide.terminal-height";
 const GREETING: Line = { kind: "out", text: "type `help` to get started" };
-
-// Persistent header banner drawn at the top of the terminal (figlet-style).
-// String.raw so the backslashes in the ASCII aren't read as escapes.
-const BANNER = String.raw`
-             .-~*%%%%%*~-.
-           .*%%%@@@@@%%%%*.
-          *%%@@%%%%%%%@@%%%*
-         (%%@%   .   .   %@%%)
-   ._.   %%@%   (o) (o)   %@%%   ._.
-  |[#]|--%%@%      v      %@%%--|::|
-  |___|  %%@%   \ _ /     %@%%  |__|
-          '%%@@%%%%%%%@@%%%'
-           '*%%%%%%%%%%%*'
-            /  '-----'  \
-           '--'       '--'
-
-   E D M O N D   N D A N J I
-   full-stack & mobile engineer  ·  ~/ eddyb.dev
-`;
 const COMMANDS = ["help", "ls", "cd", "open", "cat", "pwd", "grep", "theme", "whoami", "clear"];
 
 // The terminal is a singleton drawer. Hold its session (history + cwd) at module
@@ -114,6 +96,51 @@ export default function Terminal() {
   const outRef = useRef<HTMLDivElement>(null);
   const handleRef = useRef<HTMLDivElement>(null);
   const dragRef = useRef({ active: false, startY: 0, startH: 0, h: 0 });
+
+  // Playful quips while typing: a long musical streak ("enjoying this too much")
+  // vs frantic key-mashing ("heeeyyy!"). Tracked on printable keystrokes.
+  const [quip, setQuip] = useState<string | null>(null);
+  const streak = useRef(0);
+  const fastRun = useRef(0);
+  const lastKey = useRef(0);
+  const quipTimer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
+  function showQuip(msg: string) {
+    setQuip(msg);
+    clearTimeout(quipTimer.current);
+    quipTimer.current = setTimeout(() => setQuip(null), 2600);
+  }
+  function bumpQuip(key: string) {
+    if (key.length !== 1) return; // printable keys only
+    const t = performance.now();
+    const gap = t - lastKey.current;
+    lastKey.current = t;
+    if (gap > 2200) {
+      streak.current = 0;
+      fastRun.current = 0;
+    }
+    streak.current += 1;
+    fastRun.current = gap < 70 ? fastRun.current + 1 : 0;
+    if (fastRun.current >= 8) {
+      showQuip("heeeyyy!");
+      fastRun.current = 0;
+    } else if (streak.current > 0 && streak.current % 30 === 0) {
+      const msgs = ["you're enjoying this way too much!", "Beethoven would be proud"];
+      showQuip(msgs[(streak.current / 30 - 1) % msgs.length]);
+    }
+  }
+
+  // Cap the input line so it can't overflow off-screen: blurt a quip and clear
+  // it so they can keep typing (and keep the melody going).
+  const MAX_LINE = 70;
+  function onInputChange(e: ChangeEvent<HTMLInputElement>) {
+    const v = e.target.value;
+    if (v.length > MAX_LINE) {
+      showQuip("we out of space! keep going");
+      setValue("");
+      return;
+    }
+    setValue(v);
+  }
 
   // Focus the input on mount AND every time the drawer opens, so it's always
   // ready for input the moment it appears.
@@ -295,6 +322,7 @@ export default function Terminal() {
   // Tab → complete the current token to the longest common prefix (or fully, if
   // unique). Right/End → accept the ghost suggestion.
   function onKeyDown(e: KeyboardEvent<HTMLInputElement>) {
+    bumpQuip(e.key);
     if (e.key === "Tab") {
       e.preventDefault();
       const tokens = value.split(" ");
@@ -328,6 +356,11 @@ export default function Terminal() {
         aria-orientation="horizontal"
         aria-label="Resize terminal"
       />
+      {quip ? (
+        <div className="ide-terminal-quip" role="status">
+          {quip}
+        </div>
+      ) : null}
       <div className="ide-terminal-bar">
         <span className="ide-terminal-bar-icon" aria-hidden="true">
           <TerminalIcon />
@@ -377,7 +410,7 @@ export default function Terminal() {
           ref={inputRef}
           className="ide-terminal-input"
           value={value}
-          onChange={(e) => setValue(e.target.value)}
+          onChange={onInputChange}
           onKeyDown={onKeyDown}
           aria-label="Terminal input"
           autoComplete="off"

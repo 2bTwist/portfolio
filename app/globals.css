@@ -877,10 +877,51 @@ button.ide-row {
 /* Dark console — reads as a terminal, palette-aware (--term-* per theme) so it
    stays coherent when the theme switches. */
 .ide-terminal {
+  position: relative;
   border-top: 1px solid var(--border);
   background: var(--term-bg);
   color: var(--term-text);
   font-family: var(--mono);
+}
+/* Playful typing quip, floats top-right of the terminal. */
+.ide-terminal-quip {
+  position: absolute;
+  top: 2.4rem;
+  right: 0.9rem;
+  z-index: 3;
+  padding: 0.3rem 0.6rem;
+  border-radius: 10px;
+  background: var(--term-accent);
+  color: var(--term-bg);
+  font-family: var(--mono);
+  font-size: 0.72rem;
+  font-weight: 600;
+  white-space: nowrap;
+  box-shadow: 0 6px 16px -8px rgba(0, 0, 0, 0.5);
+  animation: quip-pop 220ms cubic-bezier(0.2, 0.9, 0.3, 1.4);
+}
+.ide-terminal-quip::after {
+  content: "";
+  position: absolute;
+  bottom: 100%;
+  right: 16px;
+  border: 6px solid transparent;
+  border-bottom-color: var(--term-accent);
+}
+@keyframes quip-pop {
+  from {
+    opacity: 0;
+    transform: translateY(-4px) scale(0.92);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .ide-terminal-quip {
+    animation: none;
+  }
 }
 /* drag strip along the top edge to resize the terminal height */
 .ide-terminal-resize {
@@ -1679,10 +1720,12 @@ img.cert-badge-art {
 .more-wrap .hero-more {
   margin-top: 0;
 }
+/* To the RIGHT of the arrow (above it collided with the Resume button), tail
+   pointing left. Vertically centered; the bob keeps the -50% offset. */
 .more-bubble {
   position: absolute;
-  bottom: calc(100% + 9px);
-  left: 0.25rem;
+  left: calc(100% + 14px);
+  top: 50%;
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -1693,35 +1736,38 @@ img.cert-badge-art {
   border-radius: 11px;
   box-shadow: 0 7px 18px -9px rgba(0, 0, 0, 0.32);
   white-space: nowrap;
+  transform: translateY(-50%);
   animation: bubble-bob 3s ease-in-out infinite;
 }
-/* little tail pointing down at the arrow */
+/* tail pointing left at the arrow */
 .more-bubble::after {
   content: "";
   position: absolute;
-  top: 100%;
-  left: 18px;
-  margin-top: -1px;
+  right: 100%;
+  top: 50%;
+  margin-top: -6px;
+  margin-right: -1px;
   border: 6px solid transparent;
-  border-top-color: var(--surface);
+  border-right-color: var(--surface);
 }
 .more-bubble::before {
   content: "";
   position: absolute;
-  top: 100%;
-  left: 17px;
+  right: 100%;
+  top: 50%;
+  margin-top: -7px;
   border: 7px solid transparent;
-  border-top-color: var(--border);
+  border-right-color: var(--border);
 }
 .more-bubble[data-hired="true"] {
   background: var(--accent);
   border-color: var(--accent);
 }
 .more-bubble[data-hired="true"]::after {
-  border-top-color: var(--accent);
+  border-right-color: var(--accent);
 }
 .more-bubble[data-hired="true"]::before {
-  border-top-color: var(--accent);
+  border-right-color: var(--accent);
 }
 .more-bubble-text {
   font-family: var(--mono);
@@ -1733,14 +1779,18 @@ img.cert-badge-art {
   display: block;
   width: 30px;
   height: 30px;
+  /* Override Tailwind preflight `img { max-width: 100% }` — against the abspos
+     shrink-to-fit bubble it resolves to 0 and collapses the gif. */
+  max-width: none;
+  flex: 0 0 auto;
 }
 @keyframes bubble-bob {
   0%,
   100% {
-    transform: translateY(0);
+    transform: translateY(-50%);
   }
   50% {
-    transform: translateY(-3px);
+    transform: translateY(calc(-50% - 3px));
   }
 }
 @media (prefers-reduced-motion: reduce) {
