@@ -147,7 +147,7 @@ export function StatusBar({ className = "", git }: { className?: string; git: Gi
             </g>
           </svg>
         </Link>
-        <div className="flex items-center gap-1 ml-1" role="group" aria-label="Theme">
+        <div className="flex items-center gap-2 ml-1" role="group" aria-label="Theme">
           {PALETTES.map((p, i) => (
             <button
               key={p.name}

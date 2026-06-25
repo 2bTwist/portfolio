@@ -813,12 +813,19 @@ button.ide-row {
   display: block;
 }
 .ide-swatch {
+  position: relative;
   width: 14px;
   height: 14px;
   border-radius: 4px;
   border: 1px solid var(--border);
   cursor: pointer;
   padding: 0;
+}
+/* Extend the clickable area to a 24px touch target without enlarging the dot. */
+.ide-swatch::before {
+  content: "";
+  position: absolute;
+  inset: -6px;
 }
 
 .ide-overlay {

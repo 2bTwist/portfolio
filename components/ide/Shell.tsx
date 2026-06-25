@@ -143,7 +143,7 @@ export function Shell({
               type="button"
               className="ide-command-center"
               onClick={toggleCmdk}
-              aria-label="Search files and posts"
+              aria-label={`${navLabel(pathname)}, search files and posts`}
               aria-keyshortcuts="Meta+K Control+K"
             >
               <span className="ide-command-center-icon" aria-hidden="true">
@@ -153,7 +153,7 @@ export function Shell({
                 </svg>
               </span>
               <span className="ide-command-center-label">{navLabel(pathname)}</span>
-              <kbd className="ide-command-center-kbd">⌘K</kbd>
+              <kbd className="ide-command-center-kbd" aria-hidden="true">⌘K</kbd>
             </button>
           </div>
         </div>
