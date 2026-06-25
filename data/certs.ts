@@ -27,7 +27,7 @@ export const CERTS: Cert[] = [
   },
   {
     id: "apple-search-ads",
-    name: "Apple Search Ads Certification",
+    name: "Apple Ads Certification",
     issuer: "Apple",
     year: "Mar 2026",
     artwork: "/images/certs/apple-search-ads.png",
