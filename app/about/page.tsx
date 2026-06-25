@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import Image from "next/image";
+import portrait from "@/public/images/portrait.jpg";
 import { profile } from "@/data/profile";
 import { PageShell } from "@/components/site/PageShell";
 import { HoverWord } from "@/components/site/HoverWord";
@@ -24,11 +25,10 @@ export default function AboutPage() {
         <figure className="about-figure">
           <div className="about-portrait">
             <Image
-              src="/images/portrait.jpg"
+              src={portrait}
               alt="Edmond at the NSBE National Convention in Chicago, in front of Cloud Gate"
-              width={1050}
-              height={1400}
               sizes="(min-width: 768px) 380px, 100vw"
+              placeholder="blur"
               priority
             />
           </div>
