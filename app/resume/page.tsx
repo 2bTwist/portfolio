@@ -13,6 +13,9 @@ export const metadata: Metadata = {
 export default function ResumePage() {
   return (
     <main className="cv-full">
+      {/* No sandbox: Chromium blocks its native PDF viewer in sandboxed iframes,
+          and this is our own first-party, same-origin static PDF (X-Frame-Options
+          + same-origin cover the framing risk). */}
       <iframe
         className="cv-embed"
         src="/resume.pdf#pagemode=none&zoom=125"

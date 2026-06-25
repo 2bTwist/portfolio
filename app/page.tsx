@@ -35,7 +35,11 @@ export default function HomePage() {
   const featured = PROJECTS.filter((p) => p.featured);
   return (
     <PageShell width="wide">
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(personLd) }} />
+      <script
+        type="application/ld+json"
+        // Escape `<` so the serialized JSON can never break out of the script tag.
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(personLd).replace(/</g, "\\u003c") }}
+      />
       <header className="hero">
         <div className="hero-copy">
           <h1 className="display text-5xl sm:text-6xl font-bold" style={{ color: "var(--text)" }}>
