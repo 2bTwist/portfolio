@@ -20,7 +20,7 @@ import Link from "next/link";
 import { createPortal } from "react-dom";
 import { usePathname } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
-import { TREE, NAV, type TreeNode } from "@/app/lib/nav";
+import { TREE, NAV, type TreeNode, type TreeFile } from "@/app/lib/nav";
 import { useMounted } from "@/components/hooks/useMounted";
 import { useSound } from "@/components/feel/SoundProvider";
 import { FileIcon, FolderIcon } from "./FileIcon";
@@ -67,8 +67,21 @@ function Chevron({ open }: { open: boolean }) {
   );
 }
 
-export function Explorer({ className = "" }: { className?: string }) {
+export function Explorer({
+  className = "",
+  writingFiles = [],
+}: {
+  className?: string;
+  writingFiles?: TreeFile[];
+}) {
   const pathname = usePathname();
+  // Fill the writing/ folder with the server-provided blog posts (nav.ts can't
+  // read the fs-based posts module from a client module).
+  const tree: TreeNode[] = TREE.map((node) =>
+    node.type === "folder" && node.href === "/writing"
+      ? { ...node, children: writingFiles }
+      : node,
+  );
   const mounted = useMounted();
   const { play } = useSound();
   const { openTab } = useSession();
@@ -212,7 +225,7 @@ export function Explorer({ className = "" }: { className?: string }) {
       <Breadcrumb pathname={pathname} onOpen={openTab} />
 
       <nav aria-label="Site files">
-        {TREE.map((node) => (
+        {tree.map((node) => (
           <Node key={node.href} node={node} pathname={pathname} depth={0} mounted={mounted} />
         ))}
       </nav>

@@ -16,7 +16,7 @@ import dynamic from "next/dynamic";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, type ReactNode } from "react";
 import { SiteNav } from "@/components/site/SiteNav";
-import { navLabel } from "@/app/lib/nav";
+import { navLabel, type TreeFile } from "@/app/lib/nav";
 import { Explorer } from "./Explorer";
 import { Tabs } from "./Tabs";
 import { StatusBar } from "./StatusBar";
@@ -36,7 +36,15 @@ function EditorPane({ children }: { children: ReactNode }) {
   );
 }
 
-export function Shell({ children, git }: { children: ReactNode; git: GitInfo }) {
+export function Shell({
+  children,
+  git,
+  writingFiles = [],
+}: {
+  children: ReactNode;
+  git: GitInfo;
+  writingFiles?: TreeFile[];
+}) {
   const pathname = usePathname();
   const router = useRouter();
   const { cmdkOpen, toggleCmdk, closeCmdk, termOpen, termMounted, toggleTerm, closeTerm } =
@@ -151,7 +159,7 @@ export function Shell({ children, git }: { children: ReactNode; git: GitInfo }) 
         </div>
 
         <div className="flex flex-1 min-h-0">
-          <Explorer className="ide-explorer hidden md:flex" />
+          <Explorer className="ide-explorer hidden md:flex" writingFiles={writingFiles} />
 
           <div className="flex flex-1 min-w-0 flex-col min-h-0">
             <Tabs className="ide-tabs hidden md:flex" />

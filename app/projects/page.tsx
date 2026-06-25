@@ -21,7 +21,9 @@ export default function ProjectsPage() {
       {[
         { label: "Web", items: web },
         { label: "Mobile", items: mobile },
-      ].map((group) => (
+      ]
+        .filter((group) => group.items.length > 0)
+        .map((group) => (
         <section key={group.label} className="mt-8">
           <h2 className="mono text-sm uppercase tracking-wide mb-3" style={{ color: "var(--muted)" }}>
             {group.label}

@@ -2471,23 +2471,36 @@ body[data-dragging] iframe {
 
 /* ── Project preview cards (Twitter/article style) ───────────────────────────
    Image on top, title + one-line description + tags below. Lifts on hover. */
+/* The <a> is the stable hover target — it never transforms, so its hit-area
+   can't slip out from under the cursor (the up/down flicker). The visual lift
+   happens on .proj-card-inner instead. */
 .proj-card {
   display: flex;
+  border-radius: 14px;
+  text-decoration: none;
+}
+.proj-card-inner {
+  display: flex;
   flex-direction: column;
+  flex: 1;
   background: var(--surface);
   border: 1px solid var(--border);
   border-radius: 14px;
   overflow: hidden;
-  text-decoration: none;
   transition:
     transform 200ms cubic-bezier(0.2, 0.9, 0.3, 1.2),
     box-shadow 200ms ease-out,
     border-color 160ms ease-out;
 }
-.proj-card:hover {
+.proj-card:hover .proj-card-inner {
   transform: translateY(-3px);
   border-color: var(--border-press);
   box-shadow: 0 16px 34px -18px rgba(0, 0, 0, 0.35);
+}
+@media (prefers-reduced-motion: reduce) {
+  .proj-card:hover .proj-card-inner {
+    transform: none;
+  }
 }
 .proj-card-media {
   position: relative;
@@ -2517,6 +2530,9 @@ body[data-dragging] iframe {
   user-select: none;
 }
 .proj-card-body {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
   padding: 0.95rem 1.05rem 1.1rem;
 }
 .proj-card-top {
@@ -2541,10 +2557,41 @@ body[data-dragging] iframe {
   text-transform: lowercase;
 }
 .proj-card-desc {
-  margin: 0.4rem 0 0.7rem;
+  margin: 0.4rem 0 0;
   color: var(--muted);
   line-height: 1.5;
   font-size: 0.92rem;
+}
+/* Tags as soft tactile "blobs", matching the tech-stack tiles. Pinned to the
+   bottom of the card body so the row aligns across cards. */
+.proj-tags {
+  margin-top: auto;
+  padding-top: 0.85rem;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+.proj-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.32rem;
+  font-size: 0.7rem;
+  line-height: 1.5;
+  color: var(--text);
+  padding: 0.18rem 0.62rem 0.18rem 0.5rem;
+  border-radius: 999px;
+  background: linear-gradient(180deg, color-mix(in srgb, var(--surface) 55%, #fff), var(--surface));
+  border: 1px solid var(--border);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.75),
+    0 2px 0 var(--border-press),
+    0 5px 9px -5px rgba(34, 25, 17, 0.26);
+}
+.proj-tag-icon {
+  width: 12px;
+  height: 12px;
+  flex-shrink: 0;
+  color: var(--muted);
 }
 @media (prefers-reduced-motion: reduce) {
   .proj-card:hover {

@@ -8,6 +8,8 @@ import { SoundProvider } from "@/components/feel/SoundProvider";
 import { CursorMount } from "@/components/feel/CursorMount";
 import { Shell } from "@/components/ide/Shell";
 import { getGitInfo } from "@/app/lib/git";
+import { getAllPosts } from "@/app/lib/posts";
+import type { TreeFile } from "@/app/lib/nav";
 import { PALETTES, DEFAULT_PALETTE_INDEX } from "@/app/lib/palette";
 import { clashDisplay, satoshi } from "@/app/fonts/fonts";
 
@@ -26,12 +28,21 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   const git = getGitInfo();
+  // The writing/ folder's children come from the fs-based posts module here
+  // (server side) and are handed to the client Explorer.
+  const writingFiles: TreeFile[] = getAllPosts().map((p) => ({
+    type: "file",
+    name: `${p.slug}.md`,
+    href: `/writing/${p.slug}`,
+  }));
   return (
     <html lang="en" className={`${clashDisplay.variable} ${satoshi.variable}`}>
       <body style={{ ...paletteVars, background: "var(--bg)", color: "var(--text)" }}>
         <SoundProvider>
           <IdeProvider>
-            <Shell git={git}>{children}</Shell>
+            <Shell git={git} writingFiles={writingFiles}>
+              {children}
+            </Shell>
           </IdeProvider>
         </SoundProvider>
         <CursorMount />

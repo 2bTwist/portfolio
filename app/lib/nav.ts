@@ -33,16 +33,17 @@ const experienceFiles: TreeFile[] = EXPERIENCE.filter((e) => e.story).map((e) =>
   href: e.story!,
 }));
 
-/* Hierarchical view for the Explorer. (Individual posts aren't listed here:
-   nav.ts is imported by client components, so it can't pull the fs-based posts
-   module. Posts are reachable via the writing/ index, ⌘K, and terminal grep.) */
+/* Hierarchical view for the Explorer. The writing/ folder's children (the blog
+   posts) are filled in at runtime by the Explorer from server-provided data,
+   because nav.ts is imported by client components and can't read the fs-based
+   posts module itself. */
 export const TREE: TreeNode[] = [
   { type: "file", name: "README.md", href: "/" },
   { type: "folder", name: "projects", href: "/projects", children: projectFiles },
   { type: "file", name: "about.md", href: "/about" },
   { type: "folder", name: "experience", href: "/experience", children: experienceFiles },
   { type: "file", name: "certs.pdf", href: "/certs" },
-  { type: "file", name: "writing.md", href: "/writing" },
+  { type: "folder", name: "writing", href: "/writing", children: [] },
 ];
 
 export type NavItem = { name: string; href: string };

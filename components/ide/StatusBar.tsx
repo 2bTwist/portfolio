@@ -91,7 +91,7 @@ export function StatusBar({ className = "", git }: { className?: string; git: Gi
           Terms
         </Link>
         <Link href="/privacy" prefetch={false}>
-          Privacy Policy
+          Privacy
         </Link>
       </nav>
       <div className="ml-auto flex items-center gap-2">
