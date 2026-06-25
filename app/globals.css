@@ -1887,26 +1887,27 @@ img.cert-badge-art {
 .stack-item--claude {
   width: 68px;
 }
-/* Claude burst "thinks" while hovered: each of the 12 spokes extends/retracts
-   from the hub (scaleY) with an opacity pulse, on a negative-delay stagger (--sd)
-   so a wave breathes around the ring. No rotation. */
+/* Claude burst "thinks" while hovered: each wedge (a real slice of the mark)
+   scales about the burst centre, so the spoke retracts toward the hub and
+   extends back out — on a negative-delay stagger (--sd) the whole ring breathes
+   as a wave. No rotation. */
 .claude-spoke {
-  transform-box: fill-box;
-  transform-origin: 50% 100%; /* hub end (bottom of the upward spoke's bbox) */
+  transform-box: view-box;
+  transform-origin: 50% 50%; /* burst centre of the 248 viewBox */
 }
 .stack-item:hover .claude-spoke {
-  animation: claude-spoke 1.2s ease-in-out infinite;
+  animation: claude-spoke 1.25s ease-in-out infinite;
   animation-delay: var(--sd, 0s);
 }
 @keyframes claude-spoke {
   0%,
   100% {
-    transform: scaleY(1);
+    transform: scale(1);
     opacity: 1;
   }
   50% {
-    transform: scaleY(0.45);
-    opacity: 0.4;
+    transform: scale(0.55);
+    opacity: 0.5;
   }
 }
 @media (prefers-reduced-motion: reduce) {
@@ -2707,4 +2708,202 @@ body[data-dragging] iframe {
 .ide-terminal ::-moz-selection {
   background: color-mix(in srgb, var(--term-accent) 40%, var(--term-bg));
   color: var(--term-text);
+}
+
+/* ── Experience timeline ─────────────────────────────────────────────────────
+   Vertical rail with logo/icon nodes; each org groups one or more roles. */
+.xp-timeline {
+  position: relative;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.xp-timeline::before {
+  /* the rail, centered under the 46px nodes */
+  content: "";
+  position: absolute;
+  left: 22px;
+  top: 8px;
+  bottom: 8px;
+  width: 2px;
+  background: var(--border);
+}
+.xp-entry {
+  position: relative;
+  display: grid;
+  grid-template-columns: 46px 1fr;
+  gap: 1.1rem;
+  padding-bottom: 2.2rem;
+}
+.xp-entry:last-child {
+  padding-bottom: 0;
+}
+.xp-node {
+  position: relative;
+  z-index: 1;
+  width: 46px;
+  height: 46px;
+  display: grid;
+  place-items: center;
+  border-radius: 12px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  overflow: hidden;
+}
+.xp-node--icon {
+  color: var(--accent);
+}
+.xp-logo {
+  display: block;
+  width: 30px;
+  height: auto;
+  max-width: none;
+}
+.xp-logo.company-logo--app,
+.xp-logo--square {
+  width: 34px;
+  height: 34px;
+  border-radius: 8px;
+}
+.xp-monogram {
+  font-weight: 700;
+  font-size: 1.1rem;
+  color: var(--accent);
+}
+.xp-content {
+  padding-top: 0.1rem;
+}
+.xp-org-row {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 0.5rem 0.7rem;
+}
+.xp-org {
+  font-family: var(--display);
+  font-weight: 600;
+  font-size: 1.15rem;
+  color: var(--text);
+  text-decoration: none;
+}
+a.xp-org:hover {
+  color: var(--accent);
+}
+.xp-loc {
+  font-size: 0.78rem;
+  color: var(--muted);
+}
+.xp-role {
+  margin-top: 0.7rem;
+}
+.xp-role-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+.xp-title {
+  font-weight: 600;
+  color: var(--text);
+}
+.xp-period {
+  flex-shrink: 0;
+  font-size: 0.78rem;
+  color: var(--muted);
+}
+.xp-summary {
+  margin: 0.45rem 0 0;
+  color: var(--muted);
+  line-height: 1.65;
+  font-size: 0.95rem;
+}
+.xp-readmore {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  margin-top: 0.9rem;
+  font-size: 0.82rem;
+  color: var(--accent);
+  text-decoration: none;
+  transition:
+    gap 140ms ease-out,
+    color 140ms ease-out;
+}
+.xp-readmore:hover {
+  color: var(--accent-press);
+  gap: 0.55rem;
+}
+/* Leadership & community */
+.xp-community {
+  margin-top: 2.6rem;
+  padding-top: 1.6rem;
+  border-top: 1px solid var(--border);
+}
+.xp-community-h {
+  font-size: 0.82rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--muted);
+  margin-bottom: 0.9rem;
+}
+.xp-activities {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+.xp-activity {
+  line-height: 1.5;
+}
+.xp-activity-role {
+  font-weight: 600;
+  color: var(--text);
+}
+.xp-activity-org {
+  color: var(--muted);
+}
+
+/* Experience story (read-more) page */
+.xp-back {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  margin-bottom: 1.5rem;
+  font-size: 0.82rem;
+  color: var(--muted);
+  text-decoration: none;
+  transition: color 140ms ease-out, gap 140ms ease-out;
+}
+.xp-back:hover {
+  color: var(--accent);
+  gap: 0.55rem;
+}
+.xp-story-head {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 2rem;
+}
+.xp-story-logo {
+  width: 48px;
+  height: auto;
+  max-width: none;
+  flex-shrink: 0;
+}
+.xp-story-logo.company-logo--app {
+  width: 52px;
+  height: 52px;
+  border-radius: 12px;
+}
+.xp-story-role {
+  margin-top: 1.6rem;
+}
+.xp-story-note {
+  margin-top: 2.4rem;
+  padding-top: 1.4rem;
+  border-top: 1px solid var(--border);
+  font-size: 0.85rem;
+  color: var(--muted);
 }

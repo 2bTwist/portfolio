@@ -9,6 +9,7 @@
 import { useEffect, useRef, useState } from "react";
 import type { CSSProperties } from "react";
 import { STACK_LOGOS } from "./stackLogos";
+import { ClaudeBurst } from "./ClaudeBurst";
 
 const THINKING = [
   "Reticulating",
@@ -28,7 +29,7 @@ const THINKING = [
 ];
 
 export function ClaudeTile() {
-  const { color, svg, name } = STACK_LOGOS.claude;
+  const { color, name } = STACK_LOGOS.claude;
   const [word, setWord] = useState<string | null>(null);
   const timer = useRef<ReturnType<typeof setInterval> | null>(null);
   const idx = useRef(0);
@@ -54,9 +55,7 @@ export function ClaudeTile() {
   return (
     <li className="stack-item stack-item--claude" onPointerEnter={start} onPointerLeave={stop}>
       <span className="stack-tile" style={{ "--logo": color } as CSSProperties}>
-        <svg viewBox="0 0 24 24" className="stack-tile-logo stack-tile-logo--claude" fill={color} aria-hidden="true">
-          {svg}
-        </svg>
+        <ClaudeBurst color={color} />
       </span>
       {/* The animated dots are a CSS ::after so the gradient shimmer clips over
           the word AND the dots as one piece of text. */}

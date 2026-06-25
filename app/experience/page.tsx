@@ -1,44 +1,100 @@
 import type { Metadata } from "next";
-import { EXPERIENCE } from "@/data/experience";
+import Link from "next/link";
+import { EXPERIENCE, EDUCATION, LEADERSHIP } from "@/data/experience";
 import { PageShell } from "@/components/site/PageShell";
-import { PageHeader } from "@/components/content/ui";
 
 export const metadata: Metadata = {
   title: "Experience - Edmond Ndanji",
-  description: "Work history: full-stack and mobile engineering.",
+  description: "Software engineering at Cisco, a CS degree at UMBC, and community roles.",
 };
 
 export default function ExperiencePage() {
   return (
     <PageShell>
-      <PageHeader title="Experience" />
-      <ol className="space-y-8">
-        {EXPERIENCE.map((entry, i) => (
-          <li key={i} className="relative pl-5" style={{ borderLeft: "2px solid var(--border)" }}>
-            <div className="flex items-baseline justify-between gap-3">
-              <h2 className="mono text-lg font-semibold" style={{ color: "var(--text)" }}>
-                {entry.role}
-                {entry.org ? <span style={{ color: "var(--muted)" }}> · {entry.org}</span> : null}
-              </h2>
-              <span className="mono text-sm shrink-0" style={{ color: "var(--muted)" }}>
-                {entry.period}
-              </span>
+      <h1 className="display text-4xl sm:text-5xl font-bold mb-8" style={{ color: "var(--text)" }}>
+        Experience
+      </h1>
+
+      <ol className="xp-timeline">
+        {EXPERIENCE.map((entry) => (
+          <li key={entry.org} className="xp-entry">
+            <div className="xp-node">
+              {entry.logo ? (
+                // eslint-disable-next-line @next/next/no-img-element -- inline brand mark, sized by CSS
+                <img className={`xp-logo ${entry.logoClass ?? ""}`} src={entry.logo} alt={entry.org} />
+              ) : (
+                <span className="xp-monogram mono" aria-hidden="true">
+                  {entry.org.slice(0, 1)}
+                </span>
+              )}
             </div>
-            <p className="mt-2 leading-relaxed" style={{ color: "var(--muted)" }}>
-              {entry.summary}
-            </p>
-            {entry.highlights ? (
-              <ul className="mt-2 space-y-1 list-disc list-inside" style={{ color: "var(--muted)" }}>
-                {entry.highlights.map((h) => (
-                  <li key={h} className="leading-relaxed">
-                    {h}
-                  </li>
-                ))}
-              </ul>
-            ) : null}
+            <div className="xp-content">
+              <div className="xp-org-row">
+                {entry.url ? (
+                  <a className="xp-org" href={entry.url} target="_blank" rel="noreferrer noopener">
+                    {entry.org}
+                  </a>
+                ) : (
+                  <span className="xp-org">{entry.org}</span>
+                )}
+                {entry.location ? <span className="xp-loc mono">{entry.location}</span> : null}
+              </div>
+              {entry.roles.map((role) => (
+                <div key={role.period} className="xp-role">
+                  <div className="xp-role-head">
+                    <span className="xp-title">{role.title}</span>
+                    <span className="xp-period mono">{role.period}</span>
+                  </div>
+                  <p className="xp-summary">{role.summary}</p>
+                </div>
+              ))}
+              {entry.story ? (
+                <Link href={entry.story} className="xp-readmore mono">
+                  Read the story
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                    <path d="M5 12h14" />
+                    <path d="M13 6l6 6-6 6" />
+                  </svg>
+                </Link>
+              ) : null}
+            </div>
           </li>
         ))}
+
+        <li className="xp-entry">
+          <div className="xp-node">
+            {EDUCATION.logo ? (
+              // eslint-disable-next-line @next/next/no-img-element -- inline brand mark, sized by CSS
+              <img className="xp-logo xp-logo--square" src={EDUCATION.logo} alt={EDUCATION.org} />
+            ) : null}
+          </div>
+          <div className="xp-content">
+            <div className="xp-org-row">
+              <span className="xp-org">{EDUCATION.org}</span>
+              {EDUCATION.location ? <span className="xp-loc mono">{EDUCATION.location}</span> : null}
+            </div>
+            <div className="xp-role">
+              <div className="xp-role-head">
+                <span className="xp-title">{EDUCATION.degree}</span>
+                <span className="xp-period mono">{EDUCATION.period}</span>
+              </div>
+              <p className="xp-summary">{EDUCATION.summary}</p>
+            </div>
+          </div>
+        </li>
       </ol>
+
+      <section className="xp-community">
+        <h2 className="xp-community-h mono">Leadership &amp; community</h2>
+        <ul className="xp-activities">
+          {LEADERSHIP.map((a) => (
+            <li key={a.role + (a.org ?? "")} className="xp-activity">
+              <span className="xp-activity-role">{a.role}</span>
+              {a.org ? <span className="xp-activity-org"> · {a.org}</span> : null}
+            </li>
+          ))}
+        </ul>
+      </section>
     </PageShell>
   );
 }
