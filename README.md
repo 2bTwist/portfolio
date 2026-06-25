@@ -17,16 +17,13 @@ get the plain stacked site underneath.
 
 ## What inspired it
 
-I spend my day inside a code editor, so I wanted the place that represents me to
-feel like one too, without turning into a gimmick. The goal was a site that is
-honestly mine: the same warm, single-palette calm I like in my tools, with
-small, intentional interactions (a typed melody in the terminal, a marker that
-sweeps under a phrase, blob-tactile tags) layered on top of pages that stay
-fast, accessible, and crawlable. The deeper idea is the one I keep coming back
-to in my work: software that is non-invasive and carefully crafted, that just
-works on the surface while being honest and well-factored underneath. The editor
-shell is the playful expression of that; the perf and accessibility gates below
-are the serious half.
+I spend most of my day in a code editor, so I wanted the place that represents
+me to feel like one, without it becoming a gimmick. Same warm, single-palette
+calm I like in my own tools, a few small touches for people who go looking, and
+underneath it all just normal pages that load fast and work everywhere.
+
+It mirrors how I like to build: software that is non-invasive and carefully
+crafted, simple on the surface and honest underneath.
 
 ## Stack
 
