@@ -974,7 +974,19 @@ button.ide-row {
   font-weight: 500;
   white-space: nowrap;
   box-shadow: 0 10px 24px -10px rgba(0, 0, 0, 0.4);
-  animation: quip-pop 200ms cubic-bezier(0.2, 0.9, 0.3, 1.4);
+  animation: cursor-pop 200ms cubic-bezier(0.2, 0.9, 0.3, 1.4);
+}
+/* Pop-in that PRESERVES the above-the-cursor offset (a plain quip-pop resets the
+   transform, which made the bubble appear at the cursor then jump up). */
+@keyframes cursor-pop {
+  from {
+    opacity: 0;
+    transform: translate(14px, calc(-100% - 12px)) scale(0.94);
+  }
+  to {
+    opacity: 1;
+    transform: translate(14px, calc(-100% - 12px)) scale(1);
+  }
 }
 .cursor-bubble-gif {
   width: 22px;
