@@ -62,6 +62,14 @@ export default function RootLayout({
   return (
     <html lang="en" className={`${clashDisplay.variable} ${satoshi.variable}`}>
       <body style={{ ...paletteVars, background: "var(--bg)", color: "var(--text)" }}>
+        {/* A note for anyone who reads the source. */}
+        <div
+          hidden
+          dangerouslySetInnerHTML={{
+            __html:
+              "<!--\n  Reading the source? Respect.\n  Built by Edmond Ndanji (eddyb.dev) with Next.js, an editor-shell aesthetic,\n  and a terminal that plays Fur Elise if you let it.\n  Say hi: ndanjiedmond@gmail.com\n-->",
+          }}
+        />
         <SoundProvider>
           <IdeProvider>
             <Shell git={git} writingFiles={writingFiles}>

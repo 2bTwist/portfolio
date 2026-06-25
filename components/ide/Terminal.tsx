@@ -391,6 +391,17 @@ export default function Terminal() {
         });
         break;
       }
+      // Hidden easter eggs (not advertised in `help`).
+      case "emacs":
+        print("emacs?? are you for real?! 😭 lol this is a vim household. try `vim`.");
+        break;
+      case "vim":
+      case "vi":
+        print("a person of taste. :wq");
+        break;
+      case "sudo":
+        print("nice try. you don't have root on my portfolio 😌");
+        break;
       default:
         print(`zsh: command not found: ${cmd}`);
     }

@@ -27,6 +27,16 @@ function loadDevReactGrab() {
   import("react-grab");
 }
 
+// A small hello for anyone who opens devtools (prod only, so dev stays quiet).
+function printConsoleGreeting() {
+  if (process.env.NODE_ENV !== "production") return;
+  const head = "color:#a04c39;font-size:14px;font-weight:700";
+  const dim = "color:#726552;font-size:12px";
+  console.log("%cHey, you opened the console 👋", head);
+  console.log("%cThe whole site is open source → https://github.com/2bTwist/portfolio", dim);
+  console.log("%cLike what you see? Let's talk → ndanjiedmond@gmail.com", dim);
+}
+
 /* Dev/runtime concerns kept out of the server tree:
    1. Kill any stale service worker from the old portfolio (it 404s on /sw.js
       and forces reload loops). public/sw.js is the robust network-level fix;
@@ -40,6 +50,10 @@ export function ClientBoot() {
 
   useEffect(() => {
     loadDevReactGrab();
+  }, []);
+
+  useEffect(() => {
+    printConsoleGreeting();
   }, []);
 
   return null;
