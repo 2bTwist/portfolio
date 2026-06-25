@@ -8,6 +8,7 @@ import { ActionLink } from "@/components/content/ui";
 import { ProjectCard } from "@/components/content/ProjectCard";
 import { SocialLinks } from "@/components/site/SocialLinks";
 import { LocalTime } from "@/components/site/LocalTime";
+import { MoreAboutMe } from "@/components/site/MoreAboutMe";
 
 export const metadata: Metadata = {
   title: "Edmond Ndanji - Full-stack & mobile engineer",
@@ -40,13 +41,7 @@ export default function HomePage() {
             <ActionLink href={profile.links.resume}>Resume</ActionLink>
           </div>
 
-          <Link href="/about" className="hero-more mono">
-            more about me
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-              <path d="M5 12h14" />
-              <path d="M13 6l6 6-6 6" />
-            </svg>
-          </Link>
+          <MoreAboutMe />
         </div>
 
         <div className="hero-mascot-wrap">

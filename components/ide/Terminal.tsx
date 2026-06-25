@@ -27,13 +27,20 @@ const GREETING: Line = { kind: "out", text: "type `help` to get started" };
 // Persistent header banner drawn at the top of the terminal (figlet-style).
 // String.raw so the backslashes in the ASCII aren't read as escapes.
 const BANNER = String.raw`
- _____   ____   __  __   ___   _   _   ____
-| ____| |  _ \ |  \/  | / _ \ | \ | | |  _ \
-|  _|   | | | || |\/| || | | ||  \| | | | | |
-| |___  | |_| || |  | || |_| || |\  | | |_| |
-|_____| |____/ |_|  |_| \___/ |_| \_| |____/
+             .-~*%%%%%*~-.
+           .*%%%@@@@@%%%%*.
+          *%%@@%%%%%%%@@%%%*
+         (%%@%   .   .   %@%%)
+   ._.   %%@%   (o) (o)   %@%%   ._.
+  |[#]|--%%@%      v      %@%%--|::|
+  |___|  %%@%   \ _ /     %@%%  |__|
+          '%%@@%%%%%%%@@%%%'
+           '*%%%%%%%%%%%*'
+            /  '-----'  \
+           '--'       '--'
 
-  full-stack & mobile engineer · ~/portfolio
+   E D M O N D   N D A N J I
+   full-stack & mobile engineer  ·  ~/ eddyb.dev
 `;
 const COMMANDS = ["help", "ls", "cd", "open", "cat", "pwd", "grep", "theme", "whoami", "clear"];
 
@@ -142,6 +149,11 @@ export default function Terminal() {
       d.startY = e.clientY;
       d.startH = out!.offsetHeight;
       handle!.dataset.dragging = "true";
+      // Capture the pointer to the handle so an <iframe> (e.g. the resume PDF
+      // viewer) can't swallow pointermove/up mid-drag and leave it stuck.
+      // body[data-dragging] also shields iframes from pointer events (CSS).
+      handle!.setPointerCapture?.(e.pointerId);
+      document.body.dataset.dragging = "true";
       // Show the (face-up) grabbing hand for the whole drag, even once the
       // pointer leaves the thin handle.
       const root = document.documentElement;
@@ -157,6 +169,7 @@ export default function Terminal() {
       if (!d.active) return;
       d.active = false;
       delete handle!.dataset.dragging;
+      delete document.body.dataset.dragging;
       delete document.documentElement.dataset.cursorGrabbing;
       localStorage.setItem(TERM_STORAGE, String(Math.round(out!.offsetHeight)));
     }

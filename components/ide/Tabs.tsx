@@ -10,7 +10,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useState, type MouseEvent } from "react";
 import { createPortal } from "react-dom";
 import { useSession } from "./store";
 
@@ -22,6 +22,27 @@ export function Tabs({ className = "" }: { className?: string }) {
   const [menu, setMenu] = useState<MenuState>(null);
 
   const closeMenu = useCallback(() => setMenu(null), []);
+
+  // Save the PDF as a blob so it always downloads — never navigates / opens the
+  // file in a new view. Falls back to a plain navigation only if the fetch fails.
+  const onDownloadResume = useCallback((e: MouseEvent<HTMLAnchorElement>) => {
+    e.preventDefault();
+    fetch("/resume.pdf")
+      .then((r) => r.blob())
+      .then((blob) => {
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = "Edmond_Ndanji_Resume.pdf";
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        URL.revokeObjectURL(url);
+      })
+      .catch(() => {
+        window.location.href = "/resume.pdf";
+      });
+  }, []);
 
   // Browser-safe keyboard shortcuts. Ignored while typing in a field so Option
   // key combos that produce characters don't also nuke tabs.
@@ -101,6 +122,23 @@ export function Tabs({ className = "" }: { className?: string }) {
             </div>
           );
         })}
+
+        {/* Editor action, right-aligned: download the real file on the resume page. */}
+        {pathname === "/resume" ? (
+          <a
+            className="ide-tab-action"
+            href="/resume.pdf"
+            download="Edmond_Ndanji_Resume.pdf"
+            onClick={onDownloadResume}
+          >
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+              <path d="M12 3v12" />
+              <path d="M7 11l5 5 5-5" />
+              <path d="M5 21h14" />
+            </svg>
+            Download PDF
+          </a>
+        ) : null}
       </div>
 
       {menu

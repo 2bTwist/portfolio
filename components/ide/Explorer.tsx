@@ -127,6 +127,7 @@ export function Explorer({ className = "" }: { className?: string }) {
       draggingRef.current = false;
       pushing.current = false;
       setDragging(false);
+      delete document.body.dataset.dragging;
       delete document.documentElement.dataset.cursorGrabbing;
     }
     function onShove(x: number, y: number) {
@@ -162,6 +163,9 @@ export function Explorer({ className = "" }: { className?: string }) {
       setDragging(true);
       startX.current = e.clientX;
       startW.current = widthRef.current;
+      // Capture pointer + shield iframes so a PDF viewer can't swallow the drag.
+      handle!.setPointerCapture?.(e.pointerId);
+      document.body.dataset.dragging = "true";
       document.documentElement.dataset.cursorGrabbing = "true";
     }
     function onMove(e: PointerEvent) {

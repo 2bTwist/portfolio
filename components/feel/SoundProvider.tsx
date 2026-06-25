@@ -99,6 +99,8 @@ export function SoundProvider({ children }: { children: ReactNode }) {
         sfx.switch();
       } else if (t.closest(".ide-social")) {
         sfx.pop(); // cute boop on the social buttons
+      } else if (t.closest(".ide-tab-action")) {
+        sfx.press(); // tab-bar action (e.g. Download PDF)
       } else if (t.closest(".ide-row, .ide-tab, .ide-palette-item")) {
         sfx.view();
       } else if (t.closest(".ide-overlay")) {

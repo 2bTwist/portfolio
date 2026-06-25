@@ -49,6 +49,9 @@ export const NAV: NavItem[] = [
   { name: "certs.pdf", href: "/certs" },
   { name: "writing.md", href: "/writing" },
   { name: "contact.md", href: "/contact" },
+  // Not in the explorer TREE (would get the cert/medal .pdf icon); listed here
+  // so it opens a real "resume.pdf" tab + label and is ⌘K-searchable.
+  { name: "resume.pdf", href: "/resume" },
 ];
 
 export function navLabel(href: string): string {
