@@ -128,6 +128,14 @@ export const sfx = {
   switch: () => blip({ freq: 620, dur: 0.035, type: "square", gain: 0.03, sweep: 80 }),
   // a low "nope" thud for hitting a limit (e.g. shoving the sidebar past its range)
   bonk: () => blip({ freq: 150, dur: 0.12, type: "square", gain: 0.06, sweep: -55 }),
+  // a tiny soft tick as the pointer slides across each tech-stack tile
+  slide: () => blip({ freq: 660, dur: 0.025, type: "sine", gain: 0.03 }),
+  // a "card turn" whoosh for the flip tiles: a rising sweep as the tile rotates,
+  // then a soft tap as the back face lands (timed near the flip's midpoint).
+  flip: () => {
+    blip({ freq: 300, dur: 0.16, type: "triangle", gain: 0.045, sweep: 320 });
+    setTimeout(() => blip({ freq: 560, dur: 0.05, type: "sine", gain: 0.035 }), 200);
+  },
   // a cute two-note "boop" (rising fifth, C5 -> G5) for the social buttons
   pop: () => {
     blip({ freq: 523, dur: 0.06, type: "sine", gain: 0.05, sweep: 40 });

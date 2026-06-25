@@ -2,7 +2,7 @@
 
 export const profile = {
   name: "Edmond Ndanji",
-  role: "Full-stack & mobile engineer",
+  role: "Full-stack & Mobile engineer",
   tagline:
     "I build systems that feel seamless and intuitive on the surface and are honest, well-factored machines underneath.",
   blurb:

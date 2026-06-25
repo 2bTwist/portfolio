@@ -1,4 +1,6 @@
-/* Project card linking to the real /projects/[slug] route. Server component. */
+/* Project preview card (Twitter/article style) linking to /projects/[slug]:
+   an on-brand image on top, then title, a one-line description, and tags. Server
+   component. Until a project's `image` is set, a tinted placeholder stands in. */
 
 import Link from "next/link";
 import type { Project } from "@/data/projects";
@@ -6,26 +8,25 @@ import { TagRow } from "./ui";
 
 export function ProjectCard({ project }: { project: Project }) {
   return (
-    <Link
-      href={`/projects/${project.id}`}
-      className="block rounded-xl p-5 no-underline transition-opacity hover:opacity-90"
-      style={{ background: "var(--surface)", border: "1px solid var(--border)" }}
-    >
-      <div className="flex items-center justify-between gap-3 mb-2">
-        <h3 className="mono text-lg font-semibold" style={{ color: "var(--text)" }}>
-          {project.title}
-        </h3>
-        <span
-          className="mono text-xs capitalize px-2 py-0.5 rounded-full shrink-0"
-          style={{ background: "var(--bg)", color: "var(--muted)", border: "1px solid var(--border)" }}
-        >
-          {project.kind}
-        </span>
+    <Link href={`/projects/${project.id}`} className="proj-card">
+      <div className="proj-card-media">
+        {project.image ? (
+          // eslint-disable-next-line @next/next/no-img-element -- on-brand art, sized by CSS
+          <img className="proj-card-img" src={project.image} alt="" loading="lazy" />
+        ) : (
+          <span className="proj-card-ph mono" aria-hidden="true">
+            {project.title.toLowerCase()}
+          </span>
+        )}
       </div>
-      <p className="leading-relaxed mb-4" style={{ color: "var(--muted)" }}>
-        {project.blurb}
-      </p>
-      <TagRow tags={project.tags} />
+      <div className="proj-card-body">
+        <div className="proj-card-top">
+          <h3 className="proj-card-title">{project.title}</h3>
+          <span className="proj-card-kind mono">{project.kind}</span>
+        </div>
+        <p className="proj-card-desc">{project.blurb}</p>
+        <TagRow tags={project.tags} />
+      </div>
     </Link>
   );
 }

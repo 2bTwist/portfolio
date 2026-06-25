@@ -17,6 +17,9 @@ export type Project = {
   detail: string;
   tags: string[];
   featured?: boolean;
+  /* On-brand preview image (public/images/projects/<id>.png); falls back to a
+     generated placeholder until the ChatGPT art is dropped in. */
+  image?: string;
   links?: {
     live?: string;
     repo?: string;

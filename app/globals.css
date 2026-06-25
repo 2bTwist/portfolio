@@ -1814,6 +1814,178 @@ img.cert-badge-art {
   transform: translateX(3px);
 }
 
+/* ── Tech stack tiles ────────────────────────────────────────────────────────
+   Chunky cream "app-icon" squircles: a lighter top bevel, a solid darker bottom
+   edge, and a grounded contact shadow read as real thickness (same tactile
+   language as the Comeau buttons). Each tile pools a faint brand-hued glow
+   (--logo) behind its real SVG logo. */
+.stack-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1.4rem 1.25rem;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.stack-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.55rem;
+}
+/* Shared squircle face look — worn by a plain tile AND by each face of a flip
+   tile, so both read identically. */
+.stack-tile,
+.stack-face {
+  position: relative;
+  display: grid;
+  place-items: center;
+  border-radius: 22px;
+  background: linear-gradient(180deg, color-mix(in srgb, var(--surface) 60%, #fff), var(--surface));
+  border: 1px solid var(--border);
+  box-shadow:
+    inset 0 1.5px 0 rgba(255, 255, 255, 0.75),
+    inset 0 -3px 4px color-mix(in srgb, var(--border-press) 45%, transparent),
+    0 3px 0 var(--border-press),
+    0 9px 16px -7px rgba(34, 25, 17, 0.3);
+}
+.stack-tile {
+  --size: 68px;
+  width: var(--size);
+  height: var(--size);
+  transition:
+    transform 240ms cubic-bezier(0.3, 0.7, 0.4, 1.4),
+    box-shadow 240ms cubic-bezier(0.3, 0.7, 0.4, 1.4);
+}
+.stack-tile::before,
+.stack-face::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: radial-gradient(
+    circle at 50% 38%,
+    color-mix(in srgb, var(--logo) 24%, transparent),
+    transparent 70%
+  );
+  opacity: 0.65;
+  pointer-events: none;
+}
+.stack-tile-logo {
+  position: relative;
+  width: 48%;
+  height: 48%;
+}
+/* The Expo chevron is geometrically centered but optically top-heavy (an upward
+   "^" over the tile's chunky bottom shadow reads high); nudge it down a hair. */
+.stack-tile-logo--expo {
+  transform: translateY(8%);
+}
+/* Lift on hover / press down on tap — plain tiles only (flip tiles spin instead). */
+.stack-item:hover .stack-tile:not(.stack-tile--flip) {
+  transform: translateY(-3px);
+  box-shadow:
+    inset 0 1.5px 0 rgba(255, 255, 255, 0.75),
+    inset 0 -3px 4px color-mix(in srgb, var(--border-press) 45%, transparent),
+    0 5px 0 var(--border-press),
+    0 16px 22px -8px rgba(34, 25, 17, 0.34);
+}
+.stack-item:active .stack-tile:not(.stack-tile--flip) {
+  transform: translateY(1px);
+  box-shadow:
+    inset 0 1.5px 0 rgba(255, 255, 255, 0.6),
+    inset 0 -2px 3px color-mix(in srgb, var(--border-press) 45%, transparent),
+    0 1px 0 var(--border-press),
+    0 6px 10px -7px rgba(34, 25, 17, 0.3);
+  transition:
+    transform 60ms ease-out,
+    box-shadow 60ms ease-out;
+}
+
+/* Flip tile: the element is just the 3D stage; the two faces carry the look. */
+.stack-tile--flip {
+  background: none;
+  border: none;
+  box-shadow: none;
+  perspective: 700px;
+}
+.stack-tile--flip::before {
+  display: none;
+}
+.stack-flip {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  transform-style: preserve-3d;
+  transition: transform 560ms cubic-bezier(0.34, 0.8, 0.36, 1.2);
+}
+.stack-face {
+  position: absolute;
+  inset: 0;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+}
+.stack-face--back {
+  transform: rotateY(180deg);
+}
+.stack-item:hover .stack-flip,
+.stack-item:focus-within .stack-flip {
+  transform: rotateY(180deg);
+}
+.stack-name {
+  font-size: 0.7rem;
+  color: var(--muted);
+}
+/* Flip-tile label: front + back names overlap in one grid cell (so the cell
+   sizes to the wider name) and crossfade. The delay lands the swap around the
+   flip's edge-on midpoint, so the name turns over with the tile (rev). */
+.stack-name--flip {
+  display: grid;
+}
+.stack-name--flip > span {
+  grid-area: 1 / 1;
+  /* Cell is as wide as the longer name (e.g. "React Native"); center the text so
+     the shorter front name ("Expo") still sits under the tile, not left-aligned. */
+  text-align: center;
+  transition: opacity 160ms ease;
+}
+.stack-name--flip .stack-name-back {
+  opacity: 0;
+}
+.stack-item:hover .stack-name--flip .stack-name-front,
+.stack-item:focus-within .stack-name--flip .stack-name-front {
+  opacity: 0;
+  transition-delay: 180ms;
+}
+.stack-item:hover .stack-name--flip .stack-name-back,
+.stack-item:focus-within .stack-name--flip .stack-name-back {
+  opacity: 1;
+  transition-delay: 180ms;
+}
+@media (prefers-reduced-motion: reduce) {
+  .stack-tile,
+  .stack-flip {
+    transition: none;
+  }
+  /* No crossfade under reduced motion — keep the front name. */
+  .stack-name--flip > span {
+    transition: none;
+  }
+  .stack-item:hover .stack-name--flip .stack-name-front,
+  .stack-item:focus-within .stack-name--flip .stack-name-front {
+    opacity: 1;
+  }
+  .stack-item:hover .stack-name--flip .stack-name-back,
+  .stack-item:focus-within .stack-name--flip .stack-name-back {
+    opacity: 0;
+  }
+  /* No spin under reduced motion — keep the front face still. */
+  .stack-item:hover .stack-flip,
+  .stack-item:focus-within .stack-flip {
+    transform: none;
+  }
+}
+
 .hero-blurb {
   max-width: 36rem;
 }
@@ -2168,5 +2340,119 @@ body[data-dragging] iframe {
   }
   .term-finale-title {
     animation: none;
+  }
+}
+
+/* ── Project preview cards (Twitter/article style) ───────────────────────────
+   Image on top, title + one-line description + tags below. Lifts on hover. */
+.proj-card {
+  display: flex;
+  flex-direction: column;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  overflow: hidden;
+  text-decoration: none;
+  transition:
+    transform 200ms cubic-bezier(0.2, 0.9, 0.3, 1.2),
+    box-shadow 200ms ease-out,
+    border-color 160ms ease-out;
+}
+.proj-card:hover {
+  transform: translateY(-3px);
+  border-color: var(--border-press);
+  box-shadow: 0 16px 34px -18px rgba(0, 0, 0, 0.35);
+}
+.proj-card-media {
+  position: relative;
+  aspect-ratio: 16 / 9;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  border-bottom: 1px solid var(--border);
+  background: radial-gradient(
+    120% 120% at 30% 0%,
+    color-mix(in srgb, var(--accent) 16%, var(--surface)),
+    var(--surface)
+  );
+}
+.proj-card-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+/* placeholder until the on-brand image is generated */
+.proj-card-ph {
+  font-size: clamp(1.6rem, 5vw, 2.4rem);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: color-mix(in srgb, var(--accent) 38%, transparent);
+  user-select: none;
+}
+.proj-card-body {
+  padding: 0.95rem 1.05rem 1.1rem;
+}
+.proj-card-top {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+.proj-card-title {
+  font-family: var(--display);
+  font-weight: 600;
+  font-size: 1.15rem;
+  color: var(--text);
+}
+.proj-card-kind {
+  flex-shrink: 0;
+  font-size: 0.66rem;
+  color: var(--muted);
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  padding: 0.08rem 0.5rem;
+  text-transform: lowercase;
+}
+.proj-card-desc {
+  margin: 0.4rem 0 0.7rem;
+  color: var(--muted);
+  line-height: 1.5;
+  font-size: 0.92rem;
+}
+@media (prefers-reduced-motion: reduce) {
+  .proj-card:hover {
+    transform: none;
+  }
+}
+
+/* ── Highlighter-marker emphasis (inline, mid-sentence) ──────────────────────
+   A terracotta highlight that sweeps in left-to-right behind the word on load.
+   Pure CSS (background-size animation), so it stays in a server component. */
+.hl-marker {
+  font-weight: 600;
+  color: var(--text);
+  white-space: nowrap;
+  background-image: linear-gradient(
+    color-mix(in srgb, var(--accent) 32%, transparent),
+    color-mix(in srgb, var(--accent) 32%, transparent)
+  );
+  background-repeat: no-repeat;
+  background-position: 0 90%;
+  background-size: 0% 44%;
+  padding: 0 0.1em;
+  box-decoration-break: clone;
+  -webkit-box-decoration-break: clone;
+  animation: hl-sweep 650ms 600ms cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+@keyframes hl-sweep {
+  to {
+    background-size: 100% 44%;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .hl-marker {
+    animation: none;
+    background-size: 100% 42%;
   }
 }

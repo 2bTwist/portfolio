@@ -8,6 +8,7 @@ import { ActionLink } from "@/components/content/ui";
 import { ProjectCard } from "@/components/content/ProjectCard";
 import { SocialLinks } from "@/components/site/SocialLinks";
 import { LocationCard } from "@/components/site/LocationCard";
+import { TechStack } from "@/components/site/TechStack";
 import { CompanyLink } from "@/components/site/CompanyLink";
 
 export const metadata: Metadata = {
@@ -56,8 +57,9 @@ export default function HomePage() {
               , a consumer app for connecting couples, now sitting at 200+ users.
             </p>
             <p className="mt-3">
-              Right now I&apos;m balancing finishing my studies with following my passion: building
-              non-invasive, carefully crafted software that quietly improves people&apos;s lives.
+              Right now I&apos;m balancing finishing my studies with learning the fundamentals and
+              philosophy behind building non-invasive, carefully crafted software that{" "}
+              <span className="hl-marker">just works</span>.
             </p>
           </div>
 
@@ -102,6 +104,13 @@ export default function HomePage() {
           <LocationCard className="hero-minimap" />
         </div>
       </header>
+
+      <section className="mt-14">
+        <h2 className="mono text-xl font-semibold mb-5" style={{ color: "var(--text)" }}>
+          Tech I reach for
+        </h2>
+        <TechStack />
+      </section>
 
       <section className="mt-14">
         <div className="flex items-baseline justify-between mb-4">

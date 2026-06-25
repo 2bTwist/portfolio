@@ -99,6 +99,8 @@ export function SoundProvider({ children }: { children: ReactNode }) {
         sfx.switch();
       } else if (t.closest(".ide-social")) {
         sfx.pop(); // cute boop on the social buttons
+      } else if (t.closest(".stack-tile")) {
+        sfx.press(); // tactile tock when an app-icon tile is pressed
       } else if (t.closest(".ide-tab-action")) {
         sfx.press(); // tab-bar action (e.g. Download PDF)
       } else if (t.closest(".ide-row, .ide-tab, .ide-palette-item")) {
@@ -114,10 +116,25 @@ export function SoundProvider({ children }: { children: ReactNode }) {
       }
     }
 
+    // Sliding the pointer across the tech-stack tiles ticks once per tile. We
+    // dedupe on the tile element so moving WITHIN a tile (e.g. over its logo) is
+    // silent, and leaving to the gap resets so re-entering ticks again.
+    let lastTile: Element | null = null;
+    function onPointerOver(e: PointerEvent) {
+      const tile = (e.target as Element | null)?.closest?.(".stack-tile") ?? null;
+      if (tile === lastTile) return;
+      lastTile = tile;
+      // Flip tiles whoosh as they turn; the rest tick as you slide across.
+      if (tile?.classList.contains("stack-tile--flip")) sfx.flip();
+      else if (tile) sfx.slide();
+    }
+
     document.addEventListener("pointerdown", onPointerDown);
+    document.addEventListener("pointerover", onPointerOver);
     return () => {
       for (const ev of warmEvents) window.removeEventListener(ev, warm);
       document.removeEventListener("pointerdown", onPointerDown);
+      document.removeEventListener("pointerover", onPointerOver);
     };
   }, [allowed]);
 
