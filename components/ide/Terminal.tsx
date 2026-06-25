@@ -112,10 +112,9 @@ export default function Terminal() {
   const [celebrating, setCelebrating] = useState(false);
   const noteIdx = useRef(0);
   const streak = useRef(0);
-  const nextQuipAt = useRef(30);
+  const nextQuipAt = useRef(48);
   const shownQuips = useRef<number[]>([]);
   const fastRun = useRef(0);
-  const spaceShown = useRef(false);
   const lastKey = useRef(0);
   const lastQuipAt = useRef(0);
   const cooldownUntil = useRef(0);
@@ -158,7 +157,7 @@ export default function Terminal() {
   // forced, for the finale / time-out).
   function showQuip(msg: string, gif?: string, force = false) {
     const now = performance.now();
-    if (!force && now - lastQuipAt.current < 5000) return;
+    if (!force && now - lastQuipAt.current < 9000) return;
     lastQuipAt.current = now;
     setQuip({ msg, gif });
     clearTimeout(quipTimer.current);
@@ -174,7 +173,7 @@ export default function Terminal() {
   function resetPerformance() {
     noteIdx.current = 0;
     streak.current = 0;
-    nextQuipAt.current = 30;
+    nextQuipAt.current = 48;
     shownQuips.current = [];
     fastRun.current = 0;
   }
@@ -223,20 +222,13 @@ export default function Terminal() {
     streak.current += 1;
     if (streak.current >= nextQuipAt.current) {
       playQuip();
-      nextQuipAt.current = streak.current + 30 + Math.floor(Math.random() * 18);
+      nextQuipAt.current = streak.current + 60 + Math.floor(Math.random() * 35);
     }
     if (noteIdx.current >= FUR_ELISE.length) finale();
   }
 
   function onInputChange(e: ChangeEvent<HTMLInputElement>) {
-    const v = e.target.value;
-    if (v.length > 96 && !spaceShown.current) {
-      showQuip("we out of space!");
-      spaceShown.current = true;
-    } else if (v.length <= 96) {
-      spaceShown.current = false;
-    }
-    setValue(v);
+    setValue(e.target.value); // the input scrolls; no false "out of space" quip
   }
 
   // Focus the input on mount AND every time the drawer opens, so it's always
