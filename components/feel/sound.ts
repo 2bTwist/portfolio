@@ -73,16 +73,15 @@ function blip({ freq, dur, type = "triangle", gain = 0.05, sweep }: Tone) {
   osc.stop(now + dur + 0.02);
 }
 
-/* Für Elise (Beethoven) — each terminal keystroke plays the next note, so typing
-   performs the tune. The A theme + B section (then it loops). After a long pause
-   it restarts from the top, so each "session" of typing begins the melody. */
+/* Für Elise (Beethoven), A theme + B section. The Terminal drives playback (one
+   note per keystroke) so it can also detect completion for the finale. */
 const HZ: Record<string, number> = {
   C4: 261.63, "C#4": 277.18, D4: 293.66, "D#4": 311.13, E4: 329.63, F4: 349.23,
   "F#4": 369.99, G4: 392.0, "G#4": 415.3, A4: 440.0, "A#4": 466.16, B4: 493.88,
   C5: 523.25, "C#5": 554.37, D5: 587.33, "D#5": 622.25, E5: 659.25, F5: 698.46,
   "F#5": 739.99, G5: 783.99, "G#5": 830.61, A5: 880.0,
 };
-const FUR_ELISE = (
+export const FUR_ELISE = (
   // A section
   "E5 D#5 E5 D#5 E5 B4 D5 C5 A4 C4 E4 A4 B4 E4 G#4 B4 C5 E4 " +
   "E5 D#5 E5 D#5 E5 B4 D5 C5 A4 C4 E4 A4 B4 E4 C5 B4 A4 " +
@@ -92,13 +91,10 @@ const FUR_ELISE = (
 )
   .split(" ")
   .map((n) => HZ[n]);
-let furIdx = 0;
-let furLast = 0;
-const FUR_RESET_MS = 2200; // pause longer than this restarts the melody
 
 // A soft "music box" note: a triangle fundamental + a quiet octave shimmer, with
 // a gentle pluck envelope. Used for the melodic terminal typing.
-function note(freq: number) {
+export function playNote(freq: number) {
   const ac = getCtx();
   if (!ac) return;
   const now = ac.currentTime;
@@ -132,15 +128,6 @@ export const sfx = {
   close: () => blip({ freq: 480, dur: 0.085, type: "triangle", gain: 0.05, sweep: -200 }),
   view: () => blip({ freq: 440, dur: 0.04, type: "sine", gain: 0.045 }),
   switch: () => blip({ freq: 620, dur: 0.035, type: "square", gain: 0.03, sweep: 80 }),
-  // Terminal typing performs Für Elise — each keystroke is the next note; a long
-  // pause restarts from the top.
-  key: () => {
-    const t = typeof performance !== "undefined" ? performance.now() : Date.now();
-    if (t - furLast > FUR_RESET_MS) furIdx = 0;
-    furLast = t;
-    note(FUR_ELISE[furIdx]);
-    furIdx = (furIdx + 1) % FUR_ELISE.length;
-  },
   // a low "nope" thud for hitting a limit (e.g. shoving the sidebar past its range)
   bonk: () => blip({ freq: 150, dur: 0.12, type: "square", gain: 0.06, sweep: -55 }),
   // a cute two-note "boop" (rising fifth, C5 -> G5) for the social buttons
@@ -149,3 +136,33 @@ export const sfx = {
     setTimeout(() => blip({ freq: 784, dur: 0.07, type: "sine", gain: 0.045, sweep: 70 }), 60);
   },
 };
+
+// One clap = a short burst of band-passed noise. applause() fires a quick,
+// slightly irregular volley for the finale.
+function clapOnce(ac: AudioContext, when: number) {
+  const dur = 0.05;
+  const buf = ac.createBuffer(1, Math.ceil(ac.sampleRate * dur), ac.sampleRate);
+  const data = buf.getChannelData(0);
+  for (let i = 0; i < data.length; i++) data[i] = (Math.random() * 2 - 1) * (1 - i / data.length);
+  const src = ac.createBufferSource();
+  src.buffer = buf;
+  const bp = ac.createBiquadFilter();
+  bp.type = "bandpass";
+  bp.frequency.value = 1600;
+  bp.Q.value = 0.6;
+  const g = ac.createGain();
+  g.gain.setValueAtTime(0.14, when);
+  g.gain.exponentialRampToValueAtTime(0.0008, when + dur);
+  src.connect(bp).connect(g).connect(ac.destination);
+  src.start(when);
+  src.stop(when + dur + 0.02);
+}
+export function applause() {
+  const ac = getCtx();
+  if (!ac) return;
+  const now = ac.currentTime;
+  // a building volley of ~16 claps over ~1.4s
+  for (let i = 0; i < 16; i++) {
+    clapOnce(ac, now + i * 0.08 + Math.random() * 0.03);
+  }
+}

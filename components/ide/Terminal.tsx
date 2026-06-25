@@ -16,8 +16,12 @@ import { searchStatic, searchPosts } from "@/app/lib/search";
 import { PALETTES } from "@/app/lib/palette";
 import { profile } from "@/data/profile";
 import { TerminalIcon } from "@/components/feel/animated-icons";
+import { playNote, applause, FUR_ELISE } from "@/components/feel/sound";
 import { BANNER } from "./banner";
 import { useOverlay, useSession } from "./store";
+
+const PIANO_GIF = "/images/grand-piano.gif";
+const MEOW_GIF = "/images/meow-party.gif";
 
 type Line = { kind: "in" | "out"; text: string; prompt?: string };
 
@@ -98,17 +102,33 @@ export default function Terminal() {
   const handleRef = useRef<HTMLDivElement>(null);
   const dragRef = useRef({ active: false, startY: 0, startH: 0, h: 0 });
 
-  // Playful quips while typing: a long musical streak ("enjoying this too much")
-  // vs frantic key-mashing ("heeeyyy!"). Tracked on printable keystrokes.
-  const [quip, setQuip] = useState<string | null>(null);
+  // ── Typing-as-piano + a non-repeating quip conversation + a finale ────────
+  // Each printable keystroke plays the next Für Elise note. Quips fire ONCE in
+  // order (not on a metronome) and reset after a pause; finishing the whole tune
+  // triggers a celebration, then a cooldown. The bubble follows the cursor.
+  const [quip, setQuip] = useState<{ msg: string; gif?: string } | null>(null);
+  const [celebrating, setCelebrating] = useState(false);
+  const noteIdx = useRef(0);
   const streak = useRef(0);
+  const convoPtr = useRef(0);
   const fastRun = useRef(0);
+  const mashShown = useRef(false);
+  const spaceShown = useRef(false);
   const lastKey = useRef(0);
+  const cooldownUntil = useRef(0);
   const quipTimer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
-  // The quip bubble appears at the cursor and follows it (like the explorer
-  // bouncer). We track the pointer and write the bubble's position imperatively.
+  const finaleTimer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
   const quipPos = useRef({ x: 0, y: 0 });
   const quipRef = useRef<HTMLDivElement>(null);
+
+  // Each line shows once, in order, at rising note counts.
+  const CONVO: { at: number; msg: string; gif?: string }[] = [
+    { at: 10, msg: "ooh, someone can play", gif: PIANO_GIF },
+    { at: 26, msg: "Beethoven would be proud", gif: PIANO_GIF },
+    { at: 46, msg: "you're enjoying this way too much!", gif: PIANO_GIF },
+    { at: 72, msg: "alright, show-off", gif: PIANO_GIF },
+  ];
+
   useEffect(() => {
     const onMove = (e: PointerEvent) => {
       quipPos.current.x = e.clientX;
@@ -120,42 +140,81 @@ export default function Terminal() {
       }
     };
     window.addEventListener("pointermove", onMove, { passive: true });
-    return () => window.removeEventListener("pointermove", onMove);
+    return () => {
+      window.removeEventListener("pointermove", onMove);
+      clearTimeout(quipTimer.current);
+      clearTimeout(finaleTimer.current);
+    };
   }, []);
-  function showQuip(msg: string) {
-    setQuip(msg);
+
+  function showQuip(msg: string, gif?: string) {
+    setQuip({ msg, gif });
     clearTimeout(quipTimer.current);
-    quipTimer.current = setTimeout(() => setQuip(null), 2600);
+    quipTimer.current = setTimeout(() => setQuip(null), 2800);
   }
-  function bumpQuip(key: string) {
-    if (key.length !== 1) return; // printable keys only
+
+  function finale() {
+    applause();
+    setCelebrating(true);
+    showQuip("congratulations!", MEOW_GIF);
+    cooldownUntil.current = performance.now() + 25000;
+    noteIdx.current = 0;
+    streak.current = 0;
+    convoPtr.current = 0;
+    clearTimeout(finaleTimer.current);
+    finaleTimer.current = setTimeout(() => {
+      setCelebrating(false);
+      sessionLines = [GREETING];
+      setLines([GREETING]);
+      setValue("");
+    }, 4200);
+  }
+
+  // Runs on each printable keystroke: plays the note, advances the conversation,
+  // and fires the finale at the end of the tune.
+  function onPlay() {
     const t = performance.now();
+    if (t < cooldownUntil.current) {
+      showQuip("nope, you're on a time out!");
+      return;
+    }
     const gap = t - lastKey.current;
     lastKey.current = t;
     if (gap > 2200) {
+      noteIdx.current = 0;
       streak.current = 0;
+      convoPtr.current = 0;
       fastRun.current = 0;
+      mashShown.current = false;
     }
+    if (gap < 70) {
+      fastRun.current += 1;
+      if (fastRun.current >= 8 && !mashShown.current) {
+        showQuip("heeeyyy!");
+        mashShown.current = true;
+      }
+    } else {
+      fastRun.current = 0;
+      mashShown.current = false;
+    }
+    playNote(FUR_ELISE[noteIdx.current]);
+    noteIdx.current += 1;
     streak.current += 1;
-    fastRun.current = gap < 70 ? fastRun.current + 1 : 0;
-    if (fastRun.current >= 8) {
-      showQuip("heeeyyy!");
-      fastRun.current = 0;
-    } else if (streak.current > 0 && streak.current % 30 === 0) {
-      const msgs = ["you're enjoying this way too much!", "Beethoven would be proud"];
-      showQuip(msgs[(streak.current / 30 - 1) % msgs.length]);
+    if (convoPtr.current < CONVO.length && streak.current >= CONVO[convoPtr.current].at) {
+      const q = CONVO[convoPtr.current];
+      showQuip(q.msg, q.gif);
+      convoPtr.current += 1;
     }
+    if (noteIdx.current >= FUR_ELISE.length) finale();
   }
 
-  // Cap the input line so it can't overflow off-screen: blurt a quip and clear
-  // it so they can keep typing (and keep the melody going).
-  const MAX_LINE = 70;
   function onInputChange(e: ChangeEvent<HTMLInputElement>) {
     const v = e.target.value;
-    if (v.length > MAX_LINE) {
-      showQuip("we out of space! keep going");
-      setValue("");
-      return;
+    if (v.length > 96 && !spaceShown.current) {
+      showQuip("we out of space!");
+      spaceShown.current = true;
+    } else if (v.length <= 96) {
+      spaceShown.current = false;
     }
     setValue(v);
   }
@@ -340,7 +399,7 @@ export default function Terminal() {
   // Tab → complete the current token to the longest common prefix (or fully, if
   // unique). Right/End → accept the ghost suggestion.
   function onKeyDown(e: KeyboardEvent<HTMLInputElement>) {
-    bumpQuip(e.key);
+    if (e.key.length === 1) onPlay(); // printable key -> next piano note + quips
     if (e.key === "Tab") {
       e.preventDefault();
       const tokens = value.split(" ");
@@ -387,11 +446,25 @@ export default function Terminal() {
               className="cursor-bubble"
               role="status"
             >
-              {quip}
+              {quip.gif ? (
+                // eslint-disable-next-line @next/next/no-img-element -- animated gif must stay unoptimized
+                <img className="cursor-bubble-gif" src={quip.gif} alt="" width={22} height={22} />
+              ) : null}
+              <span>{quip.msg}</span>
             </div>,
             document.body,
           )
         : null}
+      {celebrating ? (
+        <div className="term-finale" aria-hidden="true">
+          {Array.from({ length: 20 }).map((_, i) => (
+            <span key={i} className="term-spark" style={{ ["--a" as string]: `${(360 / 20) * i}deg` }} />
+          ))}
+          {/* eslint-disable-next-line @next/next/no-img-element -- animated gif must stay unoptimized */}
+          <img className="term-finale-gif" src={MEOW_GIF} alt="" width={76} height={76} />
+          <div className="term-finale-title">congratulations!</div>
+        </div>
+      ) : null}
       <div className="ide-terminal-bar">
         <span className="ide-terminal-bar-icon" aria-hidden="true">
           <TerminalIcon />

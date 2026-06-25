@@ -113,17 +113,11 @@ export function SoundProvider({ children }: { children: ReactNode }) {
         else sfx.open();
       }
     }
-    function onKeyDown(e: KeyboardEvent) {
-      const t = e.target as Element | null;
-      if (t?.closest?.(".ide-terminal-input") && e.key.length === 1) sfx.key();
-    }
 
     document.addEventListener("pointerdown", onPointerDown);
-    document.addEventListener("keydown", onKeyDown);
     return () => {
       for (const ev of warmEvents) window.removeEventListener(ev, warm);
       document.removeEventListener("pointerdown", onPointerDown);
-      document.removeEventListener("keydown", onKeyDown);
     };
   }, [allowed]);
 

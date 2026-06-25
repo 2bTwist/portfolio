@@ -606,12 +606,23 @@ button.ide-row {
   opacity: 1;
   margin-left: 0.35rem;
 }
+/* tail pointing right at the download button: border layer + fill on top */
+.ide-hire::before {
+  content: "";
+  position: absolute;
+  left: 100%;
+  top: 50%;
+  margin-top: -6px;
+  border: 6px solid transparent;
+  border-left-color: var(--border);
+}
 .ide-hire::after {
   content: "";
   position: absolute;
   left: 100%;
   top: 50%;
   margin-top: -5px;
+  margin-left: -1.5px;
   border: 5px solid transparent;
   border-left-color: var(--surface);
 }
@@ -941,23 +952,52 @@ button.ide-row {
 /* Quip bubble that appears at the cursor and follows it (portaled to <body>,
    position written imperatively). Sits just above-right of the pointer; below
    the custom cursor's z-index. */
+/* A real chat/speech bubble (surface + border + tail) that sits above-right of
+   the cursor, tail pointing down-left toward the pointer. */
 .cursor-bubble {
   position: fixed;
   left: 0;
   top: 0;
   z-index: 2147483646;
   pointer-events: none;
-  transform: translate(16px, -135%);
-  padding: 0.32rem 0.62rem;
-  border-radius: 11px;
-  background: var(--accent);
-  color: var(--on-accent);
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  transform: translate(14px, calc(-100% - 12px));
+  padding: 0.4rem 0.7rem;
+  border-radius: 13px;
+  background: var(--surface);
+  color: var(--text);
+  border: 1px solid var(--border);
   font-family: var(--mono);
   font-size: 0.74rem;
-  font-weight: 600;
+  font-weight: 500;
   white-space: nowrap;
-  box-shadow: 0 8px 20px -8px rgba(0, 0, 0, 0.45);
+  box-shadow: 0 10px 24px -10px rgba(0, 0, 0, 0.4);
   animation: quip-pop 200ms cubic-bezier(0.2, 0.9, 0.3, 1.4);
+}
+.cursor-bubble-gif {
+  width: 22px;
+  height: 22px;
+  max-width: none;
+  flex: 0 0 auto;
+}
+.cursor-bubble::before {
+  content: "";
+  position: absolute;
+  top: 100%;
+  left: 14px;
+  border: 7px solid transparent;
+  border-top-color: var(--border);
+}
+.cursor-bubble::after {
+  content: "";
+  position: absolute;
+  top: 100%;
+  left: 15px;
+  margin-top: -1px;
+  border: 6px solid transparent;
+  border-top-color: var(--surface);
 }
 @keyframes quip-pop {
   from {
@@ -1871,4 +1911,70 @@ img.cert-badge-art {
    drag stuck. Paired with setPointerCapture on the handle. */
 body[data-dragging] iframe {
   pointer-events: none;
+}
+
+/* Terminal finale: confetti burst + meow-party + "congratulations!" when the
+   whole tune is played through. Overlays the terminal, then it clears. */
+.term-finale {
+  position: absolute;
+  inset: 0;
+  z-index: 5;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.55rem;
+  background: color-mix(in srgb, var(--term-bg) 80%, transparent);
+  pointer-events: none;
+  overflow: hidden;
+}
+.term-finale-gif {
+  width: 76px;
+  height: 76px;
+  max-width: none;
+}
+.term-finale-title {
+  font-family: var(--mono);
+  font-size: 1.15rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  color: var(--term-accent);
+  animation: quip-pop 300ms cubic-bezier(0.2, 0.9, 0.3, 1.4);
+}
+.term-spark {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: var(--term-accent);
+  animation: spark 1100ms ease-out forwards;
+}
+.term-spark:nth-child(4n) {
+  background: var(--dot-close);
+}
+.term-spark:nth-child(4n + 1) {
+  background: var(--dot-min);
+}
+.term-spark:nth-child(4n + 2) {
+  background: var(--dot-max);
+}
+@keyframes spark {
+  0% {
+    opacity: 1;
+    transform: rotate(var(--a)) translateY(0) scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: rotate(var(--a)) translateY(-170px) scale(0.4);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .term-spark {
+    display: none;
+  }
+  .term-finale-title {
+    animation: none;
+  }
 }
