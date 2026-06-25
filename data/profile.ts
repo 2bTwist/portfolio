@@ -16,6 +16,7 @@ export const profile = {
     github: "https://github.com/2bTwist",
     linkedin: "https://www.linkedin.com/in/edmond-batch",
     x: "#", // TODO(Phase 6): real URL (still needed)
+    chess: "https://www.chess.com/member/Anhilated",
     resume: "/resume", // the HTML "paper" page; it has a Download PDF button
   },
 } as const;

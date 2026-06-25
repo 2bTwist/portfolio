@@ -12,7 +12,7 @@ export const metadata: Metadata = {
 
 export default function AboutPage() {
   return (
-    <PageShell>
+    <PageShell width="wide">
       <h1 className="display text-4xl sm:text-5xl font-bold mb-8" style={{ color: "var(--text)" }}>
         About
       </h1>
@@ -68,7 +68,11 @@ export default function AboutPage() {
           <p>
             Outside of programming, I play table tennis, so challenge me to a game whenever you see
             me, I&apos;m always down. I also play some chess. I picked it up during covid and got my
-            rating up to 1362 on chess.com.
+            rating up to 1362 on{" "}
+            <a className="txt-link" href={profile.links.chess} target="_blank" rel="noreferrer noopener">
+              chess.com
+            </a>
+            .
           </p>
 
           <p>
