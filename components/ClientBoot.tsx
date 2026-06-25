@@ -18,6 +18,9 @@ function killStaleServiceWorker() {
 }
 
 function loadDevReactGrab() {
+  // Opt out of the React Compiler: it bails on the dynamic import() expression,
+  // and this side-effect helper has nothing to memoize anyway.
+  "use no memo";
   if (process.env.NODE_ENV !== "development") return;
   // Side-effect import auto-activates the hover + ⌘C "grab element context"
   // overlay (file + component + source → clipboard for the agent). Dev only.

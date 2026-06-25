@@ -26,6 +26,14 @@ import type { GitInfo } from "@/app/lib/git";
 const CommandPalette = dynamic(() => import("./CommandPalette"), { ssr: false });
 const Terminal = dynamic(() => import("./Terminal"), { ssr: false });
 
+// Warm the lazy palette/terminal chunks. Module scope + "use no memo" so the
+// React Compiler doesn't try to lower the dynamic import() and bail.
+function warmOverlays() {
+  "use no memo";
+  void import("./CommandPalette");
+  void import("./Terminal");
+}
+
 /* Keyed wrapper: remounting on pathname change replays the CSS enter animation. */
 function EditorPane({ children }: { children: ReactNode }) {
   const pathname = usePathname();
@@ -73,16 +81,12 @@ export function Shell({
   // adds no meaningful TBT — the chunks are small and requestIdleCallback runs
   // after the blocking load work.)
   useEffect(() => {
-    const preload = () => {
-      void import("./CommandPalette");
-      void import("./Terminal");
-    };
     const ric = window.requestIdleCallback;
     if (ric) {
-      const id = ric(preload, { timeout: 2500 });
+      const id = ric(warmOverlays, { timeout: 2500 });
       return () => window.cancelIdleCallback?.(id);
     }
-    const t = window.setTimeout(preload, 1200);
+    const t = window.setTimeout(warmOverlays, 1200);
     return () => window.clearTimeout(t);
   }, []);
 

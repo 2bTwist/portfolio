@@ -21,7 +21,7 @@ export default function ExperiencePage() {
             <div className="xp-node">
               {entry.logo ? (
                 // eslint-disable-next-line @next/next/no-img-element -- inline brand mark, sized by CSS
-                <img className={`xp-logo ${entry.logoClass ?? ""}`} src={entry.logo} alt={entry.org} />
+                <img className={`xp-logo ${entry.logoClass ?? ""}`} src={entry.logo} alt={entry.org} loading="lazy" decoding="async" />
               ) : (
                 <span className="xp-monogram mono" aria-hidden="true">
                   {entry.org.slice(0, 1)}
@@ -71,7 +71,7 @@ export default function ExperiencePage() {
               <span className="xp-activity-icon" aria-hidden="true">
                 {a.logo ? (
                   // eslint-disable-next-line @next/next/no-img-element -- inline brand mark, sized by CSS
-                  <img className="xp-activity-logo" src={a.logo} alt="" />
+                  <img className="xp-activity-logo" src={a.logo} alt="" loading="lazy" decoding="async" />
                 ) : (
                   <span className="xp-activity-mono mono">{(a.org ?? a.role).slice(0, 1)}</span>
                 )}

@@ -47,7 +47,7 @@ export default function AboutPage() {
             <HoverWord
               pop={
                 // eslint-disable-next-line @next/next/no-img-element -- animated gif
-                <img className="flag-pop" src="/images/cameroon-flag.gif" alt="Flag of Cameroon" width={84} height={55} />
+                <img className="flag-pop" src="/images/cameroon-flag.gif" alt="Flag of Cameroon" width={84} height={55} loading="lazy" decoding="async" />
               }
             >
               Cameroon
