@@ -47,3 +47,10 @@ next-env.d.ts
 
 # stray
 .swift-version
+
+# Local agent / AI tooling scaffolding (not part of the portfolio)
+.agents/
+.claude/
+.gemini/
+.pi/
+.github/copilot/
