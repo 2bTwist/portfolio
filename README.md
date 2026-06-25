@@ -50,16 +50,6 @@ pnpm perf        # build + size-limit + perf e2e + perf-check
 pnpm e2e         # accessibility invariants
 ```
 
-## Development
-
-```bash
-pnpm install
-pnpm dev         # http://localhost:3000
-```
-
-Copy `.env.example` to `.env.local` for the optional Stadia Maps key used by the
-home minimap. Everything else works without configuration.
-
 ## Project structure
 
 ```
