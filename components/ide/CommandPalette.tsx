@@ -22,8 +22,11 @@ export default function CommandPalette() {
   const [postHits, setPostHits] = useState<{ q: string; hits: SearchResult[] }>({ q: "", hits: [] });
   const inputRef = useRef<HTMLInputElement>(null);
 
+  // Focus the input on open and restore focus to the trigger on close.
   useEffect(() => {
+    const prev = document.activeElement as HTMLElement | null;
     inputRef.current?.focus();
+    return () => prev?.focus?.();
   }, []);
 
   // Query the lazy post index whenever the search text changes (race-guarded).
@@ -73,6 +76,13 @@ export default function CommandPalette() {
       e.preventDefault();
       const r = items[current];
       if (r) go(r.href);
+    } else if (e.key === "Escape") {
+      e.preventDefault();
+      closeCmdk();
+    } else if (e.key === "Tab") {
+      // Trap focus: the input is the only tab stop (results are navigated with
+      // the arrow keys via aria-activedescendant), so keep focus in the dialog.
+      e.preventDefault();
     }
   }
 
@@ -97,17 +107,23 @@ export default function CommandPalette() {
             onKeyDown={onKeyDown}
             placeholder="Search files, projects, posts…"
             aria-label="Search files, projects, and posts"
+            role="combobox"
+            aria-expanded={items.length > 0}
+            aria-controls="cmdk-listbox"
+            aria-activedescendant={items.length > 0 ? `cmdk-opt-${current}` : undefined}
+            aria-autocomplete="list"
             autoComplete="off"
             spellCheck={false}
           />
         </div>
-        <ul className="ide-palette-list" role="listbox" aria-label="Results">
+        <ul id="cmdk-listbox" className="ide-palette-list" role="listbox" aria-label="Results">
           {items.map((r, i) => (
-            <li key={`${r.kind}:${r.href}`} role="option" aria-selected={i === current}>
+            <li key={`${r.kind}:${r.href}`} id={`cmdk-opt-${i}`} role="option" aria-selected={i === current}>
               <button
                 type="button"
                 className="ide-palette-item"
                 data-active={i === current}
+                tabIndex={-1}
                 onMouseMove={() => setActive(i)}
                 onClick={() => go(r.href)}
               >
