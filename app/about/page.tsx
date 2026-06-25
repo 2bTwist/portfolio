@@ -24,7 +24,7 @@ export default function AboutPage() {
             alt="Edmond in front of Cloud Gate in Chicago"
             width={1050}
             height={1400}
-            sizes="(min-width: 768px) 320px, 100vw"
+            sizes="(min-width: 768px) 380px, 100vw"
             priority
           />
         </div>

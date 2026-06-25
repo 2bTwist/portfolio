@@ -2549,7 +2549,7 @@ body[data-dragging] iframe {
 }
 @media (min-width: 768px) {
   .about-grid {
-    grid-template-columns: 320px 1fr;
+    grid-template-columns: 380px 1fr;
     gap: 2.5rem;
   }
 }
