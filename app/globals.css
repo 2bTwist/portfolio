@@ -2586,11 +2586,18 @@ body[data-dragging] iframe {
   color: var(--muted);
   text-align: center;
 }
+.about-socials {
+  margin-top: 0.9rem;
+  justify-content: center;
+}
 @media (min-width: 768px) {
   .about-figure {
     position: sticky;
     top: 1.5rem;
   }
+}
+.about-prose {
+  max-width: 62ch;
 }
 .about-prose > p {
   color: var(--muted);
@@ -2601,6 +2608,7 @@ body[data-dragging] iframe {
 }
 .about-prose strong {
   color: var(--text);
+  font-weight: 600;
 }
 /* highlighter that is also a link (the blog "write") */
 .hl-link {
