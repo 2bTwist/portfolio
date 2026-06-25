@@ -1887,19 +1887,30 @@ img.cert-badge-art {
 .stack-item--claude {
   width: 68px;
 }
-/* Claude burst "thinks" while hovered: one calm, slow rotation — no scale pulse
-   (the spin+throb read as a seizure next to the shimmering text). */
-.stack-item:hover .stack-tile-logo--claude {
-  transform-origin: 50% 50%;
-  animation: claude-think 3.6s linear infinite;
+/* Claude burst "thinks" while hovered: each of the 12 spokes extends/retracts
+   from the hub (scaleY) with an opacity pulse, on a negative-delay stagger (--sd)
+   so a wave breathes around the ring. No rotation. */
+.claude-spoke {
+  transform-box: fill-box;
+  transform-origin: 50% 100%; /* hub end (bottom of the upward spoke's bbox) */
 }
-@keyframes claude-think {
-  to {
-    transform: rotate(360deg);
+.stack-item:hover .claude-spoke {
+  animation: claude-spoke 1.2s ease-in-out infinite;
+  animation-delay: var(--sd, 0s);
+}
+@keyframes claude-spoke {
+  0%,
+  100% {
+    transform: scaleY(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scaleY(0.45);
+    opacity: 0.4;
   }
 }
 @media (prefers-reduced-motion: reduce) {
-  .stack-item:hover .stack-tile-logo--claude {
+  .stack-item:hover .claude-spoke {
     animation: none;
   }
 }
@@ -2553,6 +2564,9 @@ body[data-dragging] iframe {
     gap: 2.5rem;
   }
 }
+.about-figure {
+  margin: 0;
+}
 .about-portrait {
   position: relative;
   border-radius: 16px;
@@ -2565,8 +2579,15 @@ body[data-dragging] iframe {
   width: 100%;
   height: auto;
 }
+.about-caption {
+  margin-top: 0.7rem;
+  font-size: 0.82rem;
+  line-height: 1.5;
+  color: var(--muted);
+  text-align: center;
+}
 @media (min-width: 768px) {
-  .about-portrait {
+  .about-figure {
     position: sticky;
     top: 1.5rem;
   }

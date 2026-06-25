@@ -18,16 +18,24 @@ export default function AboutPage() {
       </h1>
 
       <div className="about-grid">
-        <div className="about-portrait">
-          <Image
-            src="/images/portrait.jpg"
-            alt="Edmond in front of Cloud Gate in Chicago"
-            width={1050}
-            height={1400}
-            sizes="(min-width: 768px) 380px, 100vw"
-            priority
-          />
-        </div>
+        <figure className="about-figure">
+          <div className="about-portrait">
+            <Image
+              src="/images/portrait.jpg"
+              alt="Edmond at the NSBE National Convention in Chicago, in front of Cloud Gate"
+              width={1050}
+              height={1400}
+              sizes="(min-width: 768px) 380px, 100vw"
+              priority
+            />
+          </div>
+          <figcaption className="about-caption">
+            <a className="txt-link" href="https://www.nsbe.org" target="_blank" rel="noreferrer noopener">
+              NSBE
+            </a>{" "}
+            National Convention, Chicago
+          </figcaption>
+        </figure>
 
         <div className="about-prose">
           <p>
