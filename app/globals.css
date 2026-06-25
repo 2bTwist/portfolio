@@ -1881,6 +1881,28 @@ img.cert-badge-art {
 .stack-tile-logo--expo {
   transform: translateY(8%);
 }
+/* Lock the Claude item's footprint to the tile width so the cycling label (whose
+   length changes every word) can't reflow the row or shift the centred tile. The
+   nowrap label overflows symmetrically into the gaps, centred under the tile. */
+.stack-item--claude {
+  width: 68px;
+}
+/* Claude burst "thinks" while hovered: one calm, slow rotation — no scale pulse
+   (the spin+throb read as a seizure next to the shimmering text). */
+.stack-item:hover .stack-tile-logo--claude {
+  transform-origin: 50% 50%;
+  animation: claude-think 3.6s linear infinite;
+}
+@keyframes claude-think {
+  to {
+    transform: rotate(360deg);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .stack-item:hover .stack-tile-logo--claude {
+    animation: none;
+  }
+}
 /* Lift on hover / press down on tap — plain tiles only (flip tiles spin instead). */
 .stack-item:hover .stack-tile:not(.stack-tile--flip) {
   transform: translateY(-3px);
@@ -1936,17 +1958,40 @@ img.cert-badge-art {
   font-size: 0.7rem;
   color: var(--muted);
 }
-/* Claude tile easter egg: while hovered the label cycles "thinking" words in the
-   accent colour, italicised, with animated trailing dots. nowrap so the longer
-   words don't wrap (Claude is the last tile, so it just grows rightward). */
+/* Claude tile easter egg: while hovered the label cycles "thinking" words as
+   shimmering gradient text (a highlight band sweeps across the word + dots),
+   italicised, with animated trailing dots. nowrap so the longer words don't wrap
+   (Claude is the last tile, so it just grows rightward). The companion logo spin
+   lives below with the other per-logo rules. */
 .stack-name--thinking {
-  color: var(--accent);
+  position: relative;
   font-style: italic;
   white-space: nowrap;
+  /* moving shimmer: a light band travels through the accent-coloured text */
+  background: linear-gradient(
+    100deg,
+    var(--accent) 30%,
+    color-mix(in srgb, var(--accent) 35%, #fff) 50%,
+    var(--accent) 70%
+  );
+  background-size: 220% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  -webkit-text-fill-color: transparent;
+  animation: stack-think-shimmer 1.8s linear infinite;
 }
-.stack-think-dots::after {
+.stack-name--thinking::after {
   content: "";
   animation: stack-think-dots 1.1s steps(1, end) infinite;
+}
+@keyframes stack-think-shimmer {
+  from {
+    background-position: 120% 0;
+  }
+  to {
+    background-position: -120% 0;
+  }
 }
 @keyframes stack-think-dots {
   0% {
@@ -1964,7 +2009,11 @@ img.cert-badge-art {
   }
 }
 @media (prefers-reduced-motion: reduce) {
-  .stack-think-dots::after {
+  .stack-name--thinking {
+    animation: none;
+    background-position: 0 0;
+  }
+  .stack-name--thinking::after {
     content: "...";
     animation: none;
   }
@@ -2488,4 +2537,63 @@ body[data-dragging] iframe {
     animation: none;
     background-size: 100% 42%;
   }
+}
+
+/* ── About page ──────────────────────────────────────────────────────────────
+   Portrait beside the narrative on desktop; stacked on mobile. */
+.about-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1.75rem;
+  align-items: start;
+}
+@media (min-width: 768px) {
+  .about-grid {
+    grid-template-columns: 320px 1fr;
+    gap: 2.5rem;
+  }
+}
+.about-portrait {
+  position: relative;
+  border-radius: 16px;
+  overflow: hidden;
+  border: 1px solid var(--border);
+  box-shadow: 0 18px 38px -22px rgba(0, 0, 0, 0.4);
+}
+.about-portrait img {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+@media (min-width: 768px) {
+  .about-portrait {
+    position: sticky;
+    top: 1.5rem;
+  }
+}
+.about-prose > p {
+  color: var(--muted);
+  line-height: 1.7;
+}
+.about-prose > p + p {
+  margin-top: 1rem;
+}
+.about-prose strong {
+  color: var(--text);
+}
+/* highlighter that is also a link (the blog "write") */
+.hl-link {
+  text-decoration: none;
+}
+.hl-link:hover {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+/* flag (or any image) inside a HoverWord popover */
+.flag-pop {
+  display: block;
+  width: 84px;
+  height: auto;
+  max-width: none;
+  border-radius: 4px;
 }

@@ -39,7 +39,7 @@ export function ClaudeTile() {
     timer.current = setInterval(() => {
       idx.current = (idx.current + 1) % THINKING.length;
       setWord(THINKING[idx.current]);
-    }, 1100);
+    }, 1800);
   };
   const stop = () => {
     if (timer.current) clearInterval(timer.current);
@@ -52,21 +52,16 @@ export function ClaudeTile() {
   }, []);
 
   return (
-    <li className="stack-item" onPointerEnter={start} onPointerLeave={stop}>
+    <li className="stack-item stack-item--claude" onPointerEnter={start} onPointerLeave={stop}>
       <span className="stack-tile" style={{ "--logo": color } as CSSProperties}>
         <svg viewBox="0 0 24 24" className="stack-tile-logo stack-tile-logo--claude" fill={color} aria-hidden="true">
           {svg}
         </svg>
       </span>
+      {/* The animated dots are a CSS ::after so the gradient shimmer clips over
+          the word AND the dots as one piece of text. */}
       <span className={`stack-name mono ${word ? "stack-name--thinking" : ""}`} aria-label={name}>
-        {word ? (
-          <>
-            {word}
-            <span className="stack-think-dots" aria-hidden="true" />
-          </>
-        ) : (
-          name
-        )}
+        {word ?? name}
       </span>
     </li>
   );

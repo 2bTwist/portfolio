@@ -1,8 +1,9 @@
 import type { Metadata } from "next";
+import Link from "next/link";
+import Image from "next/image";
 import { profile } from "@/data/profile";
-import { SKILLS } from "@/data/skills";
 import { PageShell } from "@/components/site/PageShell";
-import { PageHeader, Prose, Body } from "@/components/content/ui";
+import { HoverWord } from "@/components/site/HoverWord";
 
 export const metadata: Metadata = {
   title: "About - Edmond Ndanji",
@@ -12,40 +13,75 @@ export const metadata: Metadata = {
 export default function AboutPage() {
   return (
     <PageShell>
-      <PageHeader title="About" />
-      <Prose>
-        <Body>{profile.blurb}</Body>
-        <Body>
-          When I am not coding I am usually pulling apart a new tool, or thinking about product and
-          the small interaction details that make software feel good to touch.
-        </Body>
-      </Prose>
+      <h1 className="display text-4xl sm:text-5xl font-bold mb-8" style={{ color: "var(--text)" }}>
+        About
+      </h1>
 
-      <section className="mt-10">
-        <h2 className="mono text-lg font-semibold mb-4" style={{ color: "var(--text)" }}>
-          Skills
-        </h2>
-        <div className="grid gap-5 sm:grid-cols-2">
-          {SKILLS.map((group) => (
-            <div key={group.label}>
-              <p className="mono text-sm mb-2" style={{ color: "var(--muted)" }}>
-                {group.label}
-              </p>
-              <div className="flex flex-wrap gap-2">
-                {group.items.map((item) => (
-                  <span
-                    key={item}
-                    className="mono text-xs px-2 py-1 rounded-md"
-                    style={{ background: "var(--surface)", color: "var(--text)", border: "1px solid var(--border)" }}
-                  >
-                    {item}
-                  </span>
-                ))}
-              </div>
-            </div>
-          ))}
+      <div className="about-grid">
+        <div className="about-portrait">
+          <Image
+            src="/images/portrait.jpg"
+            alt="Edmond in front of Cloud Gate in Chicago"
+            width={1050}
+            height={1400}
+            sizes="(min-width: 768px) 320px, 100vw"
+            priority
+          />
         </div>
-      </section>
+
+        <div className="about-prose">
+          <p>
+            I&apos;m a developer based in the US, originally from{" "}
+            <HoverWord
+              pop={
+                // eslint-disable-next-line @next/next/no-img-element -- animated gif
+                <img className="flag-pop" src="/images/cameroon-flag.gif" alt="Flag of Cameroon" width={84} height={55} />
+              }
+            >
+              Cameroon
+            </HoverWord>
+            .
+          </p>
+
+          <p>
+            What I care about most is a good product. Whether it&apos;s software or hardware, you can
+            feel when something was made with intent, when real thought and effort went into getting
+            it right. I&apos;ll happily talk about that kind of work for days, and sometimes I{" "}
+            <Link href="/writing" className="hl-marker hl-link">
+              write
+            </Link>{" "}
+            about it too.
+          </p>
+
+          <p>
+            I build a lot of my own things, though most never make it online. I&apos;m a bit of a
+            perfectionist and would rather ship nothing than ship something half-done. It&apos;s a
+            habit I&apos;m slowly learning to let go of.
+          </p>
+
+          <p>
+            Most of my work is about crafting systems that are reliable and intuitive, on the
+            frontend or the backend, though these days I lean toward the backend. Right now I&apos;m
+            also teaching myself Go.
+          </p>
+
+          <p>
+            Outside of programming, I play table tennis, so challenge me to a game whenever you see
+            me, I&apos;m always down. I also play some chess. I picked it up during covid and got my
+            rating up to 1362 on chess.com.
+          </p>
+
+          <p>
+            My dream is to create opportunities and resources for kids back home, so the next ones
+            like me don&apos;t have to leave their country just to build something cool.
+          </p>
+
+          <p>
+            I&apos;m always open to a conversation about opportunities, project ideas, or your
+            product. If you&apos;d like me to try something you&apos;re building, I&apos;m down.
+          </p>
+        </div>
+      </div>
     </PageShell>
   );
 }
