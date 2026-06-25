@@ -537,6 +537,9 @@ button.ide-row {
   background: var(--bg);
 }
 .ide-tab a {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
   color: var(--text);
   text-decoration: none;
   padding: 0.4rem 0;
@@ -1697,11 +1700,6 @@ img.cert-badge-art {
   display: grid;
   place-items: center;
 }
-@media (min-width: 640px) {
-  .hero-mascot-wrap {
-    margin-left: -2.5rem;
-  }
-}
 /* Wide ambient amber wash — soft page light wrapping the figure (no hard edge). */
 .hero-mascot-wrap::before {
   content: "";
@@ -1797,7 +1795,9 @@ img.cert-badge-art {
   display: inline-flex;
   align-items: center;
   gap: 0.35rem;
-  margin-top: 1.25rem;
+  /* Sits inline at the end of the social-button row; a touch of left space
+     sets it apart from the LinkedIn button without a hard divider. */
+  margin-left: 0.35rem;
   font-size: 0.85rem;
   color: var(--muted);
   text-decoration: none;
@@ -1814,7 +1814,84 @@ img.cert-badge-art {
 }
 
 .hero-blurb {
-  max-width: 34rem;
+  max-width: 36rem;
+}
+.hero-accent {
+  color: var(--accent);
+  font-weight: 700;
+}
+/* Inline company link with a logo popover on hover. */
+.company-link {
+  position: relative;
+  color: var(--accent);
+  font-weight: 600;
+  text-decoration: none;
+  border-bottom: 1px solid color-mix(in srgb, var(--accent) 40%, transparent);
+  transition: color 140ms ease-out;
+}
+.company-link:hover {
+  color: var(--accent-press);
+}
+.company-pop {
+  position: absolute;
+  bottom: calc(100% + 9px);
+  left: 50%;
+  transform: translateX(-50%) translateY(4px) scale(0.96);
+  opacity: 0;
+  pointer-events: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.45rem 0.6rem;
+  background: #ffffff;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  box-shadow: 0 10px 24px -10px rgba(0, 0, 0, 0.35);
+  transition:
+    opacity 160ms ease-out,
+    transform 160ms cubic-bezier(0.2, 0.9, 0.3, 1.4);
+}
+.company-pop::after {
+  content: "";
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  border: 6px solid transparent;
+  border-top-color: #ffffff;
+}
+.company-logo {
+  display: block;
+  width: 88px;
+  height: auto;
+  max-width: none;
+}
+/* square app icon variant (e.g. BeSeen) */
+.company-logo--app {
+  width: 52px;
+  height: 52px;
+  border-radius: 12px;
+}
+.company-link:hover .company-pop,
+.company-link:focus-visible .company-pop {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0) scale(1);
+}
+
+/* Right column: mascot stacked above the location minimap. The whole column
+   carries the leftward pull (so mascot + map stay aligned), not the mascot
+   wrap alone. */
+.hero-right {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+  flex-shrink: 0;
+}
+@media (min-width: 640px) {
+  .hero-right {
+    margin-left: -2.5rem;
+  }
 }
 
 /* Social icon buttons — tactile "key" with depth (a static bottom edge the
@@ -1858,31 +1935,117 @@ img.cert-badge-art {
   outline-offset: 2px;
 }
 
-/* Location + live local time */
-.ide-localtime {
-  display: inline-flex;
+/* Location minimap — a single static Stadia "alidade_smooth" PNG (no JS map
+   engine, no iframe), warm-tinted toward the cream brand, with an accent pin at
+   center and the live local time overlaid on a scrim. */
+.ide-minimap {
+  position: relative;
+  display: block;
+  /* Fixed width so the card never collapses to the mascot's width above it
+     (which would wrap the label); caps to the viewport on tiny screens. */
+  width: 300px;
+  max-width: 100%;
+  aspect-ratio: 16 / 10;
+  margin: 0;
+  border-radius: 14px;
+  overflow: hidden;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  box-shadow:
+    0 1px 2px rgba(0, 0, 0, 0.04),
+    0 10px 24px -14px rgba(0, 0, 0, 0.28);
+  user-select: none;
+}
+.ide-minimap-img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  /* Calm the neutral basemap and nudge it warm so it belongs to the page. */
+  filter: saturate(0.85) contrast(0.97);
+}
+/* Cream wash over the map so it reads as part of the palette, not a screenshot. */
+.ide-minimap-tint {
+  position: absolute;
+  inset: 0;
+  background: var(--accent);
+  mix-blend-mode: soft-light;
+  opacity: 0.16;
+  pointer-events: none;
+}
+/* The pin = Edmond, sitting at the map's center (which is his city). Lifted a
+   touch above the label scrim so it reads as "here". Reuses the pulse. */
+.ide-minimap-pin {
+  position: absolute;
+  top: 43%;
+  left: 50%;
+  width: 13px;
+  height: 13px;
+  margin: -6.5px 0 0 -6.5px;
+  border-radius: 50%;
+  background: var(--accent);
+  box-shadow:
+    0 0 0 4px color-mix(in srgb, var(--accent) 22%, transparent),
+    0 1px 3px rgba(0, 0, 0, 0.4);
+  animation: localtime-pulse 2.4s ease-in-out infinite;
+}
+.ide-minimap-label {
+  position: absolute;
+  inset: auto 0 0 0;
+  display: flex;
   align-items: center;
   gap: 0.4rem;
+  padding: 0.55rem 0.7rem;
   font-family: var(--mono);
-  font-size: 0.75rem;
-  color: var(--muted);
+  font-size: 0.72rem;
+  white-space: nowrap;
+  color: var(--on-accent);
+  background: linear-gradient(
+    to top,
+    color-mix(in srgb, var(--term-bg) 82%, transparent),
+    transparent
+  );
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.45);
 }
-.ide-localtime-dot {
+.ide-minimap-dot {
   width: 7px;
   height: 7px;
   border-radius: 50%;
+  background: var(--on-accent);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--on-accent) 22%, transparent);
+}
+.ide-minimap-sep {
+  opacity: 0.6;
+}
+.ide-minimap-zone {
+  font-size: 0.6rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  opacity: 0.7;
+}
+/* Fallback when the tile can't load (no dev key / offline): a plain text badge
+   in the muted palette so the hero never shows a broken image. */
+.ide-minimap.is-fallback {
+  display: inline-flex;
+  width: auto;
+  max-width: none;
+  aspect-ratio: auto;
+  border-radius: 999px;
+  box-shadow: none;
+}
+.ide-minimap.is-fallback .ide-minimap-label {
+  position: static;
+  inset: auto;
+  background: none;
+  color: var(--muted);
+  text-shadow: none;
+  padding: 0.3rem 0.7rem;
+}
+.ide-minimap.is-fallback .ide-minimap-dot {
   background: var(--accent);
   box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 25%, transparent);
   animation: localtime-pulse 2.4s ease-in-out infinite;
-}
-.ide-localtime-sep {
-  opacity: 0.5;
-}
-.ide-localtime-zone {
-  font-size: 0.62rem;
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-  opacity: 0.6;
 }
 @keyframes localtime-pulse {
   0%,
@@ -1896,7 +2059,8 @@ img.cert-badge-art {
 @media (prefers-reduced-motion: reduce) {
   .hero-mascot,
   .hero-mascot-wrap::after,
-  .ide-localtime-dot {
+  .ide-minimap-pin,
+  .ide-minimap.is-fallback .ide-minimap-dot {
     animation: none;
   }
 }

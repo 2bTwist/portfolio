@@ -16,7 +16,7 @@ export function ProjectCard({ project }: { project: Project }) {
           {project.title}
         </h3>
         <span
-          className="mono text-xs px-2 py-0.5 rounded-full shrink-0"
+          className="mono text-xs capitalize px-2 py-0.5 rounded-full shrink-0"
           style={{ background: "var(--bg)", color: "var(--muted)", border: "1px solid var(--border)" }}
         >
           {project.kind}

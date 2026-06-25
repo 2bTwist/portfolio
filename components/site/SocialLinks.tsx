@@ -24,7 +24,13 @@ const SOCIALS: Social[] = [
   },
 ];
 
-export function SocialLinks({ className = "" }: { className?: string }) {
+export function SocialLinks({
+  className = "",
+  children,
+}: {
+  className?: string;
+  children?: React.ReactNode;
+}) {
   const links = SOCIALS.filter((s) => s.href && s.href !== "#");
   return (
     <div className={`flex flex-wrap items-center gap-2.5 ${className}`}>
@@ -42,6 +48,9 @@ export function SocialLinks({ className = "" }: { className?: string }) {
           <span>{s.label}</span>
         </a>
       ))}
+      {/* Optional trailing slot — e.g. the hero's "more about me" link, so it
+          sits in the same row as the social buttons. */}
+      {children}
     </div>
   );
 }

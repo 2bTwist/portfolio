@@ -12,6 +12,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
 import { createPortal } from "react-dom";
+import { FileIcon } from "./FileIcon";
 import { useSession } from "./store";
 
 type MenuState = { href: string; name: string; x: number; y: number } | null;
@@ -88,6 +89,7 @@ export function Tabs({ className = "" }: { className?: string }) {
               }}
             >
               <Link href={tab.href} prefetch aria-current={active ? "page" : undefined}>
+                <FileIcon name={tab.name} className="ide-file-icon" />
                 {tab.name}
               </Link>
               <button
