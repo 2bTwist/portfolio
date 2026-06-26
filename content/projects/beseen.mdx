@@ -1,0 +1,39 @@
+## Why BeSeen exists
+
+BeSeen came out of being in a long-distance relationship. The hardest part of long distance is just keeping up with each other without texting all day. So I kept asking myself: what if you didn't have to text to stay close? What if your partner could glance at a small, <Mark variant="highlight">very private status</Mark> and simply know how you're doing?
+
+The obvious question is "why not just use social media?" Because those are built for friends and followers. There's no private room for two people to be honest without an audience, without the fear of being seen by everyone, without the noise. BeSeen is that room: <Mark variant="highlight">a private space for just the two of you.</Mark>
+
+## Offline-first, and keeping it private
+
+I wanted it to work offline first. If you're only journaling for yourself, you shouldn't need the internet at all. Sharing with your partner obviously does need to sync, so the careful part was making the shared notes <Mark variant="bold">encrypted</Mark>, so what you choose to show your partner never sits readable on the server it passes through.
+
+It's built with <Mark variant="code">Expo</Mark> and <Mark variant="code">React Native</Mark>, offline-first over on-device <Mark variant="code">SQLite</Mark>, with <Mark variant="code">Supabase</Mark> syncing partners in real time. The home-screen widgets are native <Mark variant="code">Swift</Mark>: at the time Expo's widget support was still beta, Swift did it better, and Expo happily lets you drop the native module in.
+
+## The hard part wasn't the code
+
+I figured the building would be the hard part. It wasn't. <Mark variant="bold">The hardest part was marketing and growth</Mark>, something I'd never done.
+
+So I went and learned it. I picked up an Apple Search Ads certification and dug into App Store Optimization, which is its own world, nothing like the web SEO most of us know. It's all Apple's rules about how an app actually gets found. I ran a little marketing, but honestly I let it grow the way I wanted it to: organically, word of mouth, people finding it because it's a good thing. It sits at <Mark variant="highlight">200+ users and 40 connected partnerships</Mark> now. Scaling it hard would take real money and time I haven't chosen to spend yet.
+
+## Living with real users
+
+A normal day is less building, more listening. I have analytics through <Mark variant="code">PostHog</Mark> and error monitoring through <Mark variant="code">Sentry</Mark>, so I can wake up, skim my Supabase logs for anything weird (are functions firing, is anything slow), then check PostHog to see whether people are finishing onboarding and which features they actually use. Sentry and PostHog are honestly two of the best products I've worked with.
+
+<Callout type="note">
+I'd never had to handle a live bug before this. Early on I didn't even have over-the-air updates set up, so fixing anything meant submitting a whole new build and waiting on review. Wiring up OTA updates, where I can fix something and users just refresh, was one of those lessons you only learn by having real people on the other end.
+</Callout>
+
+## Designing for someone who isn't you
+
+The biggest thing BeSeen taught me is that <Mark variant="bold">designing for yourself counts for nothing.</Mark> You built it, so of course you know where everything is. Good design is when someone who has never seen it just knows what to do.
+
+<Callout type="tip">
+My test was simple: hand the app to my sister, say "create a journal entry," and watch, without telling her anything. Where does she hesitate? Which button is in the wrong place? If she could do it with no help, the design held up. If she got stuck, I had work to do.
+</Callout>
+
+Product development is genuinely hard, and it's the most fun I've had in a long time. Building things that make someone's life a little better is pretty much my whole reason for doing this.
+
+## The cleanup is the hard part
+
+Here's the part nobody warns you about: <Mark variant="highlight">most of the work is cleanup, not building.</Mark> Once the idea was validated, I went back and refactored the whole app, because the first version was, honestly, slop. Getting the architecture right after the fact turned out to be harder than the first build ever was. I'm working on the next release now. Maybe, by the time you're reading this, it's already out.
