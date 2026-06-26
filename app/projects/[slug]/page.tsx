@@ -7,7 +7,7 @@ import { getProjectStory } from "@/app/lib/project-story";
 import { MDXComponents } from "@/components/mdx/MDXComponents";
 import { PageShell } from "@/components/site/PageShell";
 import { TagRow, ActionLink } from "@/components/content/ui";
-import { GitHubIcon } from "@/components/content/tagIcons";
+import { GitHubIcon, AppStoreIcon } from "@/components/content/tagIcons";
 import { MorphImage } from "@/components/content/MorphImage";
 import { ArticleToc } from "@/components/content/ArticleToc";
 
@@ -87,7 +87,14 @@ export default async function ProjectPage({ params }: Params) {
 
       {(project.links?.live || project.links?.repo) && (
         <div className="mt-6 flex flex-wrap gap-4">
-          {project.links?.live ? <ActionLink href={project.links.live}>View live</ActionLink> : null}
+          {project.links?.live ? (
+            <ActionLink
+              href={project.links.live}
+              icon={project.links.live.includes("apps.apple.com") ? <AppStoreIcon /> : undefined}
+            >
+              View live
+            </ActionLink>
+          ) : null}
           {project.links?.repo ? (
             <ActionLink href={project.links.repo} variant="ghost" icon={<GitHubIcon />}>
               Source
