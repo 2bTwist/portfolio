@@ -5,6 +5,8 @@ import { compileMDX } from "next-mdx-remote/rsc";
 import { getAllPosts, getPost } from "@/app/lib/posts";
 import { MDXComponents } from "@/components/mdx/MDXComponents";
 import { ReadingProgress } from "@/components/mdx/ReadingProgress";
+import { ArticleToc } from "@/components/content/ArticleToc";
+import { MorphImage } from "@/components/content/MorphImage";
 import { PageShell } from "@/components/site/PageShell";
 
 type Params = { params: Promise<{ slug: string }> };
@@ -54,7 +56,23 @@ export default async function WritingPost({ params }: Params) {
           ← writing/
         </Link>
 
-        <h1 className="display text-3xl sm:text-4xl font-bold mt-4" style={{ color: "var(--text)" }}>
+        {/* Banner up top (Twitter-article style). Carries the shared
+            view-transition name so it morphs from the index card on nav. */}
+        {post.image ? (
+          <div className="project-banner mt-4">
+            <MorphImage
+              morphKey={`post-img-${post.slug}`}
+              src={post.image}
+              sizes="(min-width: 768px) 720px, 100vw"
+              priority
+            />
+          </div>
+        ) : null}
+
+        <h1
+          className={`display text-3xl sm:text-4xl font-bold ${post.image ? "mt-6" : "mt-4"}`}
+          style={{ color: "var(--text)" }}
+        >
           {post.title}
         </h1>
 
@@ -75,6 +93,7 @@ export default async function WritingPost({ params }: Params) {
           ))}
         </div>
 
+        <ArticleToc />
         <div className="prose-content mt-10">{content}</div>
 
         <nav className="mt-16 pt-8 flex flex-col gap-4 sm:flex-row sm:justify-between" style={{ borderTop: "1px solid var(--border)" }}>

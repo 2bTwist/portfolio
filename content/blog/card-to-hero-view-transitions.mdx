@@ -1,0 +1,118 @@
+---
+title: "One image, two pages: card-to-hero morphs with View Transitions"
+date: "2026-06-25"
+summary: "How a project card's thumbnail grows into the hero banner on the next page, with no animation library, using React's <ViewTransition> component and a couple of lines of CSS to tune the feel."
+tags: ["nextjs", "react", "view-transitions", "performance"]
+image: "/images/blog/card-to-hero-view-transitions-bw.webp"
+draft: true
+---
+
+When you click a project on this site, its little card image grows into the
+banner at the top of the next page. <Mark variant="highlight">The picture you tapped is the picture you land on.</Mark>
+I wanted that continuity without shipping an animation library, and it turns out
+React and the browser do almost all of the work.
+
+## The trick is a shared name
+
+The View Transitions API animates between two DOM states. You tell it which
+element on the old page corresponds to which element on the new one by giving
+both the same name. React exposes this through the <Mark variant="code">ViewTransition</Mark>
+component: wrap an element, give it a `name`, and React finds the element with
+the same name on the next page and morphs size and position between them.
+
+The card and the destination banner share one name, keyed by the project id:
+
+```tsx
+import { ViewTransition } from 'react'
+
+// Project card (a server component)
+<ViewTransition name={`project-img-${project.id}`}>
+  <Image src={project.image} alt="" fill />
+</ViewTransition>
+
+// Detail page banner — same name, different page
+<ViewTransition name={`project-img-${project.id}`}>
+  <Image src={project.image} alt="" fill priority />
+</ViewTransition>
+```
+
+Because the name is keyed by id, a grid of cards each carries a different one,
+and only the card you clicked matches the banner on the next page. <Mark variant="bold">That pairing is the whole illusion.</Mark>
+
+## Turning it on
+
+In Next's App Router this is one flag, which enables the `<ViewTransition>`
+component from the framework's bundled React:
+
+```ts
+// next.config.ts
+const nextConfig = {
+  experimental: { viewTransition: true },
+}
+```
+
+With it on, React initiates the transition whenever a `<Link>` navigation
+changes the matched element. The cards stay server components.
+
+<Callout type="warning">
+One sharp edge worth knowing: this fires on **Link navigations**, forward and
+the in-page back link. The browser's own back button does **not** morph, because
+the App Router doesn't wrap history popstate in a view transition. If a
+back-button morph matters, give people an in-app back link to use.
+</Callout>
+
+## Killing the full-page cross-fade
+
+By default the API animates the whole document as one group called `root`. On a
+site with a persistent shell around the content, that reads as an ugly flash of
+the entire frame. I only want the *image* to move, so I switch the root
+animation off and let the named group keep its morph:
+
+```css
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation: none;
+}
+```
+
+Now the page swaps instantly and the image is the only thing that travels.
+
+## Two details that make or break the feel
+
+**Use `object-fit: contain` on both ends.** The card frame and the banner have
+different aspect ratios. If the image is cropped differently on each side, the
+morph warps mid-flight. Containing it on both keeps the picture coherent while
+its box resizes.
+
+**Slow it down.** The default duration is around a quarter second, which on a
+short bit of travel barely registers. Stretching the named group to about half
+a second with an ease-out curve turns a snap into <Mark variant="highlight">something you actually see</Mark>:
+
+```css
+::view-transition-group(*) {
+  animation-duration: 520ms;
+  animation-timing-function: cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+```
+
+## Respecting people who do not want motion
+
+A morph is motion, so it goes behind `prefers-reduced-motion`. When that is set,
+every transition animation is disabled and navigation is an instant swap:
+
+```css
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-group(*),
+  ::view-transition-old(*),
+  ::view-transition-new(*) {
+    animation: none !important;
+  }
+}
+```
+
+Browsers without support just navigate normally. There is no fallback to write,
+because <Mark variant="bold">the absence of the effect *is* the fallback</Mark>, and the page was fully
+functional before the effect existed.
+
+That is the part I like most. The whole thing is progressive enhancement on top
+of plain links and images. Take it away and you still have a site.

@@ -4,15 +4,19 @@ The first time I heard "MCP" wasn't at Cisco. I try to keep up with where AI is 
 
 But I'd only ever plugged one in and played with it. I had never built one. I had never even been curious about how it worked underneath. I just used it.
 
-So when I got to Cisco and was told I'd be working with the team building an MCP server, my honest first reaction was: damn, okay, we're going right in. I'd half-expected something familiar, a CRUD app, something I'd done before. Instead it was something new. I keep running into that, and I keep asking myself the same question: how is it always something new?
+So when I got to Cisco and was told I'd be working with the team building an MCP server, my honest first reaction was: damn, okay, we're going right in. I'd half-expected something familiar, a CRUD app, something I'd done before. Instead it was something new. I keep running into that, and I keep asking myself the same question: <Mark variant="gradient">how is it always something new?</Mark>
 
 ## What an MCP server actually is
 
 Quick grounding, because the rest of this doesn't make sense without it.
 
-The Model Context Protocol is an open standard Anthropic released at the end of 2024 for connecting AI applications to outside tools and data through one shared protocol. Think of it as a universal port. Instead of hand-wiring every agent to every tool, a tool exposes itself once through an MCP server, and any app that speaks MCP can discover it and call it.
+The Model Context Protocol is an open standard Anthropic released at the end of 2024 for connecting AI applications to outside tools and data through one shared protocol. Think of it as <Mark variant="highlight">a universal port</Mark>. Instead of hand-wiring every agent to every tool, a tool exposes itself once through an MCP server, and any app that speaks MCP can discover it and call it.
 
 The shape is client and server. The AI app is the host, and for every server it connects to it spins up its own client for that one connection. Each server exposes a few things, but the one that matters here is tools: functions the agent can actually run. Your editor is the easy example. VS Code is the host, and when you point it at an MCP server it creates a client for that server.
+
+<Callout type="note">
+The mental model that finally stuck: the host spins up <Mark variant="code">one client per server</Mark>, and each server hands the agent a box of <Mark variant="code">tools</Mark> it can choose from. Hold onto that, the rest of the story leans on it.
+</Callout>
 
 ## The first week
 
@@ -20,7 +24,7 @@ My move on any new project is always the same: get my hands on it. Build the sma
 
 The team had already started, but, truthfully, most of them didn't fully understand it either, which was weirdly reassuring. Okay, nobody has this figured out yet. I asked what people were using to get up to speed, found a good walkthrough from Tech With Tim, and spent a whole night on it. I didn't want to be behind. More than anything I wanted to actually be part of the team. So I set myself a goal: by the end of the week, build my own working MCP server, however minimal.
 
-That's when it clicked how powerful this is. Normally you prompt an agent and hope. Here you hand it a box of tools, each one already does a specific thing, and the agent works out which one fits the situation. Every tool carries a description and a few hints to help it choose. You stop telling the agent what to do step by step and start handing it capabilities.
+That's when it clicked how powerful this is. Normally you prompt an agent and hope. Here you hand it a box of tools, each one already does a specific thing, and the agent works out which one fits the situation. Every tool carries a description and a few hints to help it choose. <Mark variant="bold">You stop telling the agent what to do step by step and start handing it capabilities.</Mark>
 
 ## The actual problem
 
@@ -36,7 +40,13 @@ A plain MCP server is honestly easy to build. That wasn't the job. The job was a
 
 That distinction is the whole challenge. I didn't just have to learn MCP, I had to make MCP work at enterprise scale. Out of the box it leans toward a simple, single app, and an enterprise needs more than that.
 
-The biggest new idea for me was decoupling. I'd never decoupled anything. I didn't even know the word. My mentor said it and I genuinely went, what does that mean? It means separating the API layer from the MCP layer. In our case the FastAPI side owned the REST backend: the dashboard, the registry of tools, onboarding, auth, and generating schemas. The FastMCP side owned actually speaking MCP to the agents. They could have lived in one process, FastMCP even mounts straight into FastAPI, but keeping them as a clean boundary meant we could reason about, scale, and ship each one on its own. It also kept the MCP layer something we designed on purpose, which matters, because a hand-designed MCP server beats a blind one-to-one mirror of every REST endpoint you have.
+The biggest new idea for me was <Mark variant="highlight">decoupling</Mark>. I'd never decoupled anything. I didn't even know the word. My mentor said it and I genuinely went, what does that mean?
+
+<Callout type="tip">
+**Decoupling**, the version that finally landed for me: split the system at a clean seam so each side can be reasoned about, scaled, and shipped on its own.
+</Callout>
+
+In our case the <Mark variant="code">FastAPI</Mark> side owned the REST backend: the dashboard, the registry of tools, onboarding, auth, and generating schemas. The <Mark variant="code">FastMCP</Mark> side owned actually speaking MCP to the agents. They could have lived in one process, FastMCP even mounts straight into FastAPI, but keeping them as a clean boundary meant we could reason about, scale, and ship each one on its own. It also kept the MCP layer something we designed on purpose, which matters, because <Mark variant="bold">a hand-designed MCP server beats a blind one-to-one mirror of every REST endpoint you have.</Mark>
 
 ## Building it
 
@@ -44,7 +54,7 @@ Most of what I built, I built full stack: the server, the dashboard, and the fro
 
 The first version of onboarding was rough. To add a tool you'd request an API key and wire it up through your terminal with some CLI and config. Nobody enjoyed that. So I built a dashboard in Vue, following Cisco's internal UI library, to be the front of the marketplace. You could see every tool other people had onboarded, see each tool's scope and which department it belonged to so you couldn't run something that wasn't yours to run, and see whether a tool was active and set up correctly.
 
-The part I'm most proud of is onboarding your own tool. You paste in your API's URL, and the dashboard reads its OpenAPI schema and turns those endpoints into MCP tools the agent can actually understand. FastMCP has a real path for this, `from_openapi`, and a lot of my work went into making that flow smooth, so adding a tool felt like filling in a form instead of fighting a config file.
+The part I'm most proud of is onboarding your own tool. You paste in your API's URL, and the dashboard reads its <Mark variant="code">OpenAPI</Mark> schema and turns those endpoints into MCP tools the agent can actually understand. FastMCP has a real path for this, `from_openapi`, and a lot of my work went into making that flow smooth, so <Mark variant="highlight">adding a tool felt like filling in a form instead of fighting a config file.</Mark>
 
 Then there was testing. Normally, to check that a freshly onboarded tool worked, you'd leave the dashboard, go configure the MCP server in your editor, and try it there. That works, but it's friction. So we built a small in-browser agent, basically a chatbot, whose only job is to act as an MCP client so you can test a tool right there in the page. It sounds simple now. At the time it felt like a lot.
 
@@ -62,7 +72,7 @@ When I left at the end of the summer, I figured the marketplace was a nice thing
 
 Then, back in September, I saw one of those company-wide emails, the kind that goes out to everyone about the big things being built, and it was in there. As a major thing. I had no idea it had gotten that big. I was so proud I'd worked on it. It still makes me smile, because some part of me didn't think an intern could ship something that people would actually notice and use.
 
-And then people used it. And it broke.
+And then people used it. <Mark variant="bold">And it broke.</Mark>
 
 Here's the humbling part. When I first wrote the code over the summer, I thought I'd done a good job. I came back, opened it up, and went: what was I doing?
 
@@ -70,12 +80,12 @@ The front end especially. Nothing was lazy-loading. There was a table meant to h
 
 ## The unglamorous half of the job
 
-So the second stint wasn't really building. It was cleanup. I split the front end into proper components, paginated and lazy-loaded the heavy table, and went through the backend tightening up how the files and the architecture were organized. That work is where the numbers come from: interaction latency dropped by around 40%, and the recurring incidents that kept knocking the platform over dropped by about 35%, so it stayed steady for the teams that now depended on it.
+So the second stint wasn't really building. It was cleanup. I split the front end into proper components, paginated and lazy-loaded the heavy table, and went through the backend tightening up how the files and the architecture were organized. That work is where the numbers come from: interaction latency dropped by <Mark variant="highlight">around 40%</Mark>, and the recurring incidents that kept knocking the platform over dropped by <Mark variant="highlight">about 35%</Mark>, so it stayed steady for the teams that now depended on it.
 
 Day to day, someone would hit a problem, a tool that wasn't working right, and my mentor and I would dig in and fix it. Honestly, it wasn't as fun as the first time around. The first time was learning. This was "okay, you have to clean up now, organize this." Some long nights, but I won't pretend it was anything heroic.
 
 ## What it taught me
 
-The thing that stuck with me: most of a developer's job isn't writing new code. It's maintaining the old code. Anyone can write the first version. The real question is whether you can keep it alive. Can you maintain it, fix it, handle the issues that show up once real people are leaning on it?
+The thing that stuck with me: <Mark variant="bold">most of a developer's job isn't writing new code. It's maintaining the old code.</Mark> Anyone can write the first version. The real question is whether you can keep it alive. Can you maintain it, fix it, handle the issues that show up once real people are leaning on it?
 
 Two things I'm proud of, and I'll just say them plainly. One, I shipped a full project that wasn't only decent, it was adopted and actually useful to people. Two, I picked up a technology I knew nothing about, fast, which told me my fundamentals are solid enough to learn hard things quickly. That one genuinely made me happy.

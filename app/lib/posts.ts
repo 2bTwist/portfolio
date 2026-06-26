@@ -15,6 +15,9 @@ export interface PostMetadata {
   summary: string;
   slug: string;
   tags: string[];
+  /* On-brand banner art (public/images/blog/<slug>-bw.webp). Optional: until
+     it is dropped in, the card/post header fall back to a tinted placeholder. */
+  image?: string;
 }
 
 export interface Post extends PostMetadata {
@@ -35,6 +38,7 @@ function readPost(filename: string): Post {
     summary: data.summary,
     slug,
     tags: data.tags ?? [],
+    image: data.image ?? undefined,
     content,
     draft: data.draft === true,
   };
@@ -52,6 +56,7 @@ export function getAllPosts(): PostMetadata[] {
     summary: p.summary,
     slug: p.slug,
     tags: p.tags,
+    image: p.image,
   }));
 }
 

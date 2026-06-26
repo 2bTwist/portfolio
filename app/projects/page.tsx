@@ -6,7 +6,7 @@ import { ProjectCard } from "@/components/content/ProjectCard";
 
 export const metadata: Metadata = {
   title: "Projects - Edmond Ndanji",
-  description: "Web and mobile projects: problem, role, tech, live demo and source.",
+  description: "Web and mobile projects: the problem, my role, the tech, and the full build story.",
 };
 
 export default function ProjectsPage() {
