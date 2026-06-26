@@ -19,6 +19,10 @@ export interface PostMetadata {
 
 export interface Post extends PostMetadata {
   content: string;
+  /* When true the post is hidden everywhere — listing, tags, sitemap, RSS,
+     search, and its own URL (404). Set `draft: true` in frontmatter while a
+     post is still being written. */
+  draft: boolean;
 }
 
 function readPost(filename: string): Post {
@@ -32,6 +36,7 @@ function readPost(filename: string): Post {
     slug,
     tags: data.tags ?? [],
     content,
+    draft: data.draft === true,
   };
 }
 
@@ -55,12 +60,15 @@ export function getAllPosts(): PostMetadata[] {
 export function getAllPostsWithContent(): Post[] {
   return postFiles()
     .map(readPost)
+    .filter((p) => !p.draft)
     .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
 }
 
 export function getPost(slug: string): Post | null {
   const filename = postFiles().find((f) => f.replace(/\.mdx?$/, "") === slug);
-  return filename ? readPost(filename) : null;
+  if (!filename) return null;
+  const post = readPost(filename);
+  return post.draft ? null : post;
 }
 
 export function getAllTags(): string[] {

@@ -1,6 +1,11 @@
 import type { Metadata } from "next";
+import Link from "next/link";
+import Image from "next/image";
 import { notFound } from "next/navigation";
+import { compileMDX } from "next-mdx-remote/rsc";
 import { PROJECTS, getProject } from "@/data/projects";
+import { getProjectStory } from "@/app/lib/project-story";
+import { MDXComponents } from "@/components/mdx/MDXComponents";
 import { PageShell } from "@/components/site/PageShell";
 import { TagRow, ActionLink } from "@/components/content/ui";
 
@@ -25,9 +30,42 @@ export default async function ProjectPage({ params }: Params) {
   const project = getProject(slug);
   if (!project) notFound();
 
+  const storySource = getProjectStory(project.id);
+  const { content } = storySource
+    ? await compileMDX({
+        source: storySource,
+        options: { parseFrontmatter: false },
+        components: MDXComponents,
+      })
+    : { content: null };
+
   return (
     <PageShell>
-      <div className="mb-3">
+      <Link
+        href="/projects"
+        prefetch={false}
+        className="mono text-sm no-underline transition-opacity hover:opacity-70"
+        style={{ color: "var(--muted)" }}
+      >
+        ← projects/
+      </Link>
+
+      {/* Banner image up top (Twitter-article style). Carries the shared
+          view-transition name so it can morph from the card on navigation. */}
+      {project.image ? (
+        <div className="project-banner mt-4">
+          <Image
+            src={project.image}
+            alt=""
+            fill
+            sizes="(min-width: 768px) 720px, 100vw"
+            style={{ viewTransitionName: `project-img-${project.id}` }}
+            priority
+          />
+        </div>
+      ) : null}
+
+      <div className={project.image ? "mt-6" : "mt-4"}>
         <span
           className="mono text-xs px-2 py-0.5 rounded-full"
           style={{ background: "var(--surface)", color: "var(--muted)", border: "1px solid var(--border)" }}
@@ -36,19 +74,19 @@ export default async function ProjectPage({ params }: Params) {
         </span>
       </div>
 
-      <h1 className="mono text-3xl sm:text-4xl font-bold" style={{ color: "var(--text)" }}>
+      <h1 className="display text-3xl sm:text-4xl font-bold mt-3" style={{ color: "var(--text)" }}>
         {project.title}
       </h1>
-      <p className="mt-4 text-lg leading-relaxed" style={{ color: "var(--text)" }}>
-        {project.detail}
+      <p className="mt-3 text-lg leading-relaxed" style={{ color: "var(--muted)" }}>
+        {project.blurb}
       </p>
 
-      <div className="mt-6">
+      <div className="mt-5">
         <TagRow tags={project.tags} />
       </div>
 
       {(project.links?.live || project.links?.repo) && (
-        <div className="mt-7 flex flex-wrap gap-4">
+        <div className="mt-6 flex flex-wrap gap-4">
           {project.links?.live ? <ActionLink href={project.links.live}>View live</ActionLink> : null}
           {project.links?.repo ? (
             <ActionLink href={project.links.repo} variant="ghost">
@@ -58,19 +96,13 @@ export default async function ProjectPage({ params }: Params) {
         </div>
       )}
 
-      {/* Per-project interactive demo slot (Appetize / Expo Snack), filled
-          project by project. Reserved layout region so it drops in cleanly. */}
-      {project.demo ? (
-        <section
-          className="mt-10 rounded-xl p-5"
-          style={{ background: "var(--surface)", border: "1px solid var(--border)" }}
-          aria-label="Interactive demo"
-        >
-          <p className="mono text-sm" style={{ color: "var(--muted)" }}>
-            Demo loads here.
-          </p>
-        </section>
-      ) : null}
+      {content ? (
+        <div className="prose-content mt-10">{content}</div>
+      ) : (
+        <p className="mt-8 text-lg leading-relaxed" style={{ color: "var(--text)" }}>
+          {project.detail}
+        </p>
+      )}
     </PageShell>
   );
 }

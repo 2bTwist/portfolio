@@ -22,6 +22,7 @@ export function ProjectCard({ project }: { project: Project }) {
               alt=""
               fill
               sizes="(min-width: 640px) 50vw, 100vw"
+              style={{ viewTransitionName: `project-img-${project.id}` }}
             />
           ) : (
             <span className="proj-card-ph mono" aria-hidden="true">

@@ -16,8 +16,9 @@ export type ExperienceEntry = {
   logo?: string;
   logoClass?: string;
   roles: Role[];
-  /* href to the blog-style "read more" story, when one exists */
-  story?: string;
+  /* "Read the story" link target. The full write-up may live on a project page
+     (e.g. the Cisco MCP story) rather than a dedicated experience page. */
+  storyHref?: string;
 };
 
 export const EXPERIENCE: ExperienceEntry[] = [
@@ -41,7 +42,7 @@ export const EXPERIENCE: ExperienceEntry[] = [
     location: "RTP, NC",
     url: "https://www.cisco.com",
     logo: "/images/cisco.svg",
-    story: "/experience/cisco",
+    storyHref: "/projects/cisco-mcp",
     roles: [
       {
         title: "Software Engineering Intern",
@@ -98,5 +99,4 @@ export const LEADERSHIP: Activity[] = [
     url: "https://www.colorstack.org",
     logo: "/images/colorstack.webp",
   },
-  { role: "Restaurant Manager" },
 ];

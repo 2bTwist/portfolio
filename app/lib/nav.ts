@@ -4,7 +4,6 @@
    importable, no client code. */
 
 import { PROJECTS } from "@/data/projects";
-import { EXPERIENCE } from "@/data/experience";
 
 export type TreeFile = { type: "file"; name: string; href: string };
 export type TreeFolder = {
@@ -25,14 +24,6 @@ const projectFiles: TreeFile[] = PROJECTS.map((p) => ({
   href: `/projects/${p.id}`,
 }));
 
-/* Experience entries that have a "read more" story become files under the
-   experience/ folder. */
-const experienceFiles: TreeFile[] = EXPERIENCE.filter((e) => e.story).map((e) => ({
-  type: "file",
-  name: `${e.story!.replace("/experience/", "")}.md`,
-  href: e.story!,
-}));
-
 /* Hierarchical view for the Explorer. The writing/ folder's children (the blog
    posts) are filled in at runtime by the Explorer from server-provided data,
    because nav.ts is imported by client components and can't read the fs-based
@@ -41,7 +32,7 @@ export const TREE: TreeNode[] = [
   { type: "file", name: "README.md", href: "/" },
   { type: "file", name: "about.md", href: "/about" },
   { type: "folder", name: "projects", href: "/projects", children: projectFiles },
-  { type: "folder", name: "experience", href: "/experience", children: experienceFiles },
+  { type: "file", name: "experience.md", href: "/experience" },
   { type: "folder", name: "writing", href: "/writing", children: [] },
   { type: "file", name: "certs.pdf", href: "/certs" },
 ];
@@ -54,8 +45,7 @@ export const NAV: NavItem[] = [
   { name: "about.md", href: "/about" },
   { name: "projects/", href: "/projects" },
   ...projectFiles.map((f) => ({ name: f.name, href: f.href })),
-  { name: "experience/", href: "/experience" },
-  ...experienceFiles.map((f) => ({ name: f.name, href: f.href })),
+  { name: "experience.md", href: "/experience" },
   { name: "writing/", href: "/writing" },
   { name: "certs.pdf", href: "/certs" },
   // Not in the explorer TREE (would get the cert/medal .pdf icon); listed here

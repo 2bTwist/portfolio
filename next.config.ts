@@ -4,6 +4,13 @@ import withBundleAnalyzer from "@next/bundle-analyzer";
 
 const nextConfig: NextConfig = {
   reactCompiler: true,
+  // Native View Transitions: lets the router wrap route navigations in
+  // document.startViewTransition, so elements sharing a `view-transition-name`
+  // (the project card image and the detail-page banner) morph between routes.
+  // No client JS on the cards; Firefox degrades to an instant nav.
+  experimental: {
+    viewTransition: true,
+  },
   // Dev-only: allow the LAN IP so the containerized browser used for agent
   // smoke-testing can load dev resources (lazy chunks / HMR). No prod effect.
   allowedDevOrigins: ["192.168.1.185"],

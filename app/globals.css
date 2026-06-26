@@ -2505,16 +2505,11 @@ body[data-dragging] iframe {
   place-items: center;
   overflow: hidden;
   border-bottom: 1px solid var(--border);
-  background: radial-gradient(
-    120% 120% at 30% 0%,
-    color-mix(in srgb, var(--accent) 16%, var(--surface)),
-    var(--surface)
-  );
 }
 .proj-card-img {
   width: 100%;
   height: 100%;
-  object-fit: cover;
+  object-fit: contain;
   display: block;
 }
 /* placeholder until the on-brand image is generated */
@@ -2592,6 +2587,36 @@ body[data-dragging] iframe {
 @media (prefers-reduced-motion: reduce) {
   .proj-card:hover {
     transform: none;
+  }
+}
+
+/* ── Project story page: banner image + Part-2 continuation ──────────────────
+   The banner is the same 16/9 art as the card, sat at the top of the detail
+   page (article style). It carries the shared view-transition name so it can
+   morph from the card on navigation once view transitions are switched on. */
+.project-banner {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  overflow: hidden;
+}
+.project-banner img {
+  object-fit: contain;
+}
+
+/* ── View Transitions ────────────────────────────────────────────────────────
+   Only the shared project image (card -> detail banner) should morph between
+   routes. Suppress the default whole-page (root) cross-fade so the persistent
+   IDE shell never flashes; the named image keeps its automatic morph. */
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation: none;
+}
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-group(*),
+  ::view-transition-old(*),
+  ::view-transition-new(*) {
+    animation: none !important;
   }
 }
 

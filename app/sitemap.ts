@@ -2,7 +2,6 @@ import type { MetadataRoute } from "next";
 import { SITE_URL } from "@/app/lib/site";
 import { getAllPosts } from "@/app/lib/posts";
 import { PROJECTS } from "@/data/projects";
-import { EXPERIENCE } from "@/data/experience";
 
 export default function sitemap(): MetadataRoute.Sitemap {
   const now = new Date();
@@ -21,13 +20,6 @@ export default function sitemap(): MetadataRoute.Sitemap {
     priority: 0.7,
   }));
 
-  const stories = EXPERIENCE.filter((e) => e.story).map((e) => ({
-    url: `${SITE_URL}${e.story}`,
-    lastModified: now,
-    changeFrequency: "yearly" as const,
-    priority: 0.5,
-  }));
-
   const posts = getAllPosts().map((post) => ({
     url: `${SITE_URL}/writing/${post.slug}`,
     lastModified: new Date(post.date),
@@ -35,5 +27,5 @@ export default function sitemap(): MetadataRoute.Sitemap {
     priority: 0.6,
   }));
 
-  return [...pages, ...projects, ...stories, ...posts];
+  return [...pages, ...projects, ...posts];
 }

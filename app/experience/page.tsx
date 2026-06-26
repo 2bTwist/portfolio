@@ -48,8 +48,8 @@ export default function ExperiencePage() {
                   <p className="xp-summary">{role.summary}</p>
                 </div>
               ))}
-              {entry.story ? (
-                <Link href={entry.story} prefetch={false} className="xp-readmore mono">
+              {entry.storyHref ? (
+                <Link href={entry.storyHref} prefetch={false} className="xp-readmore mono">
                   Read the story
                   <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
                     <path d="M5 12h14" />
