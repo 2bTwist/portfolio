@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import Image from "next/image";
 import { notFound } from "next/navigation";
 import { compileMDX } from "next-mdx-remote/rsc";
 import { PROJECTS, getProject } from "@/data/projects";
@@ -8,6 +7,9 @@ import { getProjectStory } from "@/app/lib/project-story";
 import { MDXComponents } from "@/components/mdx/MDXComponents";
 import { PageShell } from "@/components/site/PageShell";
 import { TagRow, ActionLink } from "@/components/content/ui";
+import { GitHubIcon } from "@/components/content/tagIcons";
+import { MorphImage } from "@/components/content/MorphImage";
+import { ArticleToc } from "@/components/content/ArticleToc";
 
 type Params = { params: Promise<{ slug: string }> };
 
@@ -54,12 +56,10 @@ export default async function ProjectPage({ params }: Params) {
           view-transition name so it can morph from the card on navigation. */}
       {project.image ? (
         <div className="project-banner mt-4">
-          <Image
+          <MorphImage
+            morphKey={`project-img-${project.id}`}
             src={project.image}
-            alt=""
-            fill
             sizes="(min-width: 768px) 720px, 100vw"
-            style={{ viewTransitionName: `project-img-${project.id}` }}
             priority
           />
         </div>
@@ -89,7 +89,7 @@ export default async function ProjectPage({ params }: Params) {
         <div className="mt-6 flex flex-wrap gap-4">
           {project.links?.live ? <ActionLink href={project.links.live}>View live</ActionLink> : null}
           {project.links?.repo ? (
-            <ActionLink href={project.links.repo} variant="ghost">
+            <ActionLink href={project.links.repo} variant="ghost" icon={<GitHubIcon />}>
               Source
             </ActionLink>
           ) : null}
@@ -97,7 +97,10 @@ export default async function ProjectPage({ params }: Params) {
       )}
 
       {content ? (
-        <div className="prose-content mt-10">{content}</div>
+        <>
+          <ArticleToc />
+          <div className="prose-content mt-10">{content}</div>
+        </>
       ) : (
         <p className="mt-8 text-lg leading-relaxed" style={{ color: "var(--text)" }}>
           {project.detail}

@@ -4,16 +4,14 @@ import withBundleAnalyzer from "@next/bundle-analyzer";
 
 const nextConfig: NextConfig = {
   reactCompiler: true,
-  // Native View Transitions: lets the router wrap route navigations in
-  // document.startViewTransition, so elements sharing a `view-transition-name`
-  // (the project card image and the detail-page banner) morph between routes.
-  // No client JS on the cards; Firefox degrades to an instant nav.
-  experimental: {
-    viewTransition: true,
-  },
+  // The card<->banner shared-element morph is hand-rolled (components/content/
+  // MorphImage.tsx, FLIP via the Web Animations API) rather than Next/React
+  // View Transitions, because those don't animate on the browser back button
+  // (React skips popstate VTs for sync scroll restoration; vercel/next.js#94369).
+  // The FLIP version works on every navigation, so no viewTransition flag.
   // Dev-only: allow the LAN IP so the containerized browser used for agent
   // smoke-testing can load dev resources (lazy chunks / HMR). No prod effect.
-  allowedDevOrigins: ["192.168.1.185"],
+  allowedDevOrigins: ["192.168.1.185", "192.168.1.191", "100.98.111.54"],
   // next-mdx-remote ships untranspiled ESM that must share Turbopack's React
   // instance, or compileMDX renders against a second copy of React.
   transpilePackages: ["next-mdx-remote"],

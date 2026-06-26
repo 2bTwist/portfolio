@@ -3,8 +3,8 @@
    component. Until a project's `image` is set, a tinted placeholder stands in. */
 
 import Link from "next/link";
-import Image from "next/image";
 import type { Project } from "@/data/projects";
+import { MorphImage } from "./MorphImage";
 import { TagIcon } from "./tagIcons";
 
 export function ProjectCard({ project }: { project: Project }) {
@@ -16,13 +16,11 @@ export function ProjectCard({ project }: { project: Project }) {
       <div className="proj-card-inner">
         <div className="proj-card-media">
           {project.image ? (
-            <Image
+            <MorphImage
+              morphKey={`project-img-${project.id}`}
               className="proj-card-img"
               src={project.image}
-              alt=""
-              fill
               sizes="(min-width: 640px) 50vw, 100vw"
-              style={{ viewTransitionName: `project-img-${project.id}` }}
             />
           ) : (
             <span className="proj-card-ph mono" aria-hidden="true">

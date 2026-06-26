@@ -1709,21 +1709,35 @@ button.ide-row {
 /* ── Home hero (Phase 6) ─────────────────────────────────────────────────────
    Text + mascot. Stacks on mobile (mascot on top), side-by-side from sm. The
    mascot PNG already carries a baked contact shadow; we just add a gentle bob. */
+/* Grid (not flex) so the location minimap can be tucked under the mascot on
+   desktop yet drop below the copy/Resume button on mobile, without duplicating
+   the card. Areas: mobile stacks mascot / copy / map; desktop puts copy in a
+   full-height left column with mascot over map on the right. */
 .hero {
-  display: flex;
-  flex-direction: column-reverse;
-  align-items: center;
+  display: grid;
+  grid-template-columns: 1fr;
+  grid-template-areas:
+    "mascot"
+    "copy"
+    "map";
+  justify-items: center;
   gap: 1rem;
 }
 @media (min-width: 640px) {
   .hero {
-    flex-direction: row;
+    grid-template-columns: minmax(0, 1fr) auto;
+    grid-template-areas:
+      "copy mascot"
+      "copy map";
+    column-gap: 1.75rem;
+    row-gap: 1rem;
     align-items: center;
-    gap: 1.75rem;
   }
 }
 .hero-copy {
-  flex: 1;
+  grid-area: copy;
+  align-self: center;
+  justify-self: stretch;
   min-width: 0;
   /* Let the mascot's light-pool overlap the copy column so figure and text
      interlock as one composition instead of two isolated columns. */
@@ -1735,6 +1749,7 @@ button.ide-row {
    shadow make it read as lit by and standing in the cream space, not pasted on.
    The wrap pulls left into the copy column so the two blocks connect. */
 .hero-mascot-wrap {
+  grid-area: mascot;
   position: relative;
   flex-shrink: 0;
   display: grid;
@@ -2191,15 +2206,14 @@ button.ide-row {
 /* Right column: mascot stacked above the location minimap. The whole column
    carries the leftward pull (so mascot + map stay aligned), not the mascot
    wrap alone. */
-.hero-right {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 1rem;
-  flex-shrink: 0;
+.hero-minimap {
+  grid-area: map;
 }
+/* Desktop: pull the mascot + map left so the figure overlaps the copy column
+   (one interlocked composition), matching the previous flex layout. */
 @media (min-width: 640px) {
-  .hero-right {
+  .hero-mascot-wrap,
+  .hero-minimap {
     margin-left: -2.5rem;
   }
 }
@@ -2604,20 +2618,73 @@ body[data-dragging] iframe {
   object-fit: contain;
 }
 
-/* ── View Transitions ────────────────────────────────────────────────────────
-   Only the shared project image (card -> detail banner) should morph between
-   routes. Suppress the default whole-page (root) cross-fade so the persistent
-   IDE shell never flashes; the named image keeps its automatic morph. */
-::view-transition-old(root),
-::view-transition-new(root) {
-  animation: none;
+/* ── Shared-element morph (MorphImage) ───────────────────────────────────────
+   The morph itself is a fixed-position clone animated in JS (see
+   components/content/MorphImage.tsx); this just makes the wrapper fill its card
+   or banner box so the <Image fill> inside has a positioned, correctly-sized
+   parent to measure. */
+.morph-img-wrap {
+  position: absolute;
+  inset: 0;
+  display: block;
 }
-@media (prefers-reduced-motion: reduce) {
-  ::view-transition-group(*),
-  ::view-transition-old(*),
-  ::view-transition-new(*) {
-    animation: none !important;
-  }
+
+/* ── Side table-of-contents (scroll-spy) ─────────────────────────────────────
+   A fixed rail in the right margin of the centered reading column. Hidden below
+   the width where the margin can hold it; on narrow screens the article just
+   reads top-to-bottom. Each item is a quiet mono label; the section in view
+   lights up in the accent and grows a left indicator bar. */
+/* Visibility + horizontal `left` are set by the component (measured from the
+   content column); these are the appearance + vertical anchoring only. */
+.article-toc {
+  position: fixed;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 168px;
+  max-height: 70vh;
+  overflow-y: auto;
+  z-index: 5;
+}
+.article-toc-title {
+  font-size: 0.66rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--muted);
+  margin-bottom: 0.6rem;
+}
+.article-toc ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  border-left: 1px solid var(--border);
+}
+.article-toc li[data-level="3"] {
+  padding-left: 0.75rem;
+}
+.article-toc-link {
+  display: block;
+  padding: 0.28rem 0 0.28rem 0.75rem;
+  margin-left: -1px;
+  border-left: 2px solid transparent;
+  font-size: 0.72rem;
+  line-height: 1.35;
+  color: var(--muted);
+  text-decoration: none;
+  transition:
+    color 160ms ease-out,
+    border-color 160ms ease-out;
+}
+.article-toc-link:hover {
+  color: var(--text);
+}
+.article-toc-link.is-active {
+  color: var(--accent);
+  border-left-color: var(--accent);
+}
+/* Anchored jumps land below the fixed reading-progress bar, not flush to the
+   viewport top. */
+.prose-content :is(h1, h2, h3) {
+  scroll-margin-top: 5rem;
 }
 
 /* ── Highlighter-marker emphasis (inline, mid-sentence) ──────────────────────

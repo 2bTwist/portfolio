@@ -107,26 +107,26 @@ export default function HomePage() {
           </div>
         </div>
 
-        {/* Right column: the pixel mascot with the location minimap tucked
-            directly beneath it. */}
-        <div className="hero-right">
-          <div className="hero-mascot-wrap">
-            <Image
-              className="hero-mascot"
-              src="/images/mascot.webp"
-              alt="Edmond's pixel-art mascot: a cheerful developer holding a glowing laptop and phone"
-              width={380}
-              height={380}
-              // Displayed at 240px (mobile) / 330px (desktop) via CSS. Without
-              // this, next/image assumed full-width and served an 828w candidate
-              // for the LCP image; sizes trims it to the real display width.
-              sizes="(min-width: 640px) 330px, 240px"
-              priority
-            />
-          </div>
-
-          <LocationCard className="hero-minimap" />
+        {/* Mascot + location minimap are direct grid children (see `.hero`):
+            desktop tucks the map under the mascot in the right column; mobile
+            drops the map to the bottom, below the Resume button, so it never
+            wedges between the mascot and the name. */}
+        <div className="hero-mascot-wrap">
+          <Image
+            className="hero-mascot"
+            src="/images/mascot.webp"
+            alt="Edmond's pixel-art mascot: a cheerful developer holding a glowing laptop and phone"
+            width={380}
+            height={380}
+            // Displayed at 240px (mobile) / 330px (desktop) via CSS. Without
+            // this, next/image assumed full-width and served an 828w candidate
+            // for the LCP image; sizes trims it to the real display width.
+            sizes="(min-width: 640px) 330px, 240px"
+            priority
+          />
         </div>
+
+        <LocationCard className="hero-minimap" />
       </header>
 
       <section className="mt-14">
