@@ -1,0 +1,44 @@
+## 24 hours and a borrowed phone
+
+We flew out from Maryland to the Bay Area for the Qualcomm x Google hackathon. The deal was easy to say and hard to do: they handed every team a Snapdragon-powered Galaxy S24 and <Mark variant="highlight">twenty-four hours</Mark> to build something with on-device AI. No cloud. Everything had to run locally, on the phone in your hand. Google's Gemma had just dropped and the whole room was buzzing about it.
+
+I'll say where I stand upfront: I think on-device is the way forward. AI shouldn't only live behind some enterprise's servers. There are real tradeoffs, and a hybrid of local and cloud probably wins in the end, but a model running in your pocket with no round-trip and no account is a genuinely different feeling.
+
+## AI as an experience, not a chatbot
+
+One of my teammates had the wild idea. What if AI wasn't a chatbot? What if it was something you could *feel*? We landed on this: point the camera at a surface, and the phone turns what it sees into <Mark variant="highlight">audio and haptics so you can feel the material you're touching</Mark>. Brick, woven fabric, bark, each one should buzz and sound different in your hand.
+
+It sounded simple and fun at the start. I'm foreshadowing on purpose, because it did not go as planned at all.
+
+## Where I fit: the architect
+
+Our team was stacked with people strong in ML and people strong in UI. I sat in the middle. I'd built apps before, so I could do a bit of ML, a bit of UI, and mostly the part in between: <Mark variant="bold">how all the separate pieces actually become one experience.</Mark> I owned the design schematics, split the work, and gave everyone a lane.
+
+My own piece was the haptics. I knew Apple's haptics well, you can do beautiful things there, but I'd never touched Android's. So my job was to learn the Android haptics library and turn a model's read of a surface into something your hand believes.
+
+## Everything was hard
+
+Honestly, every single part fought us. Nobody on the team had shipped Android before. Nobody had done on-device ML before.
+
+<Callout type="warning">
+The walls we hit, in order of how much they hurt:
+- **Finding data** to identify a material. The datasets out there didn't match what we actually needed.
+- **Mapping the model to feel.** Android's haptics library gives you a handful of parameters to tune, so we tried to get the model to emit those numbers directly, then tuned from there.
+- **Audio.** It was supposed to be model-generated too. It sounded horrible, so we gave up and pre-recorded a small set of sounds instead.
+</Callout>
+
+The one part that was almost easy was getting the model onto the phone, which was sort of the whole point of the hackathon. <Mark variant="code">Qualcomm AI Hub</Mark> did the heavy lifting: a library of models already optimized for the chip, plus a path to upload your own and have it quantized to run on the NPU. Plug and play.
+
+## Submitting at T-minus one minute
+
+We'd trained the model on photos we took right there in the room, so it really only knew the materials in our environment. We had to scope down, hard. When we asked one of the Qualcomm folks about it, he ended up posting on LinkedIn about how ambitious the whole attempt was.
+
+We submitted <Mark variant="bold">one minute before the deadline.</Mark> Things were breaking right up to the end. I pitched it on stage. We made finalist. We didn't win, but we walked out with a working demo of a phone you could feel through, built in a day.
+
+## What it taught me
+
+<Callout type="tip">
+**Scope is brutally hard to boil down.** We wanted every texture. We should have shipped four and bought ourselves the time. I keep relearning this one.
+</Callout>
+
+Two more things stuck. AI really can run on your phone, it just needs to be a very good phone. And afterward I found out there's an entire research field for exactly this, called <Mark variant="code">haptography</Mark>, that people have been working on for years. We tried to do it in twenty-four hours. That still makes me laugh.
