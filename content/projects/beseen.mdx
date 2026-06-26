@@ -1,14 +1,14 @@
 ## Why BeSeen exists
 
-BeSeen came out of being in a long-distance relationship. The hardest part of long distance is just keeping up with each other without texting all day. So I kept asking myself: what if you didn't have to text to stay close? What if your partner could glance at a small, <Mark variant="highlight">very private status</Mark> and simply know how you're doing?
+BeSeen came out of being in a long-distance relationship. The hardest part of long distance is just keeping up with each other without texting all day. So I kept asking myself: what if you didn't have to text to stay close? What if your partner could glance at a small, very private status and simply know how you're doing?
 
 The obvious question is "why not just use social media?" Because those are built for friends and followers. There's no private room for two people to be honest without an audience, without the fear of being seen by everyone, without the noise. BeSeen is that room: <Mark variant="highlight">a private space for just the two of you.</Mark>
 
 ## Offline-first, and keeping it private
 
-I wanted it to work offline first. If you're only journaling for yourself, you shouldn't need the internet at all. Sharing with your partner obviously does need to sync, so the careful part was making the shared notes <Mark variant="bold">encrypted</Mark>, so what you choose to show your partner never sits readable on the server it passes through.
+I wanted it to work offline first. If you're only journaling for yourself, you shouldn't need the internet at all. Sharing with your partner obviously does need to sync, so the careful part was <Mark variant="bold">encrypting the shared notes before they leave your phone</Mark>, so what you choose to show your partner stays private as it syncs between you.
 
-It's built with <Mark variant="code">Expo</Mark> and <Mark variant="code">React Native</Mark>, offline-first over on-device <Mark variant="code">SQLite</Mark>, with <Mark variant="code">Supabase</Mark> syncing partners in real time. The home-screen widgets are native <Mark variant="code">Swift</Mark>: at the time Expo's widget support was still beta, Swift did it better, and Expo happily lets you drop the native module in.
+It's built with <Mark variant="code">Expo</Mark> and <Mark variant="code">React Native</Mark>, offline-first over on-device SQLite, with Supabase syncing partners in real time. The home-screen widgets are native <Mark variant="code">Swift</Mark>: at the time Expo's widget support was still beta, Swift did it better, and Expo happily lets you drop the native module in.
 
 ## The hard part wasn't the code
 
@@ -36,4 +36,4 @@ Product development is genuinely hard, and it's the most fun I've had in a long 
 
 ## The cleanup is the hard part
 
-Here's the part nobody warns you about: <Mark variant="highlight">most of the work is cleanup, not building.</Mark> Once the idea was validated, I went back and refactored the whole app, because the first version was, honestly, slop. Getting the architecture right after the fact turned out to be harder than the first build ever was. I'm working on the next release now. Maybe, by the time you're reading this, it's already out.
+Here's the part nobody warns you about, especially solo: once the idea proved itself, the real work started. I went back and refactored the whole app, because the first version was, honestly, slop, and there's <Mark variant="highlight">no one else to hand the mess to.</Mark> Getting the architecture right after the fact turned out to be harder than the first build ever was. I'm working on the next release now. Maybe, by the time you're reading this, it's already out.
