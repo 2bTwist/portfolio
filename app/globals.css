@@ -955,6 +955,10 @@ button.ide-row {
    stays coherent when the theme switches. */
 .ide-terminal {
   position: relative;
+  /* Sit above the side TOC rail (z-index 5), which is fixed to the viewport and
+     would otherwise bleed over the terminal panel; the terminal covers the
+     rail's lower portion instead of the rail painting on top. */
+  z-index: 30;
   border-top: 1px solid var(--border);
   background: var(--term-bg);
   color: var(--term-text);

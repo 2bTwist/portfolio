@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { useOverlay } from "@/components/ide/store";
 
 /* Side table-of-contents with scroll-spy for long articles (project stories and
    blog posts). Reads the rendered `.prose-content` headings on mount — their
@@ -9,10 +8,10 @@ import { useOverlay } from "@/components/ide/store";
    and tracks the section in view with an IntersectionObserver. Click jumps to a
    section (smooth unless the reader prefers reduced motion).
 
-   It renders nothing for short articles (< 2 headings), is hidden by JS when the
-   left gap is too tight, and is hidden while the terminal is open (the rail is
-   viewport-anchored, so it can't tell the editor area shrank and would otherwise
-   bleed over the terminal panel). Pure DOM reads + one observer. */
+   It renders nothing for short articles (< 2 headings) and is hidden by JS when
+   the left gap is too tight. The terminal panel sits above it (z-index) so the
+   rail's lower part is covered, not hidden, when the terminal opens. Pure DOM
+   reads + one observer. */
 
 interface Heading {
   id: string;
@@ -21,7 +20,6 @@ interface Heading {
 }
 
 export function ArticleToc() {
-  const { termOpen } = useOverlay();
   const [headings, setHeadings] = useState<Heading[]>([]);
   const [activeId, setActiveId] = useState<string>("");
   // Horizontal anchor + visibility are computed from the live layout, not a CSS
@@ -98,7 +96,7 @@ export function ArticleToc() {
     };
   }, []);
 
-  if (headings.length < 2 || !pos.show || termOpen) return null;
+  if (headings.length < 2 || !pos.show) return null;
 
   const onJump = (e: React.MouseEvent<HTMLAnchorElement>, id: string) => {
     e.preventDefault();

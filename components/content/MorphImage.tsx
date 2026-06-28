@@ -46,6 +46,10 @@ interface Entry {
 // Last on-screen rect per morph key. A module singleton: the leaving page
 // writes, the arriving page reads. Survives client navigation (same document).
 const store = new Map<string, Entry>();
+// The path of the page we most recently left. Only entries recorded on THAT
+// page may morph, so old banner entries from detail pages visited earlier
+// (still in `store`) don't all fire when you return to the grid.
+let lastLeftPath = "";
 const MAX_AGE = 300_000; // ms — generous (reading a detail page takes a while)
 const DURATION = 380;
 const EASING = "cubic-bezier(0.22, 1, 0.36, 1)";
@@ -85,10 +89,15 @@ export function MorphImage({
       typeof matchMedia === "function" &&
       matchMedia("(prefers-reduced-motion: reduce)").matches;
 
-    // Morph only a genuine cross-page card<->banner pair. Same-page records and
-    // card-to-card (list grid to list grid) are consumed above but never animated.
+    // Morph only a genuine cross-page card<->banner pair, AND only when the twin
+    // was on the page we just left (not a detail page visited earlier whose
+    // banner entry is still lingering in the store).
     const shouldMorph =
-      !!prev && prev.from !== here && prev.role !== role && Date.now() - prev.t < MAX_AGE;
+      !!prev &&
+      prev.from !== here &&
+      prev.from === lastLeftPath &&
+      prev.role !== role &&
+      Date.now() - prev.t < MAX_AGE;
 
     let raf = 0;
     if (shouldMorph && !reduce && prev) {
@@ -176,6 +185,7 @@ export function MorphImage({
       const loaded = img?.currentSrc || img?.src || src;
       if (rect.width > 0 && rect.height > 0) {
         store.set(morphKey, { rect, src: loaded, t: Date.now(), from: here, role });
+        lastLeftPath = here; // this is the page we're leaving
       }
     };
   }, [morphKey, src, role]);
