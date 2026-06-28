@@ -57,7 +57,12 @@ export default async function WritingPost({ params }: Params) {
     datePublished: published,
     dateModified: published,
     author: { "@type": "Person", name: profile.name, url: SITE_URL },
-    image: post.image ? `${SITE_URL}${post.image}` : `${SITE_URL}/opengraph-image`,
+    publisher: {
+      "@type": "Organization",
+      name: profile.name,
+      logo: { "@type": "ImageObject", url: `${SITE_URL}/opengraph-image` },
+    },
+    image: `${SITE_URL}/writing/${slug}/opengraph-image`,
     url,
     mainEntityOfPage: url,
     keywords: post.tags.join(", "),
@@ -94,6 +99,7 @@ export default async function WritingPost({ params }: Params) {
             <MorphImage
               morphKey={`post-img-${post.slug}`}
               src={post.image}
+              alt={post.title}
               sizes="(min-width: 768px) 720px, 100vw"
               priority
               kind="banner"

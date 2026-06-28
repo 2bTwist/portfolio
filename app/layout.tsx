@@ -24,6 +24,7 @@ export const metadata: Metadata = {
   applicationName: "Edmond Ndanji",
   authors: [{ name: profile.name, url: SITE_URL }],
   creator: profile.name,
+  icons: { icon: "/favicon.ico" },
   alternates: {
     types: { "application/rss+xml": "/rss.xml" },
   },

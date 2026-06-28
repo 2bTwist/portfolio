@@ -27,6 +27,8 @@ export async function generateMetadata({ params }: Params): Promise<Metadata> {
     title: `${project.title} - Edmond Ndanji`,
     description: project.blurb,
     alternates: { canonical: `/projects/${project.id}` },
+    openGraph: { title: project.title, description: project.blurb, type: "article" },
+    twitter: { card: "summary_large_image", title: project.title, description: project.blurb },
   };
 }
 
@@ -73,6 +75,7 @@ export default async function ProjectPage({ params }: Params) {
           <MorphImage
             morphKey={`project-img-${project.id}`}
             src={project.image}
+            alt={project.title}
             sizes="(min-width: 768px) 720px, 100vw"
             priority
             kind="banner"

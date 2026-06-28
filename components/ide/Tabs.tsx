@@ -98,7 +98,7 @@ export function Tabs({ className = "" }: { className?: string }) {
                 aria-label={`Close ${tab.name}`}
                 onClick={() => closeTab(tab.href)}
               >
-                ×
+                <span aria-hidden="true">×</span>
               </button>
             </div>
           );

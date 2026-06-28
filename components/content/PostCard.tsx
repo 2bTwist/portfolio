@@ -30,7 +30,7 @@ export function PostCard({ post }: { post: PostMetadata }) {
         </div>
         <div className="proj-card-body">
           <div className="proj-card-top">
-            <h3 className="proj-card-title">{post.title}</h3>
+            <h2 className="proj-card-title">{post.title}</h2>
             <span className="proj-card-kind mono">{post.date}</span>
           </div>
           <p className="proj-card-desc">{post.summary}</p>

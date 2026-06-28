@@ -27,7 +27,7 @@ export function CertBadge({ cert }: { cert: Cert }) {
 
   const body = (
     <div className="cert-card-body">
-      <h3 className="cert-card-name">{cert.name}</h3>
+      <h2 className="cert-card-name">{cert.name}</h2>
       <p className="cert-card-meta mono">
         {cert.issuer}
         {cert.year ? ` · ${cert.year}` : ""}
