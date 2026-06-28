@@ -3160,19 +3160,12 @@ a.xp-org:hover {
 .data-reveal-close:hover {
   color: var(--text);
 }
-.data-reveal-kicker {
-  font-size: 0.66rem;
-  text-transform: uppercase;
-  letter-spacing: 0.12em;
-  color: var(--accent);
-  margin: 0;
-}
 .data-reveal-title {
   font-size: clamp(1.4rem, 4vw, 1.8rem);
   font-weight: 700;
   line-height: 1.1;
   color: var(--text);
-  margin: 0.5rem 0 0;
+  margin: 0;
 }
 .data-reveal-sub {
   margin: 0.6rem 0 0;

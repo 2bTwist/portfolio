@@ -1,0 +1,50 @@
+---
+title: "How to protect your privacy online, without the tinfoil hat"
+date: "2026-06-28"
+summary: "A developer's honest take on web privacy: why companies collect more than they need, why consent is the real problem, and the few simple things (an ad blocker, locked-down settings, a VPN on public wifi) that actually help."
+tags: ["privacy", "web", "security"]
+draft: false
+---
+
+A while back I got an alert I won't forget. I run a couple of monitors that watch for my data showing up in breaches, and one pinged me with: <Mark variant="highlight">your Social Security number was found in this leak.</Mark> It came from a breach at AT&T, my phone provider at the time.
+
+That's the moment web privacy stopped being abstract for me.
+
+## Why does a phone number need my Social Security?
+
+Here's what got under my skin. AT&T already had my name and my ID. So why did they ever need my Social Security number just to give me a phone line? It wasn't required for the service. They collected it anyway, and then they lost it.
+
+That one question, why do they even have this, sent me down a rabbit hole: data brokers, companies quietly selling your information for profit, a whole invisible market built on data most services never needed to collect. It's genuinely worse than most people think.
+
+## The problem isn't data, it's consent
+
+I want to be fair, because I work in tech: <Mark variant="bold">data isn't the enemy.</Mark> A lot of good software simply can't work without it. I build apps that have to collect things and sync them between partners. That's fine.
+
+The problem is that it happens *to* you instead of *with* you. Most of the time nobody tells you what's being taken, why, or who it gets sold to. You never agreed. You barely knew. And that same data gets used both for you and against you, by companies and by whoever ends up with it after the next breach.
+
+<Callout type="note">
+That's the line for me. If a service genuinely needs your data, fine. But you are owed the truth about what it takes and a real choice. Collecting what you don't need, and staying quiet about it, is the part that's broken.
+</Callout>
+
+## If you collect data, you owe something
+
+This is the philosophy I try to build by: <Mark variant="highlight">take only what the service actually needs, and be clear about it.</Mark> When one of my apps does need your data, I treat that as a responsibility rather than a free resource: who can access it, where it's stored, how it's locked down.
+
+This very site is me trying to practice that. No analytics, no tracking cookies. The one thing it can't avoid, a map that sends your IP to a maps provider, is spelled out in the privacy policy instead of hidden. And the card you may have seen when you arrived shows you your own data instead of quietly pocketing it.
+
+## What you can actually do
+
+You can't disappear, but a few low-effort moves cut most of the tracking:
+
+- **Install an ad blocker.** If you do one thing, do this. <a href="https://ublockorigin.com" target="_blank" rel="noreferrer noopener" className="txt-link">uBlock Origin</a> is free and open-source, and it stops the tracker and ad scripts before they run. Pages get faster as a bonus. I genuinely think it's the single best move.
+- **Lock down your settings.** In your social apps, dig into the privacy settings and turn off what you didn't ask for. Most of it is opt-*in* by default and never opt-out.
+- **Give the least.** If a field is optional, leave it blank. Hand over the minimum a service actually needs.
+- **Use a VPN on public wifi,** but know what it's actually for:
+
+<Callout type="warning">
+A VPN hides your IP from the sites you visit and from your provider, and it's genuinely useful on public wifi. But it is **not** privacy. Sites can still fingerprint you, your logins still identify you, and now your VPN company sees your traffic instead of your ISP. You're moving trust, not removing it.
+</Callout>
+
+## Not paranoid, just modest
+
+I'm not tinfoil-hat about any of this. I'm pretty modest, honestly. I just care enough to set up a few things, and I think that's the right bar for most people. Right now companies take an enormous amount from you by default. Give them the least, block what you can, and ask for the honesty you're owed. If enough of us did that, and enough builders only took what they needed, we'd have a noticeably safer web.

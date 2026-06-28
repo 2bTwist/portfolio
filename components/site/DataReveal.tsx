@@ -143,7 +143,6 @@ export function DataReveal() {
         <button ref={closeRef} className="data-reveal-close" onClick={dismiss} aria-label="Close">
           ×
         </button>
-        <p className="data-reveal-kicker mono">no cookies. no clicks.</p>
         <h2 id="data-reveal-title" className="data-reveal-title display">
           You just handed this site all of this.
         </h2>
@@ -170,12 +169,12 @@ export function DataReveal() {
 
         <div className="data-reveal-foot">
           <Link
-            href="/writing/what-you-give-a-website"
+            href="/writing/privacy-basics"
             prefetch={false}
             className="data-reveal-link"
             onClick={dismiss}
           >
-            Why I&apos;m showing you this →
+            What you can do about it →
           </Link>
           <button className="data-reveal-got" onClick={dismiss}>
             Got it
