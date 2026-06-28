@@ -20,7 +20,7 @@ export function PostCard({ post }: { post: PostMetadata }) {
               className="proj-card-img"
               src={post.image}
               sizes="(min-width: 640px) 50vw, 100vw"
-              centerOnArrive
+              role="card"
             />
           ) : (
             <span className="proj-card-ph mono" aria-hidden="true">

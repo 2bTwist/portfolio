@@ -65,6 +65,7 @@ export default async function WritingPost({ params }: Params) {
               src={post.image}
               sizes="(min-width: 768px) 720px, 100vw"
               priority
+              role="banner"
             />
           </div>
         ) : null}

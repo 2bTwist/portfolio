@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import { useOverlay } from "@/components/ide/store";
 
 /* Side table-of-contents with scroll-spy for long articles (project stories and
    blog posts). Reads the rendered `.prose-content` headings on mount — their
@@ -8,9 +9,10 @@ import { useEffect, useState } from "react";
    and tracks the section in view with an IntersectionObserver. Click jumps to a
    section (smooth unless the reader prefers reduced motion).
 
-   It renders nothing for short articles (< 2 headings) and is hidden by CSS on
-   narrow viewports, where a fixed side rail has no room. Pure DOM reads + one
-   observer, so it adds no measurable work to first paint. */
+   It renders nothing for short articles (< 2 headings), is hidden by JS when the
+   left gap is too tight, and is hidden while the terminal is open (the rail is
+   viewport-anchored, so it can't tell the editor area shrank and would otherwise
+   bleed over the terminal panel). Pure DOM reads + one observer. */
 
 interface Heading {
   id: string;
@@ -19,6 +21,7 @@ interface Heading {
 }
 
 export function ArticleToc() {
+  const { termOpen } = useOverlay();
   const [headings, setHeadings] = useState<Heading[]>([]);
   const [activeId, setActiveId] = useState<string>("");
   // Horizontal anchor + visibility are computed from the live layout, not a CSS
@@ -27,6 +30,12 @@ export function ArticleToc() {
   // LEFT gap (between the shell sidebar and the column) and hide it when that
   // gap is too tight. `<main>`'s left edge is the sidebar's right edge.
   const [pos, setPos] = useState<{ left: number; show: boolean }>({ left: 0, show: false });
+  // While a click-jump is animating, ignore observer-driven active changes so
+  // the marker goes straight to the clicked section instead of flickering
+  // through every section the smooth scroll passes (worse for tall, multi-line
+  // entries, which take longer to scroll past).
+  const lockRef = useRef(false);
+  const unlockTimer = useRef<number | undefined>(undefined);
 
   useEffect(() => {
     const TOC_WIDTH = 168;
@@ -67,6 +76,7 @@ export function ArticleToc() {
       const seen = new Set<string>();
       observer = new IntersectionObserver(
         (entries) => {
+          if (lockRef.current) return; // a click-jump owns the active state
           for (const entry of entries) {
             if (entry.isIntersecting) seen.add(entry.target.id);
             else seen.delete(entry.target.id);
@@ -84,19 +94,27 @@ export function ArticleToc() {
       cancelAnimationFrame(frame);
       observer?.disconnect();
       window.removeEventListener("resize", place);
+      window.clearTimeout(unlockTimer.current);
     };
   }, []);
 
-  if (headings.length < 2 || !pos.show) return null;
+  if (headings.length < 2 || !pos.show || termOpen) return null;
 
   const onJump = (e: React.MouseEvent<HTMLAnchorElement>, id: string) => {
     e.preventDefault();
     const el = document.getElementById(id);
     if (!el) return;
+    // Pin the marker to the clicked section and hold it there until the scroll
+    // settles, so the observer doesn't drag it through the sections in between.
+    setActiveId(id);
+    lockRef.current = true;
+    window.clearTimeout(unlockTimer.current);
+    unlockTimer.current = window.setTimeout(() => {
+      lockRef.current = false;
+    }, 700);
     const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     el.scrollIntoView({ behavior: reduce ? "auto" : "smooth", block: "start" });
     history.replaceState(null, "", `#${id}`);
-    setActiveId(id);
   };
 
   return (

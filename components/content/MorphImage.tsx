@@ -11,20 +11,18 @@
 
    How it works (FLIP): a MorphImage records its on-screen rect (and the exact
    loaded image URL) plus the PAGE it was on when it unmounts. When its twin —
-   the element with the same `morphKey` — mounts on a DIFFERENT page, it reads
-   that rect and flies a fixed-position clone from the old rect to its own rect,
-   then reveals itself. The clone lives at the top of <body>, so it is never
-   clipped by the card's `overflow:hidden`.
+   the element with the same `morphKey` — mounts, it reads that rect and flies a
+   fixed-position clone from the old rect to its own rect, then reveals itself.
+   The clone lives at the top of <body>, so it is never clipped by the card's
+   `overflow:hidden`.
 
-   Two rules keep it honest as a *shared* transition (not a free-for-all):
-   - We only morph when the recorded twin was on a DIFFERENT page (`from`). That
-     stops every card on a grid from animating on back: each grid card recorded
-     its own rect on the way out, but those records share the grid's path, so
-     they're skipped. Only the one card whose twin (the detail banner) lived on
-     another page actually morphs.
-   - `centerOnArrive` (cards) scrolls the arriving card to the viewport center
-     before measuring, so going back focuses the exact card you clicked and the
-     morph lands on it.
+   Three rules keep it honest as a *shared* transition (not a free-for-all):
+   - Different page (`from`): only morph when the twin was on another page.
+   - Different `role`: only morph a `card` against a `banner` (the detail hero),
+     never card-to-card. Without this, the same project cards on the home grid
+     and the /projects grid would all morph just from navigating between them.
+   - `role === "card"` arrivals scroll the card to center first, so going back
+     focuses the exact card you clicked and the morph lands on it.
 
    Pure client animation, no server round-trip, no router coupling. */
 
@@ -36,11 +34,14 @@ import { useEffect, useLayoutEffect, useRef } from "react";
 // "useLayoutEffect does nothing on the server" warning.
 const useIsoLayoutEffect = typeof window !== "undefined" ? useLayoutEffect : useEffect;
 
+type Role = "card" | "banner";
+
 interface Entry {
   rect: DOMRect;
   src: string;
   t: number;
   from: string; // pathname the element was on when it recorded
+  role: Role;
 }
 // Last on-screen rect per morph key. A module singleton: the leaving page
 // writes, the arriving page reads. Survives client navigation (same document).
@@ -56,7 +57,7 @@ export function MorphImage({
   className,
   sizes,
   priority,
-  centerOnArrive = false,
+  role = "card",
 }: {
   morphKey: string;
   src: string;
@@ -64,9 +65,9 @@ export function MorphImage({
   className?: string;
   sizes?: string;
   priority?: boolean;
-  /* When this element arrives as the shared target (e.g. a grid card on back),
-     scroll it to the viewport center before the morph lands. */
-  centerOnArrive?: boolean;
+  /* "card" in a list/grid, "banner" on a detail page. The morph only fires
+     between a card and a banner, never card-to-card. */
+  role?: Role;
 }) {
   const ref = useRef<HTMLSpanElement>(null);
 
@@ -84,12 +85,13 @@ export function MorphImage({
       typeof matchMedia === "function" &&
       matchMedia("(prefers-reduced-motion: reduce)").matches;
 
-    // Only a genuine cross-page twin morphs (see header). Same-page records
-    // (e.g. the other grid cards) are consumed above but never animated.
-    const crossPage = !!prev && prev.from !== here && Date.now() - prev.t < MAX_AGE;
+    // Morph only a genuine cross-page card<->banner pair. Same-page records and
+    // card-to-card (list grid to list grid) are consumed above but never animated.
+    const shouldMorph =
+      !!prev && prev.from !== here && prev.role !== role && Date.now() - prev.t < MAX_AGE;
 
     let raf = 0;
-    if (crossPage && !reduce && prev) {
+    if (shouldMorph && !reduce && prev) {
       // Hide the destination from the very first paint so there's never a
       // double image (real + clone). The clone is the only thing on screen
       // until it lands.
@@ -108,7 +110,7 @@ export function MorphImage({
           el.style.visibility = "";
           return;
         }
-        if (centerOnArrive) {
+        if (role === "card") {
           (el.closest(".proj-card") ?? el).scrollIntoView({
             block: "center",
             behavior: "instant" as ScrollBehavior,
@@ -173,10 +175,10 @@ export function MorphImage({
       const img = el.querySelector("img");
       const loaded = img?.currentSrc || img?.src || src;
       if (rect.width > 0 && rect.height > 0) {
-        store.set(morphKey, { rect, src: loaded, t: Date.now(), from: here });
+        store.set(morphKey, { rect, src: loaded, t: Date.now(), from: here, role });
       }
     };
-  }, [morphKey, src, centerOnArrive]);
+  }, [morphKey, src, role]);
 
   return (
     <span ref={ref} className="morph-img-wrap">
