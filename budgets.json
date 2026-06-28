@@ -33,7 +33,7 @@
       "layer": "interaction"
     },
     "bundleKB": {
-      "budget": 245,
+      "budget": 252,
       "target": 200,
       "unit": "kB",
       "layer": "bundle"

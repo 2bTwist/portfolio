@@ -5,7 +5,7 @@ import { compileMDX } from "next-mdx-remote/rsc";
 import { getAllPosts, getPost } from "@/app/lib/posts";
 import { MDXComponents } from "@/components/mdx/MDXComponents";
 import { ReadingProgress } from "@/components/mdx/ReadingProgress";
-import { ArticleToc } from "@/components/content/ArticleToc";
+import { ArticleTocMount } from "@/components/content/ArticleTocMount";
 import { MorphImage } from "@/components/content/MorphImage";
 import { PageShell } from "@/components/site/PageShell";
 
@@ -94,7 +94,7 @@ export default async function WritingPost({ params }: Params) {
           ))}
         </div>
 
-        <ArticleToc />
+        <ArticleTocMount />
         <div className="prose-content mt-10">{content}</div>
 
         <nav className="mt-16 pt-8 flex flex-col gap-4 sm:flex-row sm:justify-between" style={{ borderTop: "1px solid var(--border)" }}>

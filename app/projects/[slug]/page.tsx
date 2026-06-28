@@ -9,7 +9,7 @@ import { PageShell } from "@/components/site/PageShell";
 import { TagRow, ActionLink } from "@/components/content/ui";
 import { GitHubIcon, AppStoreIcon } from "@/components/content/tagIcons";
 import { MorphImage } from "@/components/content/MorphImage";
-import { ArticleToc } from "@/components/content/ArticleToc";
+import { ArticleTocMount } from "@/components/content/ArticleTocMount";
 
 type Params = { params: Promise<{ slug: string }> };
 
@@ -106,7 +106,7 @@ export default async function ProjectPage({ params }: Params) {
 
       {content ? (
         <>
-          <ArticleToc />
+          <ArticleTocMount />
           <div className="prose-content mt-10">{content}</div>
         </>
       ) : (
