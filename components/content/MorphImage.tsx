@@ -34,14 +34,14 @@ import { useEffect, useLayoutEffect, useRef } from "react";
 // "useLayoutEffect does nothing on the server" warning.
 const useIsoLayoutEffect = typeof window !== "undefined" ? useLayoutEffect : useEffect;
 
-type Role = "card" | "banner";
+type Kind = "card" | "banner";
 
 interface Entry {
   rect: DOMRect;
   src: string;
   t: number;
   from: string; // pathname the element was on when it recorded
-  role: Role;
+  kind: Kind;
 }
 // Last on-screen rect per morph key. A module singleton: the leaving page
 // writes, the arriving page reads. Survives client navigation (same document).
@@ -61,7 +61,7 @@ export function MorphImage({
   className,
   sizes,
   priority,
-  role = "card",
+  kind = "card",
 }: {
   morphKey: string;
   src: string;
@@ -70,8 +70,9 @@ export function MorphImage({
   sizes?: string;
   priority?: boolean;
   /* "card" in a list/grid, "banner" on a detail page. The morph only fires
-     between a card and a banner, never card-to-card. */
-  role?: Role;
+     between a card and a banner, never card-to-card. (Named `kind`, not `role`,
+     so it doesn't shadow the ARIA `role` attribute.) */
+  kind?: Kind;
 }) {
   const ref = useRef<HTMLSpanElement>(null);
 
@@ -96,7 +97,7 @@ export function MorphImage({
       !!prev &&
       prev.from !== here &&
       prev.from === lastLeftPath &&
-      prev.role !== role &&
+      prev.kind !== kind &&
       Date.now() - prev.t < MAX_AGE;
 
     let raf = 0;
@@ -119,7 +120,7 @@ export function MorphImage({
           el.style.visibility = "";
           return;
         }
-        if (role === "card") {
+        if (kind === "card") {
           (el.closest(".proj-card") ?? el).scrollIntoView({
             block: "center",
             behavior: "instant" as ScrollBehavior,
@@ -184,11 +185,11 @@ export function MorphImage({
       const img = el.querySelector("img");
       const loaded = img?.currentSrc || img?.src || src;
       if (rect.width > 0 && rect.height > 0) {
-        store.set(morphKey, { rect, src: loaded, t: Date.now(), from: here, role });
+        store.set(morphKey, { rect, src: loaded, t: Date.now(), from: here, kind });
         lastLeftPath = here; // this is the page we're leaving
       }
     };
-  }, [morphKey, src, role]);
+  }, [morphKey, src, kind]);
 
   return (
     <span ref={ref} className="morph-img-wrap">

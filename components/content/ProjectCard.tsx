@@ -21,7 +21,7 @@ export function ProjectCard({ project }: { project: Project }) {
               className="proj-card-img"
               src={project.image}
               sizes="(min-width: 640px) 50vw, 100vw"
-              role="card"
+              kind="card"
             />
           ) : (
             <span className="proj-card-ph mono" aria-hidden="true">
