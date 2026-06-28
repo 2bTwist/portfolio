@@ -7,6 +7,7 @@ import { CertBadge } from "@/components/certs/CertBadge";
 export const metadata: Metadata = {
   title: "Certifications - Edmond Ndanji",
   description: "Verified credentials, including the AWS Certified AI Practitioner and Apple Ads certification.",
+  alternates: { canonical: "/certs" },
 };
 
 export default function CertsPage() {

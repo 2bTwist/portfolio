@@ -7,6 +7,7 @@ import { PostCard } from "@/components/content/PostCard";
 export const metadata: Metadata = {
   title: "Writing - Edmond Ndanji",
   description: "Notes on software engineering, product, and building in public.",
+  alternates: { canonical: "/writing" },
 };
 
 export default function WritingPage() {

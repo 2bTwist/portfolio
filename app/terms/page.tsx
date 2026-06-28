@@ -5,6 +5,7 @@ import { PageHeader, Body, Prose } from "@/components/content/ui";
 export const metadata: Metadata = {
   title: "Terms - Edmond Ndanji",
   description: "Terms of use for this site.",
+  alternates: { canonical: "/terms" },
 };
 
 export default function TermsPage() {

@@ -3,6 +3,7 @@ import type { Metadata } from "next";
 export const metadata: Metadata = {
   title: "Resume - Edmond Ndanji",
   description: "Edmond Ndanji's resume.",
+  alternates: { canonical: "/resume" },
 };
 
 /* The page IS the PDF: public/resume.pdf rendered full-bleed by the browser's

@@ -6,6 +6,7 @@ import { PageHeader, Body, Prose } from "@/components/content/ui";
 export const metadata: Metadata = {
   title: "Privacy Policy - Edmond Ndanji",
   description: "How this site handles data: no analytics, no tracking, and an honest note on what a page load still reveals.",
+  alternates: { canonical: "/privacy" },
 };
 
 export default function PrivacyPage() {

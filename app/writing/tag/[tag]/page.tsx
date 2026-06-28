@@ -15,6 +15,7 @@ export async function generateMetadata({ params }: Params): Promise<Metadata> {
   return {
     title: `#${tag} - Writing`,
     description: `Posts tagged #${tag}.`,
+    alternates: { canonical: `/writing/tag/${tag}` },
   };
 }
 

@@ -6,6 +6,11 @@ const m = budgets.metrics;
 
 const assertions = {
   "categories:performance": ["warn", { minScore: 0.9 }],
+  // SEO is a hard gate at 100: the 8 SEO audits (indexability, canonical, meta
+  // description, title, crawlable anchors, descriptive link text, viewport,
+  // valid hreflang) all pass. Asserted from the same LH runs, so no extra CI
+  // time. A perfect SEO score is the floor for a site at this level of care.
+  "categories:seo": ["error", { minScore: 1 }],
 };
 function gate(key, auditId, severity = "error") {
   if (m[key] && m[key].budget != null) {

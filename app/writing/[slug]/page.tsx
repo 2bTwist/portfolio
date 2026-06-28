@@ -7,7 +7,10 @@ import { MDXComponents } from "@/components/mdx/MDXComponents";
 import { ReadingProgress } from "@/components/mdx/ReadingProgress";
 import { ArticleTocMount } from "@/components/content/ArticleTocMount";
 import { MorphImage } from "@/components/content/MorphImage";
+import { JsonLd } from "@/components/site/JsonLd";
 import { PageShell } from "@/components/site/PageShell";
+import { SITE_URL } from "@/app/lib/site";
+import { profile } from "@/data/profile";
 
 type Params = { params: Promise<{ slug: string }> };
 
@@ -22,6 +25,7 @@ export async function generateMetadata({ params }: Params): Promise<Metadata> {
   return {
     title: `${post.title} - Edmond Ndanji`,
     description: post.summary,
+    alternates: { canonical: `/writing/${slug}` },
     openGraph: { title: post.title, description: post.summary, type: "article" },
     twitter: { card: "summary_large_image", title: post.title, description: post.summary },
   };
@@ -43,8 +47,35 @@ export default async function WritingPost({ params }: Params) {
   const prev = i < posts.length - 1 ? posts[i + 1] : null; // older
   const next = i > 0 ? posts[i - 1] : null; // newer
 
+  const url = `${SITE_URL}/writing/${slug}`;
+  const published = new Date(post.date).toISOString();
+  const blogPosting = {
+    "@context": "https://schema.org",
+    "@type": "BlogPosting",
+    headline: post.title,
+    description: post.summary,
+    datePublished: published,
+    dateModified: published,
+    author: { "@type": "Person", name: profile.name, url: SITE_URL },
+    image: post.image ? `${SITE_URL}${post.image}` : `${SITE_URL}/opengraph-image`,
+    url,
+    mainEntityOfPage: url,
+    keywords: post.tags.join(", "),
+  };
+  const breadcrumb = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: [
+      { "@type": "ListItem", position: 1, name: "Home", item: SITE_URL },
+      { "@type": "ListItem", position: 2, name: "Writing", item: `${SITE_URL}/writing` },
+      { "@type": "ListItem", position: 3, name: post.title, item: url },
+    ],
+  };
+
   return (
     <>
+      <JsonLd data={blogPosting} />
+      <JsonLd data={breadcrumb} />
       <ReadingProgress />
       <PageShell>
         <Link

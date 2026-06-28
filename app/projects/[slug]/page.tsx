@@ -10,6 +10,8 @@ import { TagRow, ActionLink } from "@/components/content/ui";
 import { GitHubIcon, AppStoreIcon } from "@/components/content/tagIcons";
 import { MorphImage } from "@/components/content/MorphImage";
 import { ArticleTocMount } from "@/components/content/ArticleTocMount";
+import { JsonLd } from "@/components/site/JsonLd";
+import { SITE_URL } from "@/app/lib/site";
 
 type Params = { params: Promise<{ slug: string }> };
 
@@ -24,6 +26,7 @@ export async function generateMetadata({ params }: Params): Promise<Metadata> {
   return {
     title: `${project.title} - Edmond Ndanji`,
     description: project.blurb,
+    alternates: { canonical: `/projects/${project.id}` },
   };
 }
 
@@ -41,8 +44,19 @@ export default async function ProjectPage({ params }: Params) {
       })
     : { content: null };
 
+  const breadcrumb = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: [
+      { "@type": "ListItem", position: 1, name: "Home", item: SITE_URL },
+      { "@type": "ListItem", position: 2, name: "Projects", item: `${SITE_URL}/projects` },
+      { "@type": "ListItem", position: 3, name: project.title, item: `${SITE_URL}/projects/${project.id}` },
+    ],
+  };
+
   return (
     <PageShell>
+      <JsonLd data={breadcrumb} />
       <Link
         href="/projects"
         prefetch={false}

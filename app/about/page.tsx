@@ -12,6 +12,7 @@ import { SocialLinks } from "@/components/site/SocialLinks";
 export const metadata: Metadata = {
   title: "About - Edmond Ndanji",
   description: profile.blurb,
+  alternates: { canonical: "/about" },
 };
 
 export default function AboutPage() {
