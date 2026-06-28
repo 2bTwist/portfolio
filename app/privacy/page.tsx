@@ -1,10 +1,11 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { PageShell } from "@/components/site/PageShell";
 import { PageHeader, Body, Prose } from "@/components/content/ui";
 
 export const metadata: Metadata = {
   title: "Privacy Policy - Edmond Ndanji",
-  description: "How this site handles data.",
+  description: "How this site handles data: no analytics, no tracking, and an honest note on what a page load still reveals.",
 };
 
 export default function PrivacyPage() {
@@ -13,14 +14,32 @@ export default function PrivacyPage() {
       <PageHeader title="Privacy Policy" />
       <Prose>
         <Body>
-          This site collects no personal data and sets no tracking or
-          advertising cookies. It uses Vercel Speed Insights, which records
-          anonymous, aggregated performance metrics (such as page load timings)
-          to help keep the site fast. No accounts, no profiles.
+          This site runs no analytics, sets no tracking or advertising cookies,
+          and has no accounts or profiles. There is nothing here trying to
+          follow you.
         </Body>
         <Body>
-          A preference (sound on/off) is stored locally in your browser and
-          never leaves your device.
+          A few preferences (the theme, the panel sizes, and whether sound is
+          on) are saved in your browser&apos;s local storage so the site
+          remembers how you like it. They never leave your device.
+        </Body>
+        <Body>
+          In the interest of full honesty, two ordinary parties still see
+          standard request data. Vercel hosts this site and, like any web
+          server, records your IP address and basic request metadata in its
+          logs. And the small location map on the home page loads its image from
+          Stadia Maps, which means your IP and browser are sent to them to fetch
+          that tile. No tracking, but it is data you hand over simply by
+          visiting.
+        </Body>
+        <Body>
+          Curious exactly what a website learns about you the moment you arrive?
+          That is the whole point of the card you may have seen on your first
+          visit, and I wrote about it in{" "}
+          <Link href="/writing/what-you-give-a-website" className="txt-link">
+            what you hand a website
+          </Link>
+          .
         </Body>
       </Prose>
     </PageShell>

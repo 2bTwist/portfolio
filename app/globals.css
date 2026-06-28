@@ -3113,3 +3113,150 @@ a.xp-org:hover {
   font-size: 0.85rem;
   color: var(--muted);
 }
+
+/* ── Data-reveal popup ("what you just handed this site") ─────────────────────
+   First-visit modal. Cream card on a dimmed backdrop; the data reads like a
+   terminal dump (mono values). Sits above the IDE chrome but below the cursor. */
+.data-reveal-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 10000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1.25rem;
+  background: color-mix(in srgb, var(--bg) 30%, rgba(20, 14, 8, 0.62));
+  -webkit-backdrop-filter: blur(3px);
+  backdrop-filter: blur(3px);
+  animation: dr-fade 220ms ease-out;
+}
+.data-reveal-card {
+  position: relative;
+  width: 100%;
+  max-width: 34rem;
+  max-height: 86vh;
+  overflow-y: auto;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 1.6rem 1.6rem 1.4rem;
+  box-shadow: 0 30px 70px -28px rgba(34, 25, 17, 0.55);
+  animation: dr-rise 260ms cubic-bezier(0.2, 0.9, 0.3, 1.1);
+}
+.data-reveal-close {
+  position: absolute;
+  top: 0.7rem;
+  right: 0.85rem;
+  border: none;
+  background: transparent;
+  color: var(--muted);
+  font-size: 1.5rem;
+  line-height: 1;
+  cursor: pointer;
+  padding: 0.2rem;
+  border-radius: 8px;
+  transition: color 140ms ease-out;
+}
+.data-reveal-close:hover {
+  color: var(--text);
+}
+.data-reveal-kicker {
+  font-size: 0.66rem;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--accent);
+  margin: 0;
+}
+.data-reveal-title {
+  font-size: clamp(1.4rem, 4vw, 1.8rem);
+  font-weight: 700;
+  line-height: 1.1;
+  color: var(--text);
+  margin: 0.5rem 0 0;
+}
+.data-reveal-sub {
+  margin: 0.6rem 0 0;
+  color: var(--muted);
+  line-height: 1.5;
+  font-size: 0.95rem;
+}
+.data-reveal-groups {
+  margin-top: 1.3rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.2rem;
+}
+.data-reveal-group-title {
+  font-size: 0.64rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--muted);
+  margin: 0 0 0.5rem;
+}
+.data-reveal-group dl {
+  margin: 0;
+  border-top: 1px solid var(--border);
+}
+.data-reveal-row {
+  display: flex;
+  gap: 1rem;
+  justify-content: space-between;
+  padding: 0.5rem 0;
+  border-bottom: 1px solid var(--border);
+}
+.data-reveal-row dt {
+  color: var(--muted);
+  font-size: 0.8rem;
+  flex-shrink: 0;
+  padding-top: 0.1rem;
+}
+.data-reveal-row dd {
+  margin: 0;
+  color: var(--text);
+  font-size: 0.78rem;
+  text-align: right;
+  word-break: break-word;
+  min-width: 0;
+}
+.data-reveal-foot {
+  margin-top: 1.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+.data-reveal-link {
+  color: var(--accent);
+  font-weight: 600;
+  text-decoration: none;
+  font-size: 0.92rem;
+}
+.data-reveal-link:hover {
+  text-decoration: underline;
+}
+.data-reveal-got {
+  border: 1px solid var(--border);
+  background: var(--bg);
+  color: var(--text);
+  border-radius: 10px;
+  padding: 0.5rem 1.1rem;
+  font-size: 0.88rem;
+  cursor: pointer;
+  transition: border-color 140ms ease-out;
+}
+.data-reveal-got:hover {
+  border-color: var(--border-press);
+}
+@keyframes dr-fade {
+  from { opacity: 0; }
+}
+@keyframes dr-rise {
+  from { opacity: 0; transform: translateY(14px); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .data-reveal-backdrop,
+  .data-reveal-card {
+    animation: none;
+  }
+}

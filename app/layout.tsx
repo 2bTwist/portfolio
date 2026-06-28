@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import type { CSSProperties } from "react";
 import "./globals.css";
 import { ClientBoot } from "@/components/ClientBoot";
+import { DataReveal } from "@/components/site/DataReveal";
 import { IdeProvider } from "@/components/ide/store";
 import { SoundProvider } from "@/components/feel/SoundProvider";
 import { CursorMount } from "@/components/feel/CursorMount";
@@ -79,6 +80,7 @@ export default function RootLayout({
         </SoundProvider>
         <CursorMount />
         <ClientBoot />
+        <DataReveal />
       </body>
     </html>
   );
