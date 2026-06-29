@@ -1,10 +1,12 @@
 "use client";
 
-/* "What you just handed this site" reveal. Shows ONCE on a first visit
-   (remembered in localStorage), after a short delay so it never competes with
-   first paint. Gathers what the browser exposes client-side and what the server
-   saw (IP + coarse geo, from /api/whoami), shows it back to you, and stores or
-   sends none of it. Dismiss with the button, the backdrop, or Esc. */
+/* "What you just handed this site" reveal. Mounted ONLY by the /privacy page,
+   so it appears there and nowhere else, a few seconds after you land (long
+   enough to read the page first; the timer is cleared if you navigate away).
+   Shows ONCE per browser (remembered in localStorage). Gathers what the browser
+   exposes client-side and what the server saw (IP + coarse geo, from
+   /api/whoami), shows it back to you, and stores or sends none of it. Dismiss
+   with the button, the backdrop, or Esc. */
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import Link from "next/link";
@@ -105,7 +107,7 @@ export function DataReveal() {
         /* offline / local dev: just show client data */
       }
       if (!cancelled) setGroups(server ? [server, client] : [client]);
-    }, 1100);
+    }, 3500);
 
     return () => {
       cancelled = true;

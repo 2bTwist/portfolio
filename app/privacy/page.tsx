@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { PageShell } from "@/components/site/PageShell";
 import { PageHeader, Body, Prose } from "@/components/content/ui";
+import { DataRevealMount } from "@/components/site/DataRevealMount";
 
 export const metadata: Metadata = {
   title: "Privacy Policy - Edmond Ndanji",
@@ -43,6 +44,10 @@ export default function PrivacyPage() {
           .
         </Body>
       </Prose>
+      {/* The "what you just handed this site" reveal lives ONLY on this page,
+          and fires a few seconds after you land here. It unmounts (and clears
+          its timer) the moment you navigate away. */}
+      <DataRevealMount />
     </PageShell>
   );
 }
