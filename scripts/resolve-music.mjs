@@ -1,0 +1,125 @@
+/* Resolve the curated playlist against the iTunes Search API into a committed,
+   deterministic data/music.json. Run once (or to refresh links):
+
+     pnpm music:resolve
+
+   We bake artwork + 30s preview URLs at author time so the build never hits the
+   network and there are zero runtime API calls. Apple's preview/artwork URLs are
+   stable CDN links; re-run this if any ever rot. Each SOURCE entry carries the
+   search `term` plus the expected `artist`/`track` so the scorer can pick the
+   right master recording (exact title + exact artist beats remixes, live cuts,
+   covers, and "feat." collabs that merely contain the artist's name). */
+
+import { writeFile } from "node:fs/promises";
+import { fileURLToPath } from "node:url";
+import { dirname, join } from "node:path";
+
+const __dirname = dirname(fileURLToPath(import.meta.url));
+const OUT = join(__dirname, "..", "data", "music.json");
+
+/** Curated, ordered playlist. `track`/`artist` are the expected canonical
+ *  strings used for scoring (case-insensitive). `album` is an optional
+ *  disambiguating hint. Order here is the on-page order. */
+const SOURCE = [
+  { term: "JVKE her OXYGEN", artist: "JVKE", track: "her (feat. OXYGEN)" },
+  { term: "Fally Ipupa Original", artist: "Fally Ipupa", track: "Original", album: "Original" },
+  { term: "Fally Ipupa MH", artist: "Fally Ipupa", track: "MH", album: "Formule 7" },
+  { term: "Omah Lay soso", artist: "OMAH LAY", track: "soso", album: "Boy Alone" },
+  { term: "Richard Bona Muntula Moto", artist: "Richard Bona", track: "Muntula Moto" },
+  { term: "Richard Bona Dipita", artist: "Richard Bona", track: "Dipita" },
+  { term: "Richard Bona Good Times", artist: "Richard Bona", track: "Good Times" },
+  { term: "Richard Bona Kalabancoro", artist: "Richard Bona", track: "Kalabancoro" },
+  { term: "Adekunle Gold Okay", artist: "Adekunle Gold", track: "Okay" },
+  { term: "Billie Eilish everything i wanted", artist: "Billie Eilish", track: "everything i wanted" },
+  { term: "Billie Eilish i love you", artist: "Billie Eilish", track: "i love you", album: "WHEN WE ALL FALL ASLEEP" },
+  { term: "Jacob Collier Little Blue Mahogany Sessions", artist: "Jacob Collier", track: "Little Blue (Mahogany Sessions)" },
+  { term: "Radiohead Weird Fishes Arpeggi", artist: "Radiohead", track: "Weird Fishes / Arpeggi", album: "In Rainbows" },
+];
+
+const norm = (s) => (s ?? "").toLowerCase().trim();
+
+/** Higher is better. Requires the track title to at least appear; rewards exact
+ *  title, exact artist, and an album-hint match so the canonical master wins. */
+function score(result, want) {
+  const track = norm(result.trackName);
+  const artist = norm(result.artistName);
+  const album = norm(result.collectionName);
+  const wTrack = norm(want.track);
+  const wArtist = norm(want.artist);
+
+  let s = 0;
+  if (track === wTrack) s += 5;
+  else if (track.includes(wTrack)) s += 2;
+  else return -Infinity; // wrong song entirely
+
+  if (artist === wArtist) s += 3;
+  else if (artist.includes(wArtist)) s += 1; // collab/feature: weaker
+
+  if (want.album && album.includes(norm(want.album))) s += 2;
+  // De-prioritise non-canonical masters.
+  if (/\b(remix|live|mixed|karaoke|cover|instrumental|tribute|lullaby)\b/.test(track)) s -= 4;
+  return s;
+}
+
+async function search(term) {
+  const url = new URL("https://itunes.apple.com/search");
+  url.searchParams.set("term", term);
+  url.searchParams.set("entity", "song");
+  url.searchParams.set("limit", "12");
+  const res = await fetch(url);
+  if (!res.ok) throw new Error(`iTunes ${res.status} for "${term}"`);
+  const { results } = await res.json();
+  return results ?? [];
+}
+
+/** Apple returns a 100x100 thumb; bump to a crisp square for the vinyl label. */
+function upsizeArtwork(url, size = 600) {
+  return (url ?? "").replace(/\/\d+x\d+bb\.(jpg|png)/, `/${size}x${size}bb.$1`);
+}
+
+async function resolveOne(want) {
+  const results = await search(want.term);
+  let best = null;
+  let bestScore = -Infinity;
+  results.forEach((r, i) => {
+    if (!r.previewUrl) return; // no preview = useless to us
+    const s = score(r, want) - i * 0.01; // stable tiebreak toward earlier hits
+    if (s > bestScore) {
+      bestScore = s;
+      best = r;
+    }
+  });
+  if (!best) throw new Error(`No usable match for "${want.term}"`);
+  return {
+    id: String(best.trackId),
+    title: best.trackName,
+    artist: best.artistName,
+    album: best.collectionName,
+    artwork: upsizeArtwork(best.artworkUrl100),
+    preview: best.previewUrl,
+    durationMs: best.trackTimeMillis ?? null,
+    appleUrl: best.trackViewUrl ?? null,
+  };
+}
+
+async function main() {
+  const tracks = [];
+  for (const want of SOURCE) {
+    const t = await resolveOne(want);
+    const exact = norm(t.title) === norm(want.track) && norm(t.artist) === norm(want.artist);
+    console.log(`${exact ? "ok " : "~~ "}${t.artist} — ${t.title}  [${t.album}]`);
+    tracks.push(t);
+  }
+  const payload = {
+    generatedAt: new Date().toISOString().slice(0, 10),
+    note: "Generated by scripts/resolve-music.mjs (pnpm music:resolve). Do not hand-edit.",
+    tracks,
+  };
+  await writeFile(OUT, JSON.stringify(payload, null, 2) + "\n");
+  console.log(`\nWrote ${tracks.length} tracks -> data/music.json`);
+}
+
+main().catch((err) => {
+  console.error(err.message);
+  process.exit(1);
+});

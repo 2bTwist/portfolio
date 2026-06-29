@@ -33,8 +33,30 @@ function CertIcon({ className }: { className?: string }) {
   );
 }
 
+/* Music note for music.mp3 — inlined for the same reason as CertIcon (keeps the
+   Phosphor FileAudio out of the always-loaded explorer bundle). Duotone idiom. */
+function AudioIcon({ className }: { className?: string }) {
+  return (
+    <svg width={ICON_SIZE} height={ICON_SIZE} viewBox="0 0 256 256" className={className} aria-hidden>
+      <circle cx="76" cy="180" r="28" fill="currentColor" opacity="0.2" />
+      <circle cx="180" cy="156" r="28" fill="currentColor" opacity="0.2" />
+      <path
+        d="M104 180 V72 l104 -24 v108"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="16"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <circle cx="76" cy="180" r="28" fill="none" stroke="currentColor" strokeWidth="16" />
+      <circle cx="180" cy="156" r="28" fill="none" stroke="currentColor" strokeWidth="16" />
+    </svg>
+  );
+}
+
 export function FileIcon({ name, className }: { name: string; className?: string }) {
   if (name.endsWith(".pdf")) return <CertIcon className={className} />; // certs.pdf
+  if (name.endsWith(".mp3")) return <AudioIcon className={className} />; // music.mp3
   const Cmp = name.endsWith(".tsx")
     ? FileTsx
     : name.endsWith(".ts")

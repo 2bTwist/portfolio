@@ -5,6 +5,7 @@ import { ClientBoot } from "@/components/ClientBoot";
 import { IdeProvider } from "@/components/ide/store";
 import { SoundProvider } from "@/components/feel/SoundProvider";
 import { CursorMount } from "@/components/feel/CursorMount";
+import { NowPlayingMount } from "@/components/music/NowPlayingMount";
 import { Shell } from "@/components/ide/Shell";
 import { getGitInfo } from "@/app/lib/git";
 import { getAllPosts } from "@/app/lib/posts";
@@ -79,6 +80,7 @@ export default function RootLayout({
           </IdeProvider>
         </SoundProvider>
         <CursorMount />
+        <NowPlayingMount />
         <ClientBoot />
       </body>
     </html>
