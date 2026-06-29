@@ -48,11 +48,9 @@ export function VinylPlayer() {
         >
           <div className={`vinyl-disc${playing ? " is-spinning" : ""}`}>
             <div className="vinyl-label">
-              {cued ? (
+              {cued && (
                 // eslint-disable-next-line @next/next/no-img-element -- remote Apple art
                 <img src={cued.artwork} alt="" width={150} height={150} decoding="async" />
-              ) : (
-                <span className="vinyl-label-empty" aria-hidden="true">⊙</span>
               )}
             </div>
             <span className="vinyl-hole" aria-hidden="true" />
