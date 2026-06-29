@@ -47,11 +47,11 @@ function EditorPane({ children }: { children: ReactNode }) {
 export function Shell({
   children,
   git,
-  writingFiles = [],
+  blogFiles = [],
 }: {
   children: ReactNode;
   git: GitInfo;
-  writingFiles?: TreeFile[];
+  blogFiles?: TreeFile[];
 }) {
   const pathname = usePathname();
   const router = useRouter();
@@ -163,7 +163,7 @@ export function Shell({
         </div>
 
         <div className="flex flex-1 min-h-0">
-          <Explorer className="ide-explorer hidden md:flex" writingFiles={writingFiles} />
+          <Explorer className="ide-explorer hidden md:flex" blogFiles={blogFiles} />
 
           <div className="flex flex-1 min-w-0 flex-col min-h-0">
             <Tabs className="ide-tabs hidden md:flex" />

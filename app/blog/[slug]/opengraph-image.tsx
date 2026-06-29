@@ -15,15 +15,15 @@ export default async function PostOgImage({ params }: { params: Promise<{ slug: 
   const post = getPost(slug);
   if (!post) {
     return renderOgCard({
-      tab: "writing/",
-      eyebrow: "WRITING",
+      tab: "blog/",
+      eyebrow: "BLOG",
       title: "Edmond Ndanji",
       summary: "Notes on building software.",
     });
   }
   return renderOgCard({
     tab: `${slug}.mdx`,
-    eyebrow: "WRITING",
+    eyebrow: "BLOG",
     title: post.title,
     summary: post.summary,
   });

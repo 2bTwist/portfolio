@@ -54,12 +54,12 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   const git = getGitInfo();
-  // The writing/ folder's children come from the fs-based posts module here
+  // The blog/ folder's children come from the fs-based posts module here
   // (server side) and are handed to the client Explorer.
-  const writingFiles: TreeFile[] = getAllPosts().map((p) => ({
+  const blogFiles: TreeFile[] = getAllPosts().map((p) => ({
     type: "file",
     name: `${p.slug}.md`,
-    href: `/writing/${p.slug}`,
+    href: `/blog/${p.slug}`,
   }));
   return (
     <html lang="en" className={`${clashDisplay.variable} ${satoshi.variable}`}>
@@ -74,7 +74,7 @@ export default function RootLayout({
         />
         <SoundProvider>
           <IdeProvider>
-            <Shell git={git} writingFiles={writingFiles}>
+            <Shell git={git} blogFiles={blogFiles}>
               {children}
             </Shell>
           </IdeProvider>

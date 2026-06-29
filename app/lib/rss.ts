@@ -13,10 +13,10 @@ export function generateRss(): string {
       (post) => `
     <item>
       <title><![CDATA[${post.title}]]></title>
-      <link>${SITE_URL}/writing/${post.slug}</link>
+      <link>${SITE_URL}/blog/${post.slug}</link>
       <pubDate>${new Date(post.date).toUTCString()}</pubDate>
       <description><![CDATA[${post.summary}]]></description>
-      <guid>${SITE_URL}/writing/${post.slug}</guid>
+      <guid>${SITE_URL}/blog/${post.slug}</guid>
     </item>`,
     )
     .join("");
@@ -24,7 +24,7 @@ export function generateRss(): string {
   return `<?xml version="1.0" encoding="UTF-8"?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
-    <title>${profile.name} - Writing</title>
+    <title>${profile.name} - Blog</title>
     <link>${SITE_URL}</link>
     <description>Software engineering, product development, and building in public</description>
     <language>en</language>

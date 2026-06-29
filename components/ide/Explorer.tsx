@@ -69,17 +69,17 @@ function Chevron({ open }: { open: boolean }) {
 
 export function Explorer({
   className = "",
-  writingFiles = [],
+  blogFiles = [],
 }: {
   className?: string;
-  writingFiles?: TreeFile[];
+  blogFiles?: TreeFile[];
 }) {
   const pathname = usePathname();
-  // Fill the writing/ folder with the server-provided blog posts (nav.ts can't
+  // Fill the blog/ folder with the server-provided blog posts (nav.ts can't
   // read the fs-based posts module from a client module).
   const tree: TreeNode[] = TREE.map((node) =>
-    node.type === "folder" && node.href === "/writing"
-      ? { ...node, children: writingFiles }
+    node.type === "folder" && node.href === "/blog"
+      ? { ...node, children: blogFiles }
       : node,
   );
   const mounted = useMounted();
@@ -261,7 +261,7 @@ export function Explorer({
 /* Clickable path crumbs in the explorer header: `~/edmond / projects / ledger`.
    Each crumb navigates to (and opens a tab for) its cumulative route. A crumb is
    only a link when that route is real — in NAV or the current page — so an
-   intermediate non-route (e.g. `/writing/tag`) renders as plain text, not a 404. */
+   intermediate non-route (e.g. `/blog/tag`) renders as plain text, not a 404. */
 const NAV_HREFS = new Set(NAV.map((n) => n.href));
 
 function Breadcrumb({

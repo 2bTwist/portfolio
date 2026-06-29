@@ -6,7 +6,7 @@ import { PROJECTS } from "@/data/projects";
 export default function sitemap(): MetadataRoute.Sitemap {
   const now = new Date();
 
-  const pages = ["", "/about", "/projects", "/experience", "/certs", "/writing", "/resume"].map((p) => ({
+  const pages = ["", "/about", "/projects", "/experience", "/certs", "/blog", "/resume"].map((p) => ({
     url: `${SITE_URL}${p}`,
     lastModified: now,
     changeFrequency: "monthly" as const,
@@ -21,7 +21,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
   }));
 
   const posts = getAllPosts().map((post) => ({
-    url: `${SITE_URL}/writing/${post.slug}`,
+    url: `${SITE_URL}/blog/${post.slug}`,
     lastModified: new Date(post.date),
     changeFrequency: "yearly" as const,
     priority: 0.6,

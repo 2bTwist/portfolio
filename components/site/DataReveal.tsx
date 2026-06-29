@@ -171,7 +171,7 @@ export function DataReveal() {
 
         <div className="data-reveal-foot">
           <Link
-            href="/writing/privacy-basics"
+            href="/blog/privacy-basics"
             prefetch={false}
             className="data-reveal-link"
             onClick={dismiss}

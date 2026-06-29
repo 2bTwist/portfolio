@@ -1,4 +1,4 @@
-/* Blog preview card (Twitter/article style) linking to /writing/[slug]: an
+/* Blog preview card (Twitter/article style) linking to /blog/[slug]: an
    on-brand banner on top, then title, summary, date, and tags. Shares the
    project-card styling so the two surfaces read as one language. Server
    component. The banner carries a `view-transition-name` so it morphs into the
@@ -11,7 +11,7 @@ import { MorphImage } from "./MorphImage";
 
 export function PostCard({ post }: { post: PostMetadata }) {
   return (
-    <Link href={`/writing/${post.slug}`} prefetch={false} className="proj-card">
+    <Link href={`/blog/${post.slug}`} prefetch={false} className="proj-card">
       <div className="proj-card-inner">
         <div className="proj-card-media">
           {post.image ? (

@@ -38,7 +38,7 @@ export default function PrivacyPage() {
           Curious exactly what a website learns about you the moment you arrive?
           That is the whole point of the card that popped up a moment ago. If
           you&apos;d rather hand over less, here&apos;s{" "}
-          <Link href="/writing/privacy-basics" className="txt-link">
+          <Link href="/blog/privacy-basics" className="txt-link">
             how to protect your privacy online
           </Link>
           .

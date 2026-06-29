@@ -24,7 +24,7 @@ const projectFiles: TreeFile[] = PROJECTS.map((p) => ({
   href: `/projects/${p.id}`,
 }));
 
-/* Hierarchical view for the Explorer. The writing/ folder's children (the blog
+/* Hierarchical view for the Explorer. The blog/ folder's children (the blog
    posts) are filled in at runtime by the Explorer from server-provided data,
    because nav.ts is imported by client components and can't read the fs-based
    posts module itself. */
@@ -33,7 +33,7 @@ export const TREE: TreeNode[] = [
   { type: "file", name: "about.md", href: "/about" },
   { type: "folder", name: "projects", href: "/projects", children: projectFiles },
   { type: "file", name: "experience.md", href: "/experience" },
-  { type: "folder", name: "writing", href: "/writing", children: [] },
+  { type: "folder", name: "blog", href: "/blog", children: [] },
   { type: "file", name: "certs.pdf", href: "/certs" },
   { type: "file", name: "music.mp3", href: "/music" },
 ];
@@ -47,7 +47,7 @@ export const NAV: NavItem[] = [
   { name: "projects/", href: "/projects" },
   ...projectFiles.map((f) => ({ name: f.name, href: f.href })),
   { name: "experience.md", href: "/experience" },
-  { name: "writing/", href: "/writing" },
+  { name: "blog/", href: "/blog" },
   { name: "certs.pdf", href: "/certs" },
   { name: "music.mp3", href: "/music" },
   // Not in the explorer TREE (would get the cert/medal .pdf icon); listed here

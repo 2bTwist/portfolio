@@ -108,7 +108,7 @@ export async function searchPosts(query: string, limit = 6): Promise<SearchResul
     kind: "post" as const,
     name: r.item.title,
     sub: r.item.summary,
-    href: `/writing/${r.item.slug}`,
+    href: `/blog/${r.item.slug}`,
     score: r.score ?? 1,
   }));
 }

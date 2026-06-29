@@ -20,6 +20,14 @@ const nextConfig: NextConfig = {
   turbopack: {
     root: path.resolve("."),
   },
+  // The blog used to live at /writing; keep those URLs (and anything Google
+  // indexed) alive with permanent redirects to the new /blog routes.
+  async redirects() {
+    return [
+      { source: "/writing", destination: "/blog", permanent: true },
+      { source: "/writing/:path*", destination: "/blog/:path*", permanent: true },
+    ];
+  },
   // Baseline security headers for every response (Vercel also adds HSTS).
   async headers() {
     return [

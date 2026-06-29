@@ -5,16 +5,16 @@ import { PageHeader } from "@/components/content/ui";
 import { PostCard } from "@/components/content/PostCard";
 
 export const metadata: Metadata = {
-  title: "Writing - Edmond Ndanji",
+  title: "Blog - Edmond Ndanji",
   description: "Notes on software engineering, product, and building in public.",
-  alternates: { canonical: "/writing" },
+  alternates: { canonical: "/blog" },
 };
 
-export default function WritingPage() {
+export default function BlogPage() {
   const posts = getAllPosts();
   return (
     <PageShell>
-      <PageHeader title="Writing" lead="Notes from building things, in public." />
+      <PageHeader title="Blog" lead="Notes from building things, in public." />
       {posts.length === 0 ? (
         <p style={{ color: "var(--muted)" }}>No posts yet. Check back soon.</p>
       ) : (

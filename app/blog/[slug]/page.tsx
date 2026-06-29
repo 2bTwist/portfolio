@@ -25,13 +25,13 @@ export async function generateMetadata({ params }: Params): Promise<Metadata> {
   return {
     title: `${post.title} - Edmond Ndanji`,
     description: post.summary,
-    alternates: { canonical: `/writing/${slug}` },
+    alternates: { canonical: `/blog/${slug}` },
     openGraph: { title: post.title, description: post.summary, type: "article" },
     twitter: { card: "summary_large_image", title: post.title, description: post.summary },
   };
 }
 
-export default async function WritingPost({ params }: Params) {
+export default async function BlogPost({ params }: Params) {
   const { slug } = await params;
   const post = getPost(slug);
   if (!post) notFound();
@@ -47,7 +47,7 @@ export default async function WritingPost({ params }: Params) {
   const prev = i < posts.length - 1 ? posts[i + 1] : null; // older
   const next = i > 0 ? posts[i - 1] : null; // newer
 
-  const url = `${SITE_URL}/writing/${slug}`;
+  const url = `${SITE_URL}/blog/${slug}`;
   const published = new Date(post.date).toISOString();
   const blogPosting = {
     "@context": "https://schema.org",
@@ -62,7 +62,7 @@ export default async function WritingPost({ params }: Params) {
       name: profile.name,
       logo: { "@type": "ImageObject", url: `${SITE_URL}/opengraph-image` },
     },
-    image: `${SITE_URL}/writing/${slug}/opengraph-image`,
+    image: `${SITE_URL}/blog/${slug}/opengraph-image`,
     url,
     mainEntityOfPage: url,
     keywords: post.tags.join(", "),
@@ -72,7 +72,7 @@ export default async function WritingPost({ params }: Params) {
     "@type": "BreadcrumbList",
     itemListElement: [
       { "@type": "ListItem", position: 1, name: "Home", item: SITE_URL },
-      { "@type": "ListItem", position: 2, name: "Writing", item: `${SITE_URL}/writing` },
+      { "@type": "ListItem", position: 2, name: "Blog", item: `${SITE_URL}/blog` },
       { "@type": "ListItem", position: 3, name: post.title, item: url },
     ],
   };
@@ -84,12 +84,12 @@ export default async function WritingPost({ params }: Params) {
       <ReadingProgress />
       <PageShell>
         <Link
-          href="/writing"
+          href="/blog"
           prefetch={false}
           className="mono text-sm no-underline transition-opacity hover:opacity-70"
           style={{ color: "var(--muted)" }}
         >
-          ← writing/
+          ← blog/
         </Link>
 
         {/* Banner up top (Twitter-article style). Carries the shared
@@ -121,7 +121,7 @@ export default async function WritingPost({ params }: Params) {
           {post.tags.map((tag) => (
             <Link
               key={tag}
-              href={`/writing/tag/${tag}`}
+              href={`/blog/tag/${tag}`}
               prefetch={false}
               className="mono text-xs no-underline transition-opacity hover:opacity-70"
               style={{ color: "var(--accent)" }}
@@ -137,7 +137,7 @@ export default async function WritingPost({ params }: Params) {
         <nav className="mt-16 pt-8 flex flex-col gap-4 sm:flex-row sm:justify-between" style={{ borderTop: "1px solid var(--border)" }}>
           <div className="sm:flex-1">
             {prev ? (
-              <Link href={`/writing/${prev.slug}`} prefetch={false} className="no-underline transition-opacity hover:opacity-70">
+              <Link href={`/blog/${prev.slug}`} prefetch={false} className="no-underline transition-opacity hover:opacity-70">
                 <div className="mono text-xs uppercase tracking-wide mb-1" style={{ color: "var(--muted)" }}>
                   Previous
                 </div>
@@ -149,7 +149,7 @@ export default async function WritingPost({ params }: Params) {
           </div>
           <div className="sm:flex-1 sm:text-right">
             {next ? (
-              <Link href={`/writing/${next.slug}`} prefetch={false} className="no-underline transition-opacity hover:opacity-70">
+              <Link href={`/blog/${next.slug}`} prefetch={false} className="no-underline transition-opacity hover:opacity-70">
                 <div className="mono text-xs uppercase tracking-wide mb-1" style={{ color: "var(--muted)" }}>
                   Next
                 </div>

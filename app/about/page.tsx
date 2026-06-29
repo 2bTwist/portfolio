@@ -61,7 +61,7 @@ export default function AboutPage() {
             feel when something was <strong>made with intent</strong>, when real thought and effort
             went into getting it right. I&apos;ll happily talk about that kind of work for days, and
             sometimes I{" "}
-            <Link href="/writing" prefetch={false} className="hl-marker hl-link">
+            <Link href="/blog" prefetch={false} className="hl-marker hl-link">
               write
             </Link>{" "}
             about it too.

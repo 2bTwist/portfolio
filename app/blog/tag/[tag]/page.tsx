@@ -13,9 +13,9 @@ export async function generateStaticParams() {
 export async function generateMetadata({ params }: Params): Promise<Metadata> {
   const { tag } = await params;
   return {
-    title: `#${tag} - Writing`,
+    title: `#${tag} - Blog`,
     description: `Posts tagged #${tag}.`,
-    alternates: { canonical: `/writing/tag/${tag}` },
+    alternates: { canonical: `/blog/tag/${tag}` },
   };
 }
 
@@ -31,7 +31,7 @@ export default async function TagPage({ params }: Params) {
       ) : (
         <div className="space-y-8">
           {posts.map((post) => (
-            <Link key={post.slug} href={`/writing/${post.slug}`} prefetch={false} className="block group no-underline">
+            <Link key={post.slug} href={`/blog/${post.slug}`} prefetch={false} className="block group no-underline">
               <h2 className="display text-2xl font-semibold transition-opacity group-hover:opacity-70" style={{ color: "var(--text)" }}>
                 {post.title}
               </h2>
@@ -45,8 +45,8 @@ export default async function TagPage({ params }: Params) {
           ))}
         </div>
       )}
-      <Link href="/writing" prefetch={false} className="mono text-sm no-underline mt-12 inline-block transition-opacity hover:opacity-70" style={{ color: "var(--accent)" }}>
-        ← all writing
+      <Link href="/blog" prefetch={false} className="mono text-sm no-underline mt-12 inline-block transition-opacity hover:opacity-70" style={{ color: "var(--accent)" }}>
+        ← all posts
       </Link>
     </PageShell>
   );
