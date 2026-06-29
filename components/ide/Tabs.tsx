@@ -15,6 +15,7 @@ import { createPortal } from "react-dom";
 import { FileIcon } from "./FileIcon";
 import { useSession } from "./store";
 import { beginRowDrag, consumeSuppressClick } from "./rowDrag";
+import { useIsMac, chord } from "./keys";
 
 type MenuState = { href: string; name: string; x: number; y: number } | null;
 
@@ -22,6 +23,7 @@ export function Tabs({ className = "" }: { className?: string }) {
   const pathname = usePathname();
   const { tabs, closeTab, closeOthers, closeAll } = useSession();
   const [menu, setMenu] = useState<MenuState>(null);
+  const isMac = useIsMac();
 
   const closeMenu = useCallback(() => setMenu(null), []);
 
@@ -162,7 +164,7 @@ export function Tabs({ className = "" }: { className?: string }) {
                 }}
               >
                 <span>Close</span>
-                <span className="ide-tab-menu-key">⌥W</span>
+                <span className="ide-tab-menu-key">{chord(isMac, ["alt"], "W")}</span>
               </button>
               <button
                 type="button"
@@ -175,7 +177,7 @@ export function Tabs({ className = "" }: { className?: string }) {
                 }}
               >
                 <span>Close Others</span>
-                <span className="ide-tab-menu-key">⌥⇧W</span>
+                <span className="ide-tab-menu-key">{chord(isMac, ["alt", "shift"], "W")}</span>
               </button>
               <button
                 type="button"
@@ -187,7 +189,7 @@ export function Tabs({ className = "" }: { className?: string }) {
                 }}
               >
                 <span>Close All</span>
-                <span className="ide-tab-menu-key">⌥⇧A</span>
+                <span className="ide-tab-menu-key">{chord(isMac, ["alt", "shift"], "A")}</span>
               </button>
             </div>,
             document.body,

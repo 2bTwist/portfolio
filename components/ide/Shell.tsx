@@ -22,6 +22,7 @@ import { EditorArea } from "./EditorArea";
 import { Tabs } from "./Tabs";
 import { StatusBar } from "./StatusBar";
 import { useOverlay } from "./store";
+import { useIsMac, chord } from "./keys";
 import type { GitInfo } from "@/app/lib/git";
 
 const CommandPalette = dynamic(() => import("./CommandPalette"), { ssr: false });
@@ -62,6 +63,7 @@ export function Shell({
 }) {
   const pathname = usePathname();
   const router = useRouter();
+  const isMac = useIsMac();
   const { cmdkOpen, toggleCmdk, closeCmdk, termOpen, termMounted, toggleTerm, closeTerm } =
     useOverlay();
 
@@ -164,7 +166,7 @@ export function Shell({
                 </svg>
               </span>
               <span className="ide-command-center-label">{navLabel(pathname)}</span>
-              <kbd className="ide-command-center-kbd" aria-hidden="true">⌘K</kbd>
+              <kbd className="ide-command-center-kbd" aria-hidden="true">{chord(isMac, ["mod"], "K")}</kbd>
             </button>
           </div>
         </div>
