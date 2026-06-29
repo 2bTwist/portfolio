@@ -19,7 +19,6 @@ import { SiteNav } from "@/components/site/SiteNav";
 import { navLabel, type TreeFile } from "@/app/lib/nav";
 import { Explorer } from "./Explorer";
 import { EditorArea } from "./EditorArea";
-import { DragGhost } from "./DragGhost";
 import { Tabs } from "./Tabs";
 import { StatusBar } from "./StatusBar";
 import { useOverlay } from "./store";
@@ -27,13 +26,19 @@ import type { GitInfo } from "@/app/lib/git";
 
 const CommandPalette = dynamic(() => import("./CommandPalette"), { ssr: false });
 const Terminal = dynamic(() => import("./Terminal"), { ssr: false });
+// The drag chip only appears once a drag begins, so it's kept off the initial
+// bundle and warmed on idle (below) — by the time anyone drags, it's mounted.
+const DragGhost = dynamic(() => import("./DragGhost").then((m) => ({ default: m.DragGhost })), {
+  ssr: false,
+});
 
-// Warm the lazy palette/terminal chunks. Module scope + "use no memo" so the
-// React Compiler doesn't try to lower the dynamic import() and bail.
+// Warm the lazy palette/terminal/drag-chip chunks. Module scope + "use no memo"
+// so the React Compiler doesn't try to lower the dynamic import() and bail.
 function warmOverlays() {
   "use no memo";
   void import("./CommandPalette");
   void import("./Terminal");
+  void import("./DragGhost");
 }
 
 /* Keyed wrapper: remounting on pathname change replays the CSS enter animation. */
