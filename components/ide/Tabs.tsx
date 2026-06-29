@@ -14,6 +14,7 @@ import { useCallback, useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import { FileIcon } from "./FileIcon";
 import { useSession } from "./store";
+import { beginRowDrag, consumeSuppressClick } from "./rowDrag";
 
 type MenuState = { href: string; name: string; x: number; y: number } | null;
 
@@ -83,12 +84,20 @@ export function Tabs({ className = "" }: { className?: string }) {
               key={tab.href}
               className="ide-tab"
               data-active={active}
+              onPointerDown={(e) => beginRowDrag(e, tab.href, tab.name)}
               onContextMenu={(e) => {
                 e.preventDefault();
                 setMenu({ href: tab.href, name: tab.name, x: e.clientX, y: e.clientY });
               }}
             >
-              <Link href={tab.href} prefetch={false} aria-current={active ? "page" : undefined}>
+              <Link
+                href={tab.href}
+                prefetch={false}
+                aria-current={active ? "page" : undefined}
+                onClick={(e) => {
+                  if (consumeSuppressClick()) e.preventDefault();
+                }}
+              >
                 <FileIcon name={tab.name} className="ide-file-icon" />
                 {tab.name}
               </Link>

@@ -1,8 +1,7 @@
 import type { Metadata } from "next";
-import { PageShell } from "@/components/site/PageShell";
 import { JsonLd } from "@/components/site/JsonLd";
-import { VinylPlayer } from "@/components/music/VinylPlayer";
 import { TRACKS } from "@/app/lib/music";
+import { MusicBody } from "./_body";
 
 export const metadata: Metadata = {
   title: "Music - Edmond Ndanji",
@@ -30,15 +29,9 @@ const playlistLd = {
 
 export default function MusicPage() {
   return (
-    <PageShell width="wide">
+    <>
       <JsonLd data={playlistLd} />
-      <h1 className="display text-4xl sm:text-5xl font-bold mb-2" style={{ color: "var(--text)" }}>
-        On repeat
-      </h1>
-      <p className="mb-8 font-sans" style={{ color: "var(--muted)" }}>
-        A little turntable of what I&apos;ve had playing lately. Drop the needle.
-      </p>
-      <VinylPlayer />
-    </PageShell>
+      <MusicBody />
+    </>
   );
 }

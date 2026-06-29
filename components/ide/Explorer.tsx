@@ -25,6 +25,7 @@ import { useMounted } from "@/components/hooks/useMounted";
 import { useSound } from "@/components/feel/SoundProvider";
 import { FileIcon, FolderIcon } from "./FileIcon";
 import { useSession } from "./store";
+import { beginRowDrag, consumeSuppressClick } from "./rowDrag";
 
 const MIN_WIDTH = 170;
 const MAX_WIDTH = 300;
@@ -339,7 +340,14 @@ function Node({
         className="ide-row"
         style={pad}
         aria-current={active ? "page" : undefined}
-        onClick={() => openTab(node.href)}
+        onPointerDown={(e) => beginRowDrag(e, node.href, node.name)}
+        onClick={(e) => {
+          if (consumeSuppressClick()) {
+            e.preventDefault();
+            return;
+          }
+          openTab(node.href);
+        }}
       >
         <span className="ide-twistie" aria-hidden="true" />
         <span className="ide-row-icon">{mounted ? <FileIcon name={node.name} className="ide-file-icon" /> : null}</span>
@@ -365,7 +373,12 @@ function Node({
         style={pad}
         aria-expanded={open}
         aria-current={pathname === node.href ? "page" : undefined}
-        onClick={() => {
+        onPointerDown={(e) => beginRowDrag(e, node.href, node.name)}
+        onClick={(e) => {
+          if (consumeSuppressClick()) {
+            e.preventDefault();
+            return;
+          }
           setOpen((o) => !o);
           openTab(node.href);
         }}

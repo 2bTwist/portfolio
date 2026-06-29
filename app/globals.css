@@ -3656,3 +3656,117 @@ a.xp-org:hover {
   .vinyl-platter:active { transform: none; }
   .np-dock { animation: none; }
 }
+
+/* ───────────────────────── Split editor (two panes) ─────────────────────────
+   The left pane is the real route (children); the right pane renders another
+   file's body from the client registry. Width is driven by a single --lf custom
+   property on the container so the divider can write it imperatively mid-drag,
+   and so mobile (no md: rule) is never affected. Desktop (md+) only. */
+
+@media (min-width: 768px) {
+  .ide-split-left {
+    flex: 0 0 calc(var(--lf, 0.5) * 100%);
+    min-width: 0;
+  }
+  .ide-split-divider {
+    display: block;
+    flex: 0 0 8px;
+    align-self: stretch;
+    position: relative;
+    cursor: col-resize;
+    background: transparent;
+  }
+  .ide-split-divider::before {
+    content: "";
+    position: absolute;
+    inset: 0 3.5px;
+    background: var(--border);
+    transition: background-color 130ms ease-out;
+  }
+  .ide-split-divider:hover::before,
+  .ide-split-divider:focus-visible::before { background: var(--accent); }
+  .ide-split-divider:focus-visible { outline: none; }
+  .ide-split-right { border-left: 1px solid var(--border); }
+}
+.ide-split-divider { display: none; }
+
+.ide-split-pane-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  flex: none;
+  padding: 0.35rem 0.55rem 0.35rem 0.85rem;
+  border-bottom: 1px solid var(--border);
+  font-size: 0.8rem;
+  color: var(--muted);
+}
+.ide-split-pane-name {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  min-width: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.ide-split-pane-close {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 22px;
+  height: 22px;
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--muted);
+  cursor: pointer;
+  transition: background-color 120ms ease-out, color 120ms ease-out;
+}
+.ide-split-pane-close:hover { background: var(--surface); color: var(--text); }
+.ide-split-loading { padding: 2rem; color: var(--muted); font-size: 0.85rem; }
+
+/* Drop hint shown while dragging an explorer file over the editor (desktop). */
+.ide-drop-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 6;
+  display: none;
+  align-items: center;
+  justify-content: flex-end;
+  padding-right: 6%;
+  pointer-events: none;
+  background: linear-gradient(to right, transparent 45%, color-mix(in srgb, var(--accent) 14%, transparent));
+}
+.ide-drop-overlay.is-active { display: flex; }
+.ide-drop-card {
+  border: 1.5px dashed var(--accent);
+  border-radius: 14px;
+  padding: 0.7rem 1.1rem;
+  color: var(--accent);
+  font-size: 0.85rem;
+  font-weight: 600;
+  background: var(--bg);
+}
+@media (max-width: 767px) { .ide-drop-overlay { display: none !important; } }
+
+/* Floating chip that follows the cursor while dragging an Explorer file. */
+.ide-drag-ghost {
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 60;
+  display: none;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.3rem 0.6rem;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--text);
+  font-size: 0.8rem;
+  box-shadow: 0 8px 24px rgba(40, 24, 12, 0.22);
+  pointer-events: none;
+  white-space: nowrap;
+}
+.ide-drag-ghost.is-active { display: inline-flex; }

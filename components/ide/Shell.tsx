@@ -18,6 +18,8 @@ import { useEffect, type ReactNode } from "react";
 import { SiteNav } from "@/components/site/SiteNav";
 import { navLabel, type TreeFile } from "@/app/lib/nav";
 import { Explorer } from "./Explorer";
+import { EditorArea } from "./EditorArea";
+import { DragGhost } from "./DragGhost";
 import { Tabs } from "./Tabs";
 import { StatusBar } from "./StatusBar";
 import { useOverlay } from "./store";
@@ -169,10 +171,11 @@ export function Shell({
             <Tabs className="ide-tabs hidden md:flex" />
             {/* The editor pane is the only scroll region on desktop, so the
                 chrome (titlebar/explorer/tabs/status bar) stays fixed. On mobile
-                there's no height cap, so the document scrolls normally. */}
-            <div className="flex-1 md:min-h-0 md:overflow-y-auto" data-editor-scroll>
+                there's no height cap, so the document scrolls normally. EditorArea
+                turns this into two panes when a file is dropped into a split. */}
+            <EditorArea>
               <EditorPane>{children}</EditorPane>
-            </div>
+            </EditorArea>
             {termMounted ? (
               <div className={termOpen ? "hidden shrink-0 md:block" : "hidden"}>
                 <Terminal />
@@ -185,6 +188,7 @@ export function Shell({
       </div>
 
       {cmdkOpen ? <CommandPalette /> : null}
+      <DragGhost />
     </>
   );
 }
