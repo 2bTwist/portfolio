@@ -2180,12 +2180,21 @@ button.ide-row {
     opacity 160ms ease-out,
     transform 160ms cubic-bezier(0.2, 0.9, 0.3, 1.4);
 }
+.company-pop::before,
 .company-pop::after {
   content: "";
   position: absolute;
   top: 100%;
   left: 50%;
   transform: translateX(-50%);
+  border-style: solid;
+  border-color: transparent;
+}
+.company-pop::before {
+  border-width: 7px;
+  border-top-color: var(--border);
+}
+.company-pop::after {
   border: 6px solid transparent;
   border-top-color: #ffffff;
 }
