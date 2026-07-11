@@ -51,6 +51,7 @@ next-env.d.ts
 # Local agent / AI tooling scaffolding (not part of the portfolio)
 .agents/
 .claude/
+.codex/
 .gemini/
 .pi/
 .github/copilot/
