@@ -33,4 +33,12 @@ export const CERTS: Cert[] = [
     artwork: "/images/certs/apple-search-ads.webp",
     url: "https://certification-ads.apple.com/certificate/HapAk3kzap",
   },
+  {
+    id: "umbc-professional-edge",
+    name: 'UMBC Professional "Edge"',
+    issuer: "UMBC Career Center",
+    year: "Feb 2026",
+    artwork: "/images/certs/umbc-professional-edge.webp",
+    url: "https://badges.parchment.com/public/credential/6983cd04ca57d367ab003cda",
+  },
 ];
