@@ -50,6 +50,17 @@ export function ArticleToc() {
     };
     place();
     window.addEventListener("resize", place, { passive: true });
+    // The explorer sidebar is drag-resizable, which moves <main>'s left edge
+    // without any window resize — the rail must re-place (or hide) live, not
+    // keep stale coordinates that overlap the sidebar. rAF-coalesced so the
+    // per-frame ResizeObserver bursts during a drag cost one place() per frame.
+    let placeRaf = 0;
+    const ro = new ResizeObserver(() => {
+      cancelAnimationFrame(placeRaf);
+      placeRaf = requestAnimationFrame(place);
+    });
+    const main = document.querySelector("main");
+    if (main) ro.observe(main);
 
     let observer: IntersectionObserver | undefined;
     // Defer the DOM read out of the effect body (a frame in), so layout is
@@ -90,6 +101,8 @@ export function ArticleToc() {
 
     return () => {
       cancelAnimationFrame(frame);
+      cancelAnimationFrame(placeRaf);
+      ro.disconnect();
       observer?.disconnect();
       window.removeEventListener("resize", place);
       window.clearTimeout(unlockTimer.current);
