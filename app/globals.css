@@ -2272,9 +2272,9 @@ button.ide-row {
   outline-offset: 2px;
 }
 
-/* Location minimap — a single static Stadia "alidade_smooth" PNG (no JS map
-   engine, no iframe), warm-tinted toward the cream brand, with an accent pin at
-   center and the live local time overlaid on a scrim. */
+/* Location minimap — a single first-party static WebP (no JS map engine, no
+   iframe, no third-party tiles), warm-tinted toward the cream brand, with an
+   accent pin at center and the live local time overlaid on a scrim. */
 .ide-minimap {
   position: relative;
   display: block;
@@ -2335,6 +2335,18 @@ button.ide-row {
     0 0 0 4px color-mix(in srgb, var(--accent) 22%, transparent),
     0 1px 3px rgba(0, 0, 0, 0.4);
   animation: localtime-pulse 2.4s ease-in-out infinite;
+}
+/* Basemap attribution — tiny and quiet, but present (ODbL requires it). */
+.ide-minimap-credit {
+  position: absolute;
+  top: 0.4rem;
+  right: 0.55rem;
+  font-family: var(--mono);
+  font-size: 0.5rem;
+  letter-spacing: 0.02em;
+  color: var(--ink);
+  opacity: 0.38;
+  pointer-events: none;
 }
 .ide-minimap-label {
   position: absolute;

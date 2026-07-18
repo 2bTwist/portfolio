@@ -19,7 +19,8 @@
     "perf:calibrate": "tsx tools/perf-check/cli.ts calibrate",
     "perf": "next build && size-limit && playwright test e2e/perf.spec.ts && tsx tools/perf-check/cli.ts check",
     "doctor": "react-doctor --no-telemetry",
-    "music:resolve": "node scripts/resolve-music.mjs"
+    "music:resolve": "node scripts/resolve-music.mjs",
+    "map:generate": "node scripts/generate-minimap.mjs"
   },
   "dependencies": {
     "@phosphor-icons/react": "^2.1.10",
