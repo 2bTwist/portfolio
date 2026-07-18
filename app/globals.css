@@ -523,6 +523,13 @@ button.ide-row {
   border-bottom: 1px solid var(--border);
   overflow-x: auto;
   min-height: 33px;
+  /* Chrome strip: scrollable but no visible scrollbar. Also load-bearing for
+     the resume "hire me" bubble — a scrollbar appearing here steals row height
+     mid-hover (Firefox), collapsing the hover target into a flicker loop. */
+  scrollbar-width: none;
+}
+.ide-tabs::-webkit-scrollbar {
+  display: none;
 }
 .ide-tab {
   display: inline-flex;
@@ -1053,16 +1060,32 @@ button.ide-row {
     animation: none;
   }
 }
-/* drag strip along the top edge to resize the terminal height */
+/* Drag strip along the top edge to resize the terminal height. Overlaid
+   (absolute, out of flow) like the explorer's handle, so its hit area never
+   pushes the terminal bar down; the visible affordance is only the thin
+   ::after line straddling the border. */
 .ide-terminal-resize {
-  height: 7px;
-  margin-top: -1px;
+  position: absolute;
+  top: -4px;
+  left: 0;
+  right: 0;
+  height: 8px;
   cursor: row-resize;
-  background: transparent;
-  transition: background 120ms ease-out;
+  touch-action: none;
+  z-index: 5;
 }
-.ide-terminal-resize:hover,
-.ide-terminal-resize[data-dragging="true"] {
+.ide-terminal-resize::after {
+  content: "";
+  position: absolute;
+  top: 3px;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: transparent;
+  transition: background 140ms ease-out;
+}
+.ide-terminal-resize:hover::after,
+.ide-terminal-resize[data-dragging="true"]::after {
   background: var(--accent);
 }
 .ide-terminal-bar {
