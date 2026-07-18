@@ -4,6 +4,12 @@ import withBundleAnalyzer from "@next/bundle-analyzer";
 
 const nextConfig: NextConfig = {
   reactCompiler: true,
+  // Serve AVIF to browsers that accept it (20-40% smaller than WebP for
+  // photographic content — the About portrait is the big win), WebP otherwise.
+  // Negotiated per-request by the optimizer, so there's no compat risk.
+  images: {
+    formats: ["image/avif", "image/webp"],
+  },
   // The card<->banner shared-element morph is hand-rolled (components/content/
   // MorphImage.tsx, FLIP via the Web Animations API) rather than Next/React
   // View Transitions, because those don't animate on the browser back button
