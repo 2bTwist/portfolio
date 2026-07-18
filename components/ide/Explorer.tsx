@@ -17,6 +17,7 @@
    revoking your privileges (a cooldown), then giving up. */
 
 import Link from "next/link";
+import dynamic from "next/dynamic";
 import { createPortal } from "react-dom";
 import { usePathname } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
@@ -26,6 +27,14 @@ import { useSound } from "@/components/feel/SoundProvider";
 import { FileIcon, FolderIcon } from "./FileIcon";
 import { useSession } from "./store";
 import { beginRowDrag, consumeSuppressClick } from "./rowDrag";
+
+// Lazy like the mobile dock's mount: ssr:false keeps the widget + player store
+// chunk off the initial bundle (the size budget is tight); it renders null
+// until playback starts, so it costs nothing when no music is playing.
+const NowPlayingCard = dynamic(
+  () => import("@/components/music/NowPlayingCard").then((m) => m.NowPlayingCard),
+  { ssr: false },
+);
 
 const MIN_WIDTH = 170;
 const MAX_WIDTH = 300;
@@ -223,13 +232,19 @@ export function Explorer({
       className={`${className}${shake ? " ide-explorer--shake" : ""}`}
       aria-label="File explorer"
     >
-      <Breadcrumb pathname={pathname} onOpen={openTab} />
+      {/* Inner scroll region so the pinned now-playing card below never
+          scrolls away with a long tree. */}
+      <div className="ide-explorer-scroll">
+        <Breadcrumb pathname={pathname} onOpen={openTab} />
 
-      <nav aria-label="Site files">
-        {tree.map((node) => (
-          <Node key={node.href} node={node} pathname={pathname} depth={0} mounted={mounted} />
-        ))}
-      </nav>
+        <nav aria-label="Site files">
+          {tree.map((node) => (
+            <Node key={node.href} node={node} pathname={pathname} depth={0} mounted={mounted} />
+          ))}
+        </nav>
+      </div>
+
+      <NowPlayingCard />
 
       <div
         ref={handleRef}
