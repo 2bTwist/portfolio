@@ -27,7 +27,8 @@
    Pure client animation, no server round-trip, no router coupling. */
 
 import Image from "next/image";
-import { useEffect, useLayoutEffect, useRef } from "react";
+import { usePathname } from "next/navigation";
+import { useEffect, useInsertionEffect, useLayoutEffect, useRef } from "react";
 
 // Run before paint on the client (so we can hide the element + start the clone
 // with no flash), but fall back to useEffect during SSR to avoid React's
@@ -49,10 +50,31 @@ const store = new Map<string, Entry>();
 // The path of the page we most recently left. Only entries recorded on THAT
 // page may morph, so old banner entries from detail pages visited earlier
 // (still in `store`) don't all fire when you return to the grid.
+//
+// Written ONLY by <MorphRouteSync/> (mounted once in the Shell), which sees
+// every route change. It used to be written from MorphImage unmounts, but pages
+// with no morph elements then never counted as "left": README → project →
+// about → README replayed the project's stale banner morph because about.md
+// never advanced the pointer.
 let lastLeftPath = "";
+let currentPath = "";
 const MAX_AGE = 300_000; // ms — generous (reading a detail page takes a while)
 const DURATION = 380;
 const EASING = "cubic-bezier(0.22, 1, 0.36, 1)";
+
+/* Advances the previous/current page pointers on EVERY route change, whether or
+   not the page contains a MorphImage. useInsertionEffect so it runs before the
+   arriving twins' layout effects consume their entries in the same commit. */
+export function MorphRouteSync() {
+  const pathname = usePathname();
+  useInsertionEffect(() => {
+    if (pathname !== currentPath) {
+      lastLeftPath = currentPath;
+      currentPath = pathname;
+    }
+  }, [pathname]);
+  return null;
+}
 
 export function MorphImage({
   morphKey,
@@ -101,7 +123,20 @@ export function MorphImage({
       Date.now() - prev.t < MAX_AGE;
 
     let raf = 0;
-    if (shouldMorph && !reduce && prev) {
+    if (shouldMorph && reduce && prev) {
+      // Reduced motion: positioning isn't motion. Still center the card a back
+      // navigation returns to (so the reader resumes where they were), just
+      // without the flying clone.
+      raf = requestAnimationFrame(() => {
+        if (!el.isConnected) return;
+        if (kind === "card") {
+          (el.closest(".proj-card") ?? el).scrollIntoView({
+            block: "center",
+            behavior: "instant" as ScrollBehavior,
+          });
+        }
+      });
+    } else if (shouldMorph && !reduce && prev) {
       // Hide the destination from the very first paint so there's never a
       // double image (real + clone). The clone is the only thing on screen
       // until it lands.
@@ -185,8 +220,8 @@ export function MorphImage({
       const img = el.querySelector("img");
       const loaded = img?.currentSrc || img?.src || src;
       if (rect.width > 0 && rect.height > 0) {
+        // (lastLeftPath is owned by MorphRouteSync, not written here.)
         store.set(morphKey, { rect, src: loaded, t: Date.now(), from: here, kind });
-        lastLeftPath = here; // this is the page we're leaving
       }
     };
   }, [morphKey, src, kind]);

@@ -75,6 +75,33 @@ function blip({ freq, dur, type = "triangle", gain = 0.05, sweep }: Tone) {
   osc.stop(now + dur + 0.02);
 }
 
+/* A whoosh is air, not a tone: white noise pushed through a band-pass filter
+   whose center frequency sweeps upward, with a soft swell-and-fade envelope.
+   Oscillator blips always read as "beep" no matter the sweep. */
+function whoosh({ from = 380, to = 2400, dur = 0.32, gain = 0.06 } = {}) {
+  const ac = getCtx();
+  if (!ac) return;
+  const now = ac.currentTime;
+  const len = Math.ceil(ac.sampleRate * dur);
+  const buf = ac.createBuffer(1, len, ac.sampleRate);
+  const data = buf.getChannelData(0);
+  for (let i = 0; i < len; i++) data[i] = Math.random() * 2 - 1;
+  const src = ac.createBufferSource();
+  src.buffer = buf;
+  const bp = ac.createBiquadFilter();
+  bp.type = "bandpass";
+  bp.Q.value = 1.1;
+  bp.frequency.setValueAtTime(from, now);
+  bp.frequency.exponentialRampToValueAtTime(to, now + dur);
+  const g = ac.createGain();
+  g.gain.setValueAtTime(0.0001, now);
+  g.gain.exponentialRampToValueAtTime(gain, now + dur * 0.25);
+  g.gain.exponentialRampToValueAtTime(0.0001, now + dur);
+  src.connect(bp).connect(g).connect(ac.destination);
+  src.start(now);
+  src.stop(now + dur + 0.02);
+}
+
 /* Für Elise (Beethoven) — the FULL piece (rondo A-B-A-C-A, 539 melody notes),
    sourced from robsoncouto/arduino-songs and stored as note names in
    ./furElise. The Terminal plays one note per keystroke and detects the end for
@@ -130,6 +157,8 @@ export const sfx = {
   bonk: () => blip({ freq: 150, dur: 0.12, type: "square", gain: 0.06, sweep: -55 }),
   // a tiny soft tick as the pointer slides across each tech-stack tile
   slide: () => blip({ freq: 660, dur: 0.025, type: "sine", gain: 0.03 }),
+  // scroll-back-to-top: an airy upward whoosh (filtered noise, not a tone)
+  rise: () => whoosh(),
   // a "card turn" whoosh for the flip tiles: a rising sweep as the tile rotates,
   // then a soft tap as the back face lands (timed near the flip's midpoint).
   flip: () => {

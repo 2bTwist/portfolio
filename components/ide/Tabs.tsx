@@ -16,6 +16,7 @@ import { FileIcon } from "./FileIcon";
 import { useSession } from "./store";
 import { beginRowDrag, consumeSuppressClick } from "./rowDrag";
 import { useIsMac, chord } from "./keys";
+import { scrollEditorTop } from "./scroll";
 
 type MenuState = { href: string; name: string; x: number; y: number } | null;
 
@@ -97,7 +98,15 @@ export function Tabs({ className = "" }: { className?: string }) {
                 prefetch={false}
                 aria-current={active ? "page" : undefined}
                 onClick={(e) => {
-                  if (consumeSuppressClick()) e.preventDefault();
+                  if (consumeSuppressClick()) {
+                    e.preventDefault();
+                    return;
+                  }
+                  // Re-clicking the active tab scrolls its page back to top.
+                  if (active) {
+                    e.preventDefault();
+                    scrollEditorTop();
+                  }
                 }}
               >
                 <FileIcon name={tab.name} className="ide-file-icon" />

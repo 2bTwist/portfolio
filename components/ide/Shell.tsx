@@ -14,8 +14,10 @@
 
 import dynamic from "next/dynamic";
 import { usePathname, useRouter } from "next/navigation";
-import { useEffect, type ReactNode } from "react";
+import { useEffect, useLayoutEffect, type ReactNode } from "react";
 import { SiteNav } from "@/components/site/SiteNav";
+import { MorphRouteSync } from "@/components/content/MorphImage";
+import { BackToTop } from "./BackToTop";
 import { navLabel, type TreeFile } from "@/app/lib/nav";
 import { Explorer } from "./Explorer";
 import { EditorArea } from "./EditorArea";
@@ -66,6 +68,14 @@ export function Shell({
   const isMac = useIsMac();
   const { cmdkOpen, toggleCmdk, closeCmdk, termOpen, termMounted, toggleTerm, closeTerm } =
     useOverlay();
+
+  // The editor pane is a persistent scroll container, so unlike window scroll
+  // (which Next resets) its position silently carries over between routes.
+  // Reset it on every navigation; the morph's card-centering runs a frame later
+  // and wins when a genuine back-morph wants to focus the card instead.
+  useLayoutEffect(() => {
+    document.querySelector("[data-editor-scroll]")?.scrollTo(0, 0);
+  }, [pathname]);
 
   useEffect(() => {
     function onKey(e: KeyboardEvent) {
@@ -196,6 +206,9 @@ export function Shell({
 
       {cmdkOpen ? <CommandPalette /> : null}
       <DragGhost />
+      <MorphRouteSync />
+      {/* Hidden while the terminal drawer is up so it never floats over it. */}
+      <BackToTop hidden={termMounted && termOpen} />
     </>
   );
 }

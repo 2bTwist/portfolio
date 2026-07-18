@@ -27,6 +27,7 @@ import { useSound } from "@/components/feel/SoundProvider";
 import { FileIcon, FolderIcon } from "./FileIcon";
 import { useSession } from "./store";
 import { beginRowDrag, consumeSuppressClick } from "./rowDrag";
+import { scrollEditorTop } from "./scroll";
 
 // Lazy like the mobile dock's mount: ssr:false keeps the widget + player store
 // chunk off the initial bundle (the size budget is tight); it renders null
@@ -347,6 +348,7 @@ function Node({
     return (
       <Link
         href={node.href}
+        aria-label={active ? `${node.name} (current file) — scroll to top` : undefined}
         // prefetch={false}: the whole file tree is in-viewport, so forced
         // prefetch fired a route RSC fetch for every row on load (~20+ requests).
         // false keeps Next's hover/touch prefetch — instant nav once you point at
@@ -359,6 +361,13 @@ function Node({
         onClick={(e) => {
           if (consumeSuppressClick()) {
             e.preventDefault();
+            return;
+          }
+          // Clicking the file you're already in scrolls it back to the top
+          // (IDE muscle memory) instead of a no-op same-route navigation.
+          if (active) {
+            e.preventDefault();
+            scrollEditorTop();
             return;
           }
           openTab(node.href);
