@@ -1759,11 +1759,6 @@ button.ide-row {
   gap: 1rem;
   margin-bottom: 0.7rem;
 }
-.pulse-head-actions {
-  display: flex;
-  align-items: center;
-  gap: 0.85rem;
-}
 .pulse-total {
   font-size: 0.76rem;
   color: var(--muted);
@@ -1782,27 +1777,6 @@ button.ide-row {
   outline: 2px solid var(--accent);
   outline-offset: 3px;
   border-radius: 2px;
-}
-.pulse-replay {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.35rem;
-  padding: 0.38rem 0.58rem;
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  color: var(--text);
-  background: var(--surface);
-  font-size: 0.72rem;
-  cursor: pointer;
-  transition: border-color 140ms ease-out, background 140ms ease-out;
-}
-.pulse-replay:hover {
-  border-color: var(--accent);
-  background: color-mix(in srgb, var(--accent) 6%, var(--surface));
-}
-.pulse-replay:focus-visible {
-  outline: 2px solid var(--accent);
-  outline-offset: 3px;
 }
 .pulse-grid {
   width: 100%;
@@ -1908,9 +1882,6 @@ button.ide-row {
   height: 9px;
 }
 @media (max-width: 639px) {
-  .pulse-head-actions {
-    gap: 0.55rem;
-  }
   .pulse-total {
     text-align: right;
   }
@@ -1921,9 +1892,6 @@ button.ide-row {
     opacity: 1;
     transform: none;
     animation: none;
-  }
-  .pulse-replay {
-    display: none;
   }
 }
 

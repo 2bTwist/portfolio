@@ -38,7 +38,6 @@ export function ContributionPulse({
 }) {
   const [data, setData] = useState<ContributionGridData>(initialData);
   const [isRevealed, setIsRevealed] = useState(false);
-  const [animationRun, setAnimationRun] = useState(0);
   const sectionRef = useRef<HTMLElement>(null);
 
   useEffect(() => {
@@ -84,31 +83,20 @@ export function ContributionPulse({
   return (
     <section className="contribution-pulse mt-14" ref={sectionRef} aria-label="GitHub contributions">
       <div className="pulse-toolbar">
-        <div className="pulse-head-actions">
-          <a
-            className="pulse-total pulse-total-link mono"
-            href={GITHUB_PROFILE_URL}
-            target="_blank"
-            rel="noreferrer"
-            aria-label="View contributions on GitHub"
-          >
-            {data.total.toLocaleString("en-US")} contributions
-          </a>
-          <button
-            className="pulse-replay mono"
-            type="button"
-            onClick={() => setAnimationRun((run) => run + 1)}
-            aria-label="Replay contribution animation"
-          >
-            <span aria-hidden="true">↻</span> Replay
-          </button>
-        </div>
+        <a
+          className="pulse-total pulse-total-link mono"
+          href={GITHUB_PROFILE_URL}
+          target="_blank"
+          rel="noreferrer"
+          aria-label="View contributions on GitHub"
+        >
+          {data.total.toLocaleString("en-US")} contributions
+        </a>
       </div>
 
       <p className="sr-only">{summary}</p>
       <div className="pulse-grid" aria-label="GitHub contribution graph">
               <div
-                key={animationRun}
                 className={`pulse-canvas${isRevealed ? " is-revealed" : ""}`}
                 style={{ "--week-count": data.weeks.length } as CSSProperties}
                 aria-hidden="true"
