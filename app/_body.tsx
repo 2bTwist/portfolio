@@ -9,6 +9,7 @@ import { SocialLinks } from "@/components/site/SocialLinks";
 import { LocationCard } from "@/components/site/LocationCard";
 import { TechStack } from "@/components/site/TechStack";
 import { CompanyLink } from "@/components/site/CompanyLink";
+import { ContributionPulse } from "@/components/site/ContributionPulse";
 
 export function HomeBody() {
   const featured = PROJECTS.filter((p) => p.featured);
@@ -109,6 +110,8 @@ export function HomeBody() {
         </h2>
         <TechStack />
       </section>
+
+      <ContributionPulse />
 
       <section className="mt-14">
         <div className="flex items-baseline justify-between mb-4">
