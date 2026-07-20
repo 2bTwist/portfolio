@@ -4,6 +4,7 @@ import { useEffect, useRef, useState, type CSSProperties } from "react";
 import type { ContributionGridData } from "@/app/lib/github-contributions";
 import { bundledGitHubContributions } from "@/data/github-contributions";
 
+const GITHUB_PROFILE_URL = "https://github.com/2bTwist";
 const dateFormatter = new Intl.DateTimeFormat("en-US", {
   month: "short",
   day: "numeric",
@@ -22,6 +23,14 @@ function isContributionGridData(value: unknown): value is ContributionGridData {
   );
 }
 
+async function refreshContributionGrid(signal: AbortSignal): Promise<ContributionGridData | null> {
+  const response = await fetch("/api/github-contributions", { signal });
+  if (!response.ok) return null;
+
+  const snapshot: unknown = await response.json();
+  return isContributionGridData(snapshot) ? snapshot : null;
+}
+
 export function ContributionPulse({
   initialData = bundledGitHubContributions,
 }: {
@@ -37,15 +46,8 @@ export function ContributionPulse({
 
     async function loadActivity() {
       try {
-        const response = await fetch("/api/github-contributions", {
-          signal: controller.signal,
-        });
-        if (!response.ok) throw new Error(`GitHub activity request failed: ${response.status}`);
-
-        const snapshot: unknown = await response.json();
-        if (!isContributionGridData(snapshot)) throw new Error("Invalid GitHub activity response");
-
-        setData(snapshot);
+        const snapshot = await refreshContributionGrid(controller.signal);
+        if (snapshot) setData(snapshot);
       } catch {
         if (controller.signal.aborted) return;
         // Keep the bundled snapshot visible when the background refresh fails.
@@ -60,8 +62,8 @@ export function ContributionPulse({
     const section = sectionRef.current;
     if (!section || isRevealed) return;
     if (!("IntersectionObserver" in window)) {
-      setIsRevealed(true);
-      return;
+      const timeout = globalThis.setTimeout(() => setIsRevealed(true), 0);
+      return () => globalThis.clearTimeout(timeout);
     }
 
     let observer: IntersectionObserver | null = null;
@@ -83,7 +85,15 @@ export function ContributionPulse({
     <section className="contribution-pulse mt-14" ref={sectionRef} aria-label="GitHub contributions">
       <div className="pulse-toolbar">
         <div className="pulse-head-actions">
-          <span className="pulse-total mono">{data.total.toLocaleString("en-US")} contributions</span>
+          <a
+            className="pulse-total pulse-total-link mono"
+            href={GITHUB_PROFILE_URL}
+            target="_blank"
+            rel="noreferrer"
+            aria-label="View contributions on GitHub"
+          >
+            {data.total.toLocaleString("en-US")} contributions
+          </a>
           <button
             className="pulse-replay mono"
             type="button"

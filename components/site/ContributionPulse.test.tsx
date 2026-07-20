@@ -62,7 +62,9 @@ describe("ContributionPulse", () => {
     expect(screen.queryByText("activity.log")).toBeNull();
     expect(container.querySelector(".pulse-card")).toBeNull();
     expect(screen.queryByLabelText("Scrollable GitHub contribution graph")).toBeNull();
-    expect(screen.queryByLabelText("View 2bTwist on GitHub")).toBeNull();
+    expect(screen.getByRole("link", { name: "View contributions on GitHub" }).getAttribute("href")).toBe(
+      "https://github.com/2bTwist",
+    );
     expect(screen.getByLabelText("GitHub contribution graph").className).toBe("pulse-grid");
   });
 

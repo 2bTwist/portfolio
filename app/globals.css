@@ -1768,6 +1768,21 @@ button.ide-row {
   font-size: 0.76rem;
   color: var(--muted);
 }
+.pulse-total-link {
+  text-decoration: underline;
+  text-decoration-color: color-mix(in srgb, currentColor 45%, transparent);
+  text-underline-offset: 3px;
+  transition: color 140ms ease-out, text-decoration-color 140ms ease-out;
+}
+.pulse-total-link:hover {
+  color: var(--accent);
+  text-decoration-color: currentColor;
+}
+.pulse-total-link:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+  border-radius: 2px;
+}
 .pulse-replay {
   display: inline-flex;
   align-items: center;
@@ -1801,7 +1816,7 @@ button.ide-row {
 }
 .pulse-months {
   display: grid;
-  grid-template-columns: repeat(var(--week-count), minmax(0, 10px));
+  grid-template-columns: repeat(var(--week-count), minmax(0, 1fr));
   column-gap: var(--pulse-gap);
   width: calc(100% - 34px);
   height: 1.2rem;
@@ -1827,7 +1842,7 @@ button.ide-row {
 }
 .pulse-weeks {
   display: grid;
-  grid-template-columns: repeat(var(--week-count), minmax(0, 10px));
+  grid-template-columns: repeat(var(--week-count), minmax(0, 1fr));
   column-gap: var(--pulse-gap);
   min-width: 0;
 }
@@ -1841,7 +1856,6 @@ button.ide-row {
   --pulse-fill: color-mix(in srgb, var(--border) 68%, var(--surface));
   display: block;
   width: 100%;
-  max-width: 10px;
   height: auto;
   aspect-ratio: 1;
   border-radius: 3px;
