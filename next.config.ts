@@ -38,6 +38,12 @@ const nextConfig: NextConfig = {
   async headers() {
     return [
       {
+        // Next 16 app routes append their Response headers as arrays; pre-setting
+        // this singleton keeps it a string for Next's built-in compression filter.
+        source: "/api/github-contributions",
+        headers: [{ key: "Content-Type", value: "application/json" }],
+      },
+      {
         source: "/:path*",
         headers: [
           { key: "X-Content-Type-Options", value: "nosniff" },

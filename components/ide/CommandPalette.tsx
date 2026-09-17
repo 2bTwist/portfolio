@@ -9,12 +9,12 @@ import { useEffect, useLayoutEffect, useMemo, useRef, useState, type KeyboardEve
 import { useRouter } from "next/navigation";
 import { searchStatic, searchPosts, type SearchResult } from "@/app/lib/search";
 import { SearchIcon } from "@/components/feel/animated-icons";
-import { useOverlay, useSession } from "./store";
+import { useOverlay, useTabSession } from "./store";
 
 export default function CommandPalette() {
   const router = useRouter();
   const { closeCmdk } = useOverlay();
-  const { openTab } = useSession();
+  const { openTab } = useTabSession();
   const [query, setQuery] = useState("");
   const [active, setActive] = useState(0);
   // Post hits are tagged with the query they belong to, so a stale in-flight

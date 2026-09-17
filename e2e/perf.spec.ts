@@ -141,6 +141,14 @@ test("homepage interaction perf (INP proxy + CPU profile)", async ({ page }) => 
         await client.send("Profiler.enable");
         await client.send("Profiler.setSamplingInterval", { interval: 1000 });
         await client.send("Profiler.start");
+        // Replay the palette switches measured above as well as the explorer
+        // interactions. This diagnostic profile stays separate from the gate,
+        // but it must include the whole-shell work that a theme click performs.
+        for (let i = 0; i < swatchCount; i++) {
+          const swatch = swatches.nth(i);
+          await clickInPlace(swatch);
+          await expect(swatch).toHaveAttribute("aria-pressed", "true");
+        }
         for (let i = 0; i < 3; i++) {
           const box = await twistie.boundingBox();
           if (!box) break;

@@ -1827,7 +1827,8 @@ button.ide-row {
   border-radius: 3px;
   background: var(--pulse-fill);
   transform-origin: center;
-  will-change: transform;
+  /* Let active keyframes request compositing; hundreds of idle cells do not
+     need permanent transform layers during palette changes. */
 }
 .pulse-day--level-0 {
   --pulse-fill: color-mix(in srgb, var(--border) 68%, var(--surface));

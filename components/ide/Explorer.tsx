@@ -25,7 +25,7 @@ import { TREE, NAV, type TreeNode, type TreeFile } from "@/app/lib/nav";
 import { useMounted } from "@/components/hooks/useMounted";
 import { useSound } from "@/components/feel/SoundProvider";
 import { FileIcon, FolderIcon } from "./FileIcon";
-import { useSession } from "./store";
+import { useTabSession } from "./store";
 import { beginRowDrag, consumeSuppressClick } from "./rowDrag";
 import { scrollEditorTop } from "./scroll";
 
@@ -95,7 +95,7 @@ export function Explorer({
   );
   const mounted = useMounted();
   const { play } = useSound();
-  const { openTab } = useSession();
+  const { openTab } = useTabSession();
 
   const [dragging, setDragging] = useState(false);
   const [locked, setLocked] = useState(false);
@@ -348,7 +348,7 @@ function Node({
   mounted: boolean;
 }) {
   const [open, setOpen] = useState(true);
-  const { openTab } = useSession();
+  const { openTab } = useTabSession();
   const pad = { paddingLeft: `${BASE_PAD_REM + depth * INDENT_REM}rem` };
 
   if (node.type === "file") {

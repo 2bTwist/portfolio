@@ -13,7 +13,7 @@ import { usePathname } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import { FileIcon } from "./FileIcon";
-import { useSession } from "./store";
+import { useTabSession } from "./store";
 import { beginRowDrag, consumeSuppressClick } from "./rowDrag";
 import { useIsMac, chord } from "./keys";
 import { scrollEditorTop } from "./scroll";
@@ -22,7 +22,7 @@ type MenuState = { href: string; name: string; x: number; y: number } | null;
 
 export function Tabs({ className = "" }: { className?: string }) {
   const pathname = usePathname();
-  const { tabs, closeTab, closeOthers, closeAll } = useSession();
+  const { tabs, closeTab, closeOthers, closeAll } = useTabSession();
   const [menu, setMenu] = useState<MenuState>(null);
   const isMac = useIsMac();
 

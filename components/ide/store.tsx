@@ -4,7 +4,8 @@
    the explorer/tabs (proven by perf/shell-render.test.tsx):
 
    - SessionContext: palette (theme) + open tabs. Changes when you navigate or
-     switch theme.
+     switch theme. TabSessionContext gives navigation-only readers a stable
+     subscription when just the palette changes.
    - OverlayContext: the ⌘K palette / terminal open flags. Changes constantly as
      you open/close them.
 
@@ -21,6 +22,7 @@ import {
   useCallback,
   useContext,
   useEffect,
+  useMemo,
   useState,
   type ReactNode,
 } from "react";
@@ -53,11 +55,19 @@ type Overlay = {
 };
 
 const SessionContext = createContext<Session | null>(null);
+type TabSession = Omit<Session, "paletteIndex" | "setPaletteIndex">;
+const TabSessionContext = createContext<TabSession | null>(null);
 const OverlayContext = createContext<Overlay | null>(null);
 
 export function useSession(): Session {
   const ctx = useContext(SessionContext);
   if (!ctx) throw new Error("useSession must be used within <IdeProvider>");
+  return ctx;
+}
+
+export function useTabSession(): TabSession {
+  const ctx = useContext(TabSessionContext);
+  if (!ctx) throw new Error("useTabSession must be used within <IdeProvider>");
   return ctx;
 }
 
@@ -165,11 +175,20 @@ function SessionProvider({ children }: { children: ReactNode }) {
     router.push("/");
   }, [router]);
 
+  // Navigation readers do not need to re-render for a palette update. Keep
+  // their subscription stable while the same provider continues to own both.
+  const tabSession = useMemo(
+    () => ({ tabs, openTab, closeTab, closeOthers, closeAll }),
+    [tabs, openTab, closeTab, closeOthers, closeAll],
+  );
+
   return (
     <SessionContext.Provider
-      value={{ paletteIndex, setPaletteIndex, tabs, openTab, closeTab, closeOthers, closeAll }}
+      value={{ paletteIndex, setPaletteIndex, ...tabSession }}
     >
-      {children}
+      <TabSessionContext.Provider value={tabSession}>
+        {children}
+      </TabSessionContext.Provider>
     </SessionContext.Provider>
   );
 }
