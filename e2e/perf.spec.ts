@@ -13,6 +13,10 @@ import { createHash } from "node:crypto";
 // INP first (no profiler, clean), then capture the profile as a non-blocking
 // extra that can never fail the test.
 const CPU_THROTTLE = 4;
+type MeasuredEvent = Pick<
+  PerformanceEventTiming,
+  "name" | "duration" | "startTime" | "processingStart" | "processingEnd"
+> & { interactionId: number };
 type ExercisedAction = {
   kind: "swatch" | "twistie";
   index: number;
@@ -36,15 +40,19 @@ test("homepage interaction perf (INP proxy + CPU profile)", async ({ page }) => 
   // excluding unrelated Event Timing entries. This is not field INP.
   await page.evaluate(() => {
     (window as unknown as {
-      __events: { name: string; duration: number; interactionId: number }[];
+      __events: MeasuredEvent[];
     }).__events = [];
     new PerformanceObserver((list) => {
       for (const e of list.getEntries()) {
-        const event = e as PerformanceEntry & { duration: number; interactionId: number };
+        const event = e as MeasuredEvent;
         if (["pointerdown", "pointerup", "click"].includes(event.name) && event.interactionId > 0) {
           (window as unknown as {
-            __events: { name: string; duration: number; interactionId: number }[];
-          }).__events.push({ name: event.name, duration: event.duration, interactionId: event.interactionId });
+            __events: MeasuredEvent[];
+          }).__events.push({
+            name: event.name, duration: event.duration, interactionId: event.interactionId,
+            startTime: event.startTime, processingStart: event.processingStart,
+            processingEnd: event.processingEnd,
+          });
         }
       }
     }).observe({ type: "event", durationThreshold: 0, buffered: true } as PerformanceObserverInit);
@@ -114,8 +122,8 @@ test("homepage interaction perf (INP proxy + CPU profile)", async ({ page }) => 
     });
   }
 
-  const events: { name: string; duration: number; interactionId: number }[] = await page.evaluate(
-    () => (window as unknown as { __events: { name: string; duration: number; interactionId: number }[] }).__events ?? [],
+  const events: MeasuredEvent[] = await page.evaluate(
+    () => (window as unknown as { __events: MeasuredEvent[] }).__events ?? [],
   );
   expect(events.length).toBeGreaterThan(0);
   const inp = Math.max(...events.map((event) => event.duration));
