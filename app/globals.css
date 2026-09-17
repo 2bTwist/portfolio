@@ -210,7 +210,7 @@ body {
   border-radius: 6px;
   color: var(--muted);
   cursor: pointer;
-  transition: color 140ms ease-out, background 140ms ease-out;
+  transition: var(--palette-transition, color 140ms ease-out, background 140ms ease-out);
 }
 .ide-nav-btn:hover {
   color: var(--text);
@@ -232,9 +232,10 @@ body {
   font-size: 0.74rem;
   cursor: pointer;
   /* Only hover changes border/text; the palette background updates directly. */
-  transition:
+  transition: var(--palette-transition,
     border-color 140ms ease-out,
-    color 140ms ease-out;
+    color 140ms ease-out
+  );
 }
 .ide-command-center:hover {
   border-color: var(--border-press);
@@ -307,7 +308,7 @@ body {
   color: var(--muted);
   text-decoration: none;
   border-radius: 3px;
-  transition: color 120ms ease-out;
+  transition: var(--palette-transition, color 120ms ease-out);
 }
 .ide-crumb:hover {
   color: var(--text);
@@ -345,7 +346,7 @@ body {
   width: 2px;
   height: 100%;
   background: transparent;
-  transition: background 140ms ease-out;
+  transition: var(--palette-transition, background 140ms ease-out);
 }
 .ide-resize-handle:hover::after,
 .ide-resize-handle[data-dragging="true"]::after {
@@ -432,9 +433,10 @@ body {
   text-decoration: none;
   white-space: nowrap;
   /* Row text keeps the same color on hover, so only animate its hover work. */
-  transition:
+  transition: var(--palette-transition,
     background 140ms ease-out,
-    transform 160ms cubic-bezier(0.2, 0.9, 0.3, 1.3);
+    transform 160ms cubic-bezier(0.2, 0.9, 0.3, 1.3)
+  );
 }
 .ide-row:hover {
   background: var(--bg);
@@ -543,7 +545,7 @@ button.ide-row {
   font-family: var(--mono);
   font-size: 0.78rem;
   white-space: nowrap;
-  transition: background 160ms ease-out;
+  transition: var(--palette-transition, background 160ms ease-out);
   animation: ideTabIn 260ms cubic-bezier(0.2, 0.9, 0.3, 1.2);
 }
 @keyframes ideTabIn {
@@ -758,7 +760,7 @@ button.ide-row {
   text-decoration: underline;
   text-underline-offset: 2px;
   text-decoration-thickness: 1px;
-  transition: color 140ms ease-out;
+  transition: var(--palette-transition, color 140ms ease-out);
 }
 .ide-legal a:hover {
   color: var(--text);
@@ -1085,7 +1087,7 @@ button.ide-row {
   right: 0;
   height: 2px;
   background: transparent;
-  transition: background 140ms ease-out;
+  transition: var(--palette-transition, background 140ms ease-out);
 }
 .ide-terminal-resize:hover::after,
 .ide-terminal-resize[data-dragging="true"]::after {
@@ -1587,9 +1589,10 @@ button.ide-row {
   border-radius: 6px;
   padding: 0.3rem;
   cursor: pointer;
-  transition:
+  transition: var(--palette-transition,
     color 140ms ease-out,
-    border-color 140ms ease-out;
+    border-color 140ms ease-out
+  );
 }
 .code-copy:hover {
   color: var(--text);
@@ -1670,10 +1673,11 @@ button.ide-row {
   text-decoration: none;
 }
 .cert-card--link {
-  transition:
+  transition: var(--palette-transition,
     transform 200ms cubic-bezier(0.2, 0.9, 0.3, 1.2),
     box-shadow 200ms ease-out,
-    border-color 160ms ease-out;
+    border-color 160ms ease-out
+  );
 }
 .cert-card--link:hover {
   transform: translateY(-3px);
@@ -1759,7 +1763,7 @@ button.ide-row {
   text-decoration: underline;
   text-decoration-color: color-mix(in srgb, currentColor 45%, transparent);
   text-underline-offset: 3px;
-  transition: color 140ms ease-out, text-decoration-color 140ms ease-out;
+  transition: var(--palette-transition, color 140ms ease-out, text-decoration-color 140ms ease-out);
 }
 .pulse-total-link:hover {
   color: var(--accent);
@@ -2061,7 +2065,7 @@ button.ide-row {
   font-size: 0.85rem;
   color: var(--muted);
   text-decoration: none;
-  transition: color 140ms ease-out;
+  transition: var(--palette-transition, color 140ms ease-out);
 }
 .hero-more:hover {
   color: var(--text);
@@ -2112,9 +2116,10 @@ button.ide-row {
   --size: 68px;
   width: var(--size);
   height: var(--size);
-  transition:
+  transition: var(--palette-transition,
     transform 240ms cubic-bezier(0.3, 0.7, 0.4, 1.4),
-    box-shadow 240ms cubic-bezier(0.3, 0.7, 0.4, 1.4);
+    box-shadow 240ms cubic-bezier(0.3, 0.7, 0.4, 1.4)
+  );
 }
 .stack-tile::before,
 .stack-face::before {
@@ -2190,9 +2195,10 @@ button.ide-row {
     inset 0 -2px 3px color-mix(in srgb, var(--border-press) 45%, transparent),
     0 1px 0 var(--border-press),
     0 6px 10px -7px rgba(34, 25, 17, 0.3);
-  transition:
+  transition: var(--palette-transition,
     transform 60ms ease-out,
-    box-shadow 60ms ease-out;
+    box-shadow 60ms ease-out
+  );
 }
 
 /* Flip tile: the element is just the 3D stage; the two faces carry the look. */
@@ -2353,7 +2359,7 @@ button.ide-row {
   font-weight: 600;
   text-decoration: none;
   border-bottom: 1px solid color-mix(in srgb, var(--accent) 40%, transparent);
-  transition: color 140ms ease-out;
+  transition: var(--palette-transition, color 140ms ease-out);
 }
 .company-link:hover {
   color: var(--accent-press);
@@ -2447,10 +2453,11 @@ button.ide-row {
   border: 1px solid var(--border);
   box-shadow: 0 2px 0 var(--border-press);
   transform: translateY(-1px);
-  transition:
+  transition: var(--palette-transition,
     transform 120ms cubic-bezier(0.3, 0.7, 0.4, 1),
     box-shadow 120ms cubic-bezier(0.3, 0.7, 0.4, 1),
-    color 140ms ease-out;
+    color 140ms ease-out
+  );
 }
 .ide-social:hover {
   color: var(--accent);
@@ -2460,9 +2467,10 @@ button.ide-row {
 .ide-social:active {
   transform: translateY(1px);
   box-shadow: 0 0 0 var(--border-press);
-  transition:
+  transition: var(--palette-transition,
     transform 40ms,
-    box-shadow 40ms;
+    box-shadow 40ms
+  );
 }
 .ide-social:focus-visible {
   outline: 2px solid var(--accent);
@@ -2719,10 +2727,11 @@ body[data-dragging] iframe {
   border: 1px solid var(--border);
   border-radius: 14px;
   overflow: hidden;
-  transition:
+  transition: var(--palette-transition,
     transform 200ms cubic-bezier(0.2, 0.9, 0.3, 1.2),
     box-shadow 200ms ease-out,
-    border-color 160ms ease-out;
+    border-color 160ms ease-out
+  );
 }
 .proj-card:hover .proj-card-inner {
   transform: translateY(-3px);
@@ -2894,9 +2903,10 @@ body[data-dragging] iframe {
   line-height: 1.35;
   color: var(--muted);
   text-decoration: none;
-  transition:
+  transition: var(--palette-transition,
     color 160ms ease-out,
-    border-color 160ms ease-out;
+    border-color 160ms ease-out
+  );
 }
 .article-toc-link:hover {
   color: var(--text);
@@ -3091,7 +3101,7 @@ body[data-dragging] iframe {
   font-weight: 600;
   text-decoration: none;
   border-bottom: 1px solid color-mix(in srgb, var(--accent) 40%, transparent);
-  transition: color 140ms ease-out;
+  transition: var(--palette-transition, color 140ms ease-out);
 }
 .txt-link:hover {
   color: var(--accent-press);
@@ -3302,9 +3312,10 @@ a.xp-org:hover {
   font-size: 0.82rem;
   color: var(--accent);
   text-decoration: none;
-  transition:
+  transition: var(--palette-transition,
     gap 140ms ease-out,
-    color 140ms ease-out;
+    color 140ms ease-out
+  );
 }
 .xp-readmore:hover {
   color: var(--accent-press);
@@ -3371,7 +3382,7 @@ a.xp-org:hover {
   color: var(--muted);
   text-decoration: none;
   border-bottom: 1px solid color-mix(in srgb, var(--accent) 35%, transparent);
-  transition: color 140ms ease-out;
+  transition: var(--palette-transition, color 140ms ease-out);
 }
 .xp-activity-link:hover {
   color: var(--accent);
@@ -3386,7 +3397,7 @@ a.xp-org:hover {
   font-size: 0.82rem;
   color: var(--muted);
   text-decoration: none;
-  transition: color 140ms ease-out, gap 140ms ease-out;
+  transition: var(--palette-transition, color 140ms ease-out, gap 140ms ease-out);
 }
 .xp-back:hover {
   color: var(--accent);
@@ -3462,7 +3473,7 @@ a.xp-org:hover {
   cursor: pointer;
   padding: 0.2rem;
   border-radius: 8px;
-  transition: color 140ms ease-out;
+  transition: var(--palette-transition, color 140ms ease-out);
 }
 .data-reveal-close:hover {
   color: var(--text);
@@ -3543,7 +3554,7 @@ a.xp-org:hover {
   padding: 0.5rem 1.1rem;
   font-size: 0.88rem;
   cursor: pointer;
-  transition: border-color 140ms ease-out;
+  transition: var(--palette-transition, border-color 140ms ease-out);
 }
 .data-reveal-got:hover {
   border-color: var(--border-press);
@@ -3748,7 +3759,7 @@ a.xp-org:hover {
   background: var(--surface);
   color: var(--text);
   cursor: pointer;
-  transition: border-color 140ms ease-out, transform 140ms ease-out, color 140ms ease-out;
+  transition: var(--palette-transition, border-color 140ms ease-out, transform 140ms ease-out, color 140ms ease-out);
 }
 .vinyl-ctl:hover {
   border-color: var(--border-press);
@@ -3793,7 +3804,7 @@ a.xp-org:hover {
   color: var(--text);
   cursor: pointer;
   text-align: left;
-  transition: background-color 130ms ease-out;
+  transition: var(--palette-transition, background-color 130ms ease-out);
 }
 .vinyl-row:hover {
   background: var(--surface);
@@ -3868,11 +3879,12 @@ a.xp-org:hover {
   opacity: 0;
   transform: translateY(10px) scale(0.9);
   pointer-events: none;
-  transition:
+  transition: var(--palette-transition,
     opacity 180ms ease-out,
     transform 180ms ease-out,
     color 130ms ease-out,
-    border-color 130ms ease-out;
+    border-color 130ms ease-out
+  );
 }
 .ide-backtop[data-visible="true"] {
   opacity: 1;
@@ -3958,7 +3970,7 @@ a.xp-org:hover {
   backdrop-filter: blur(6px);
   color: var(--on-accent);
   cursor: pointer;
-  transition: background-color 130ms ease-out, transform 130ms ease-out;
+  transition: var(--palette-transition, background-color 130ms ease-out, transform 130ms ease-out);
 }
 .npc-btn:hover { background: color-mix(in srgb, var(--term-bg) 82%, transparent); }
 .npc-btn:active { transform: scale(0.9); }
@@ -3978,7 +3990,7 @@ a.xp-org:hover {
   color: var(--on-accent);
   cursor: pointer;
   opacity: 0;
-  transition: opacity 150ms ease-out, background-color 130ms ease-out;
+  transition: var(--palette-transition, opacity 150ms ease-out, background-color 130ms ease-out);
   z-index: 1;
 }
 .npc:hover .npc-close,
@@ -4120,7 +4132,7 @@ a.xp-org:hover {
   background: transparent;
   color: var(--text);
   cursor: pointer;
-  transition: background-color 130ms ease-out, transform 130ms ease-out;
+  transition: var(--palette-transition, background-color 130ms ease-out, transform 130ms ease-out);
 }
 .np-btn:hover { background: color-mix(in srgb, var(--accent) 14%, transparent); }
 .np-btn:active { transform: scale(0.9); }
@@ -4138,7 +4150,7 @@ a.xp-org:hover {
   background: transparent;
   color: var(--muted);
   cursor: pointer;
-  transition: color 130ms ease-out, background-color 130ms ease-out;
+  transition: var(--palette-transition, color 130ms ease-out, background-color 130ms ease-out);
 }
 .np-close:hover { color: var(--text); background: var(--bg); }
 
@@ -4190,7 +4202,7 @@ a.xp-org:hover {
     position: absolute;
     inset: 0 3.5px;
     background: var(--border);
-    transition: background-color 130ms ease-out;
+    transition: var(--palette-transition, background-color 130ms ease-out);
   }
   .ide-split-divider:hover::before,
   .ide-split-divider:focus-visible::before { background: var(--accent); }
@@ -4229,7 +4241,7 @@ a.xp-org:hover {
   background: transparent;
   color: var(--muted);
   cursor: pointer;
-  transition: background-color 120ms ease-out, color 120ms ease-out;
+  transition: var(--palette-transition, background-color 120ms ease-out, color 120ms ease-out);
 }
 .ide-split-pane-close:hover { background: var(--surface); color: var(--text); }
 .ide-split-loading { padding: 2rem; color: var(--muted); font-size: 0.85rem; }
