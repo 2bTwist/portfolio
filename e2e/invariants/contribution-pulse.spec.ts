@@ -20,7 +20,7 @@ test("contribution graph fills its row", async ({ page }) => {
 });
 
 test("contribution count links to GitHub", async ({ page }) => {
-  await expect(page.getByRole("link", { name: "View contributions on GitHub" })).toHaveAttribute(
+  await expect(page.getByRole("link", { name: /^[\d,]+ contributions on GitHub$/ })).toHaveAttribute(
     "href",
     "https://github.com/2bTwist",
   );

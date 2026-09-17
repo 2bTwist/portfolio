@@ -20,6 +20,8 @@ for (const theme of ["Cream", "Latte", "Frappe (soft dark)"]) {
     });
     await expect(page.locator(".pulse-grid")).toHaveCount(1);
     await page.locator(".pulse-grid").scrollIntoViewIfNeeded();
+    const labelResults = await new AxeBuilder({ page }).withRules(["label-content-name-mismatch"]).analyze();
+    expect(labelResults.violations).toEqual([]);
     const results = await new AxeBuilder({ page }).analyze();
     const blocking = results.violations.filter(
       (v) => v.impact === "serious" || v.impact === "critical",

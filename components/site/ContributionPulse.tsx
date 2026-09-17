@@ -88,7 +88,7 @@ export function ContributionPulse({
           href={GITHUB_PROFILE_URL}
           target="_blank"
           rel="noreferrer"
-          aria-label="View contributions on GitHub"
+          aria-label={`${data.total.toLocaleString("en-US")} contributions on GitHub`}
         >
           {data.total.toLocaleString("en-US")} contributions
         </a>

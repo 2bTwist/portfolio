@@ -3,6 +3,10 @@
 import { useEffect, useRef } from "react";
 
 const POSTER = "/images/projects/cogito/cogito-transparent-poster.webp";
+const POSTER_SMALL = "/images/projects/cogito/cogito-transparent-poster-small.webp";
+const POSTER_MEDIUM = "/images/projects/cogito/cogito-transparent-poster-medium.webp";
+const POSTER_SOURCES = `${POSTER_SMALL} 480w, ${POSTER_MEDIUM} 720w, ${POSTER} 960w`;
+const POSTER_SIZES = "auto, (max-width: 767px) calc(100vw - 32px), 50vw";
 const MOTION = "/images/projects/cogito/cogito-transparent-hop.webp";
 const DURATION = 3567;
 
@@ -17,6 +21,8 @@ export function CogitoPreview({
 }) {
   const imageRef = useRef<HTMLImageElement>(null);
   const replayRef = useRef<HTMLButtonElement>(null);
+  const generationRef = useRef(0);
+  const sourceRef = useRef<Promise<Blob> | undefined>(undefined);
 
   useEffect(() => {
     const image = imageRef.current;
@@ -49,15 +55,15 @@ export function CogitoPreview({
     let played = false;
     let hovered = matchMedia("(hover: hover)").matches && target.matches(":hover");
     let disposed = false;
-    let generation = 0;
     let objectURL: string | undefined;
-    let source: Promise<Blob> | undefined;
     let timer: ReturnType<typeof setTimeout> | undefined;
     const allowed = () => !reduced.matches && !connection?.saveData;
     const pause = () => {
-      generation++;
+      generationRef.current += 1;
       clearTimeout(timer);
       preview.dataset.playing = "false";
+      image.srcset = POSTER_SOURCES;
+      image.sizes = POSTER_SIZES;
       image.src = POSTER;
       if (objectURL) URL.revokeObjectURL(objectURL);
       objectURL = undefined;
@@ -67,19 +73,25 @@ export function CogitoPreview({
       if (objectURL && !restart) return;
       pause();
       played = true;
-      const request = generation;
+      const request = generationRef.current;
       try {
-        source ??= fetch(MOTION).then(response => {
-          if (!response.ok) throw new Error("Preview unavailable");
-          return response.blob();
-        });
+        let source = sourceRef.current;
+        if (!source) {
+          source = fetch(MOTION).then(response => {
+            if (!response.ok) throw new Error("Preview unavailable");
+            return response.blob();
+          });
+          sourceRef.current = source;
+        }
         const blob = await source;
-        if (disposed || request !== generation || !visible || !allowed() || document.hidden) return;
+        if (disposed || request !== generationRef.current || !visible || !allowed() || document.hidden) return;
         // A fresh URL gives each replay its own decoder timeline, including Safari.
         objectURL = URL.createObjectURL(blob);
+        image.removeAttribute("srcset");
+        image.removeAttribute("sizes");
         image.src = objectURL;
       } catch {
-        source = undefined;
+        sourceRef.current = undefined;
         // Failed or blocked media leaves the transparent, server-rendered poster.
       }
     };
@@ -138,7 +150,7 @@ export function CogitoPreview({
   return (
     <span className="cogito-preview" data-playing="false">
       {/* eslint-disable-next-line @next/next/no-img-element -- finite alpha animation with a static SSR poster */}
-      <img ref={imageRef} src={POSTER} width={960} height={540}
+      <img ref={imageRef} src={POSTER} srcSet={POSTER_SOURCES} sizes={POSTER_SIZES} width={960} height={540}
         alt="" aria-hidden="true" loading="lazy" decoding="async" />
       {replayControl && (
         <button ref={replayRef} type="button" className="cogito-replay" aria-label="Replay animation" hidden>

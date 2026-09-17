@@ -11,20 +11,21 @@ export function CopyEmail({ email }: { email: string }) {
     if (timer.current) clearTimeout(timer.current);
   }, []);
 
-  async function copy() {
+  function copy() {
     if (pending.current) return;
     pending.current = true;
     if (timer.current) clearTimeout(timer.current);
     setMessage("");
-    try {
-      await navigator.clipboard.writeText(email);
-      setMessage("Copied to clipboard");
-      timer.current = setTimeout(() => setMessage(""), 1600);
-    } catch {
-      setMessage("Unable to copy. Select the email to copy it manually.");
-    } finally {
-      pending.current = false;
-    }
+    void Promise.resolve()
+      .then(() => navigator.clipboard.writeText(email))
+      .then(
+        () => {
+          setMessage("Copied to clipboard");
+          timer.current = setTimeout(() => setMessage(""), 1600);
+        },
+        () => setMessage("Unable to copy. Select the email to copy it manually."),
+      )
+      .finally(() => { pending.current = false; });
   }
 
   return (

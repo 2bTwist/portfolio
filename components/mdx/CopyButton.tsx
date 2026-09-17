@@ -13,20 +13,21 @@ export function CopyButton({ text }: { text: string }) {
     if (timer.current) clearTimeout(timer.current);
   }, []);
 
-  async function copy() {
+  function copy() {
     if (pending.current) return;
     pending.current = true;
     if (timer.current) clearTimeout(timer.current);
     setStatus("idle");
-    try {
-      await navigator.clipboard.writeText(text);
-      setStatus("copied");
-      timer.current = setTimeout(() => setStatus("idle"), 1500);
-    } catch {
-      setStatus("error");
-    } finally {
-      pending.current = false;
-    }
+    void Promise.resolve()
+      .then(() => navigator.clipboard.writeText(text))
+      .then(
+        () => {
+          setStatus("copied");
+          timer.current = setTimeout(() => setStatus("idle"), 1500);
+        },
+        () => setStatus("error"),
+      )
+      .finally(() => { pending.current = false; });
   }
 
   return (
