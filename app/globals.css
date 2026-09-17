@@ -1812,6 +1812,22 @@ button.ide-row {
   column-gap: var(--pulse-gap);
   min-width: 0;
 }
+/* The cells are already invisible before their viewport-triggered reveal.
+   Skip their rendering work until then, including during theme switches.
+   Reserve seven square rows and six gaps using the grid's actual inline size;
+   the surrounding labels and accessible graph summary remain rendered. */
+@supports (content-visibility: hidden) {
+  @media (prefers-reduced-motion: no-preference) {
+    .pulse-canvas:not(.is-revealed) .pulse-weeks {
+      content-visibility: hidden;
+      contain-intrinsic-size: 0 0;
+      padding-bottom: calc(
+        (100% - (var(--week-count) - 1) * var(--pulse-gap)) * 7 / var(--week-count)
+        + 6 * var(--pulse-gap)
+      );
+    }
+  }
+}
 .pulse-week {
   display: grid;
   grid-template-rows: repeat(7, minmax(0, 1fr));
