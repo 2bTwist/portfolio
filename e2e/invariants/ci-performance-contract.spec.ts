@@ -109,7 +109,14 @@ test("palette changes suppress global transitions without muting local interacti
       const transitions = await page.evaluate(
         () => (window as typeof window & { __transitionRuns?: { property: string; target: string }[] }).__transitionRuns ?? [],
       );
-      expect(transitions).toEqual([]);
+      // Pointer movement into a swatch may animate the custom cursor. Palette
+      // switching must not launch paint transitions across the page, while that
+      // ordinary local transform/opacity feedback remains allowed.
+      expect(
+        transitions.filter(({ property }) =>
+          /^(color|background(?:-color)?|border(?:-.+)?|box-shadow|outline-color|text-decoration-color|fill|stroke)$/.test(property),
+        ),
+      ).toEqual([]);
     };
 
     await switchPalette("Latte", "#eef1f5");
