@@ -174,6 +174,141 @@ test("homepage interaction perf (INP proxy + CPU profile)", async ({ page }) => 
     console.warn(`CPU profile skipped: ${String(e).split("\n")[0]}`);
   }
 
+  // Best-effort rendering trace in a fresh browser context. This is intentionally
+  // after the gate artifact and does not feed its verdict: unlike the warmed gate
+  // page, it includes startup work that can delay the first theme presentation.
+  // Keep the trace bounded and close its isolated context on every path, so an
+  // incomplete CDP stream cannot leave diagnostic work running beside the gate.
+  const traceUrl = page.url();
+  const browser = page.context().browser();
+  const traceViewport = page.viewportSize() ?? { width: 1280, height: 720 };
+  const traceBrowserVersion = browser?.version();
+  await page.close().catch((closeError) => {
+    console.warn(`Rendering trace gate-page cleanup skipped: ${String(closeError).split("\n")[0]}`);
+  });
+  if (!browser) {
+    console.warn("Rendering trace skipped: browser connection unavailable");
+  } else {
+    try {
+      const traceContext = await browser.newContext({
+        viewport: traceViewport,
+      });
+      const tracePage = await traceContext.newPage();
+      const traceClient = await traceContext.newCDPSession(tracePage);
+      const traceEvents: unknown[] = [];
+      let tracingActive = false;
+      let traceAbortError: Error | undefined;
+      let resolveTrace!: () => void;
+      const traceComplete = new Promise<void>((resolve) => {
+        resolveTrace = resolve;
+      });
+      traceClient.on("Tracing.dataCollected", (event: { value?: unknown[] }) => {
+        if (event.value) traceEvents.push(...event.value);
+      });
+      traceClient.on("Tracing.tracingComplete", () => resolveTrace());
+
+      let endTimer: ReturnType<typeof setTimeout> | undefined;
+      const endTracing = async () => {
+        if (!tracingActive) return;
+        tracingActive = false;
+        await new Promise<void>((resolve, reject) => {
+          endTimer = setTimeout(() => reject(new Error("Tracing.end timed out")), 1500);
+          void traceClient.send("Tracing.end").then(resolve, reject);
+        }).finally(() => {
+          if (endTimer) clearTimeout(endTimer);
+        });
+      };
+
+      const traceWork = (async () => {
+        await traceClient.send("Emulation.setCPUThrottlingRate", { rate: CPU_THROTTLE });
+        await traceClient.send("Tracing.start", {
+          categories: [
+            "devtools.timeline",
+            "blink.user_timing",
+            "disabled-by-default-devtools.timeline",
+            "disabled-by-default-devtools.timeline.frame",
+            "disabled-by-default-devtools.timeline.invalidationTracking",
+            "cc",
+            "gpu",
+            "viz",
+          ].join(","),
+          transferMode: "ReportEvents",
+        });
+        tracingActive = true;
+        await tracePage.goto(traceUrl);
+        const { frameTree } = await traceClient.send("Page.getFrameTree") as {
+          frameTree: { frame: { id: string } };
+        };
+        await expect(tracePage.locator(".ide-row-icon svg").first()).toBeVisible();
+        const traceSwatches = tracePage.locator(".ide-swatch");
+        await expect(traceSwatches).toHaveCount(3);
+        for (let i = 0; i < 3; i++) {
+          const swatch = traceSwatches.nth(i);
+          const box = await swatch.boundingBox();
+          if (!box) throw new Error("Rendering trace target was not visible");
+          await tracePage.evaluate((index) => performance.mark(`theme-probe-${index}`), i);
+          await tracePage.mouse.click(box.x + box.width / 2, box.y + box.height / 2);
+          await tracePage.waitForTimeout(120);
+          await expect(tracePage).toHaveURL(/\/$/);
+        }
+        await endTracing();
+        await traceComplete;
+        if (traceAbortError) throw traceAbortError;
+        writeFileSync(
+          "perf-results/homepage.trace.json",
+          JSON.stringify({
+            traceEvents,
+            metadata: {
+              url: tracePage.url(),
+              frameId: frameTree.frame.id,
+              browserVersion: traceBrowserVersion,
+              cpuThrottle: CPU_THROTTLE,
+              actions: ["swatch:0", "swatch:1", "swatch:2"],
+              marks: ["theme-probe-0", "theme-probe-1", "theme-probe-2"],
+              measuredAt: new Date().toISOString(),
+            },
+          }),
+        );
+        console.log("Rendering trace -> perf-results/homepage.trace.json");
+      })();
+
+      let traceTimer: ReturnType<typeof setTimeout> | undefined;
+      try {
+        await Promise.race([
+          traceWork,
+          new Promise<never>((_, reject) => {
+            traceTimer = setTimeout(() => reject(new Error("Rendering trace timed out")), 6000);
+          }),
+        ]);
+      } catch (e) {
+        const error = e instanceof Error ? e : new Error(String(e));
+        console.warn(`Rendering trace skipped: ${error.message}`);
+        traceAbortError = error;
+        resolveTrace();
+        try {
+          await endTracing();
+        } catch (endError) {
+          console.warn(`Rendering trace cleanup skipped: ${String(endError).split("\n")[0]}`);
+        }
+      } finally {
+        if (traceTimer) clearTimeout(traceTimer);
+        await traceContext.close().catch((closeError) => {
+          console.warn(`Rendering trace context cleanup skipped: ${String(closeError).split("\n")[0]}`);
+        });
+        let settleTimer: ReturnType<typeof setTimeout> | undefined;
+        await Promise.race([
+          traceWork.catch(() => undefined),
+          new Promise<void>((resolve) => {
+            settleTimer = setTimeout(resolve, 1000);
+          }),
+        ]);
+        if (settleTimer) clearTimeout(settleTimer);
+      }
+    } catch (e) {
+      console.warn(`Rendering trace setup skipped: ${String(e).split("\n")[0]}`);
+    }
+  }
+
   const budgets = JSON.parse(readFileSync("budgets.json", "utf8"));
   const inpBudget = budgets.metrics.inp.budget;
   if (inpBudget != null) expect(inp).toBeLessThanOrEqual(inpBudget);
