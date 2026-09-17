@@ -10,7 +10,7 @@ export function ProjectsBody() {
     <PageShell>
       <PageHeader
         title="Projects"
-        lead="Things I have built, split by where they run."
+        lead="Things I have built and things I’m building, split by where they run."
       />
       {[
         { label: "Web", items: web },
@@ -22,7 +22,7 @@ export function ProjectsBody() {
           <h2 className="mono text-sm uppercase tracking-wide mb-3" style={{ color: "var(--muted)" }}>
             {group.label}
           </h2>
-          <div className="grid gap-4 sm:grid-cols-2">
+          <div className="project-grid">
             {group.items.map((p) => (
               <ProjectCard key={p.id} project={p} />
             ))}

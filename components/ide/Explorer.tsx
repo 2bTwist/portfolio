@@ -125,10 +125,14 @@ export function Explorer({
   // bouncer's setState never re-apply a stale width and fight the drag. CSS sets
   // the default; this restores any saved width on mount.
   useEffect(() => {
-    const saved = Number(localStorage.getItem(STORAGE_KEY));
-    if (saved >= MIN_WIDTH && saved <= WON_MAX) {
-      widthRef.current = saved;
-      if (asideRef.current) asideRef.current.style.width = `${saved}px`;
+    try {
+      const saved = Number(localStorage.getItem(STORAGE_KEY));
+      if (saved >= MIN_WIDTH && saved <= WON_MAX) {
+        widthRef.current = saved;
+        if (asideRef.current) asideRef.current.style.width = `${saved}px`;
+      }
+    } catch {
+      // Keep the default width when browser storage is unavailable.
     }
   }, []);
 
@@ -210,7 +214,11 @@ export function Explorer({
     function onUp() {
       if (!draggingRef.current) return;
       endDrag();
-      localStorage.setItem(STORAGE_KEY, String(Math.round(widthRef.current)));
+      try {
+        localStorage.setItem(STORAGE_KEY, String(Math.round(widthRef.current)));
+      } catch {
+        // Resizing still works for this session without persistence.
+      }
     }
 
     handle.addEventListener("pointerdown", onDown);
@@ -359,7 +367,7 @@ function Node({
         aria-current={active ? "page" : undefined}
         onPointerDown={(e) => beginRowDrag(e, node.href, node.name)}
         onClick={(e) => {
-          if (consumeSuppressClick()) {
+          if (consumeSuppressClick(e)) {
             e.preventDefault();
             return;
           }
@@ -399,7 +407,7 @@ function Node({
         aria-current={pathname === node.href ? "page" : undefined}
         onPointerDown={(e) => beginRowDrag(e, node.href, node.name)}
         onClick={(e) => {
-          if (consumeSuppressClick()) {
+          if (consumeSuppressClick(e)) {
             e.preventDefault();
             return;
           }

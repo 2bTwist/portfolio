@@ -21,7 +21,7 @@ async function measureAll(url: string, runs: number) {
   const [lh, bundleKB] = await Promise.all([measureLighthouse(url, runs), measureBundleKB()]);
   return {
     lcp: lh.lcp, cls: lh.cls, tbt: lh.tbt,
-    inp: readInp(), bundleKB, perfScore: lh.perfScore,
+    inp: readInp(url), bundleKB, perfScore: lh.perfScore,
   } as Record<string, number | null>;
 }
 
@@ -42,7 +42,9 @@ program
     const measured = await measureAll(opts.url, Number(opts.runs));
     const rows = Object.entries(budgets.metrics).map(([k, m]) => {
       const value = measured[k] ?? null;
-      const pass = value == null || m.budget == null ? null : value <= m.budget;
+      // A calibrated metric must be present to pass. An unavailable measurement
+      // is an incomplete gate, never a silent full pass.
+      const pass = m.budget == null ? null : value != null && value <= m.budget;
       return { metric: k, layer: m.layer, value, budget: m.budget, target: m.target, unit: m.unit, pass };
     });
     const verdict = rows.some((r) => r.pass === false) ? "fail" : "pass";
@@ -59,7 +61,7 @@ program
       }
       console.log("");
     }
-    process.exit(verdict === "fail" ? 1 : 0);
+    process.exitCode = verdict === "fail" ? 1 : 0;
   });
 
 program
@@ -83,4 +85,8 @@ program
     console.log(`Calibrated ${opts.budget}: measured + ${opts.margin}% headroom, floored at target.`);
   });
 
-program.parseAsync();
+void program.parseAsync()
+  .catch((error: unknown) => {
+    console.error(error instanceof Error ? error.stack ?? error.message : String(error));
+    process.exitCode = 1;
+  });

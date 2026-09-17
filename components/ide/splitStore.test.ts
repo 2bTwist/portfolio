@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach } from "vitest";
+import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
 import { act, renderHook } from "@testing-library/react";
 import {
   useSplit,
@@ -14,12 +14,35 @@ import {
    each case. */
 
 describe("split store", () => {
+  afterEach(() => {
+    vi.restoreAllMocks();
+  });
+
   beforeEach(() => {
     act(() => {
       closeRight();
       setLeftFraction(0.5);
     });
     localStorage.clear();
+  });
+
+  it("falls back to the default ratio when persisted storage cannot be read", () => {
+    vi.spyOn(Storage.prototype, "getItem").mockImplementation(() => {
+      throw new DOMException("Storage access is denied", "SecurityError");
+    });
+
+    const { result } = renderHook(() => useSplit());
+    expect(result.current.leftFraction).toBe(0.5);
+  });
+
+  it("updates the in-memory ratio when persistence is denied", () => {
+    const { result } = renderHook(() => useSplit());
+    vi.spyOn(Storage.prototype, "setItem").mockImplementation(() => {
+      throw new DOMException("Storage access is denied", "SecurityError");
+    });
+
+    act(() => setLeftFraction(0.65));
+    expect(result.current.leftFraction).toBeCloseTo(0.65);
   });
 
   it("starts as a single pane with a half split", () => {

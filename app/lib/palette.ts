@@ -42,7 +42,7 @@ export const PALETTES: Palette[] = [
       "--bg": "#eef1f5",
       "--surface": "#ffffff",
       "--text": "#4c4f69",
-      "--muted": "#6c6f85",
+      "--muted": "#66697e",
       "--accent": "#7a36d6",
       "--accent-press": "#6c28c4",
       "--on-accent": "#ffffff",

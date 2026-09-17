@@ -12,7 +12,7 @@
    file is hovering. */
 
 import dynamic from "next/dynamic";
-import { type ReactNode } from "react";
+import { useCallback, useRef, type ReactNode } from "react";
 import { useSplit } from "./splitStore";
 import { useDrag } from "./dragStore";
 
@@ -29,6 +29,15 @@ function DropOverlay({ active }: { active: boolean }) {
 }
 
 export function EditorArea({ children }: { children: ReactNode }) {
+  const primaryRef = useRef<HTMLDivElement | null>(null);
+  const scrollTopRef = useRef<number | null>(null);
+  // SplitView is lazy-loaded and replaces the scroll element. Preserve the
+  // reader's position when that element is replaced, including on close.
+  const bindPrimaryPane = useCallback((pane: HTMLDivElement | null) => {
+    if (primaryRef.current) scrollTopRef.current = primaryRef.current.scrollTop;
+    primaryRef.current = pane;
+    if (pane && scrollTopRef.current !== null) pane.scrollTop = scrollTopRef.current;
+  }, []);
   const { rightHref, leftFraction } = useSplit();
   const drag = useDrag();
   const showDrop = drag.active && drag.over;
@@ -37,7 +46,7 @@ export function EditorArea({ children }: { children: ReactNode }) {
   if (!rightHref) {
     return (
       <div className="relative flex flex-1 min-h-0 flex-col" data-editor-root>
-        <div className="flex-1 md:min-h-0 md:overflow-y-auto" data-editor-scroll>
+        <div ref={bindPrimaryPane} className="flex-1 md:min-h-0 md:overflow-y-auto" data-editor-scroll>
           {children}
         </div>
         <DropOverlay active={showDrop} />
@@ -46,7 +55,7 @@ export function EditorArea({ children }: { children: ReactNode }) {
   }
 
   return (
-    <SplitView rightHref={rightHref} leftFraction={leftFraction} showDrop={showDrop}>
+    <SplitView rightHref={rightHref} leftFraction={leftFraction} showDrop={showDrop} primaryPaneRef={bindPrimaryPane}>
       {children}
     </SplitView>
   );

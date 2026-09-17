@@ -33,42 +33,81 @@ export function SplitDivider({
     const handle = handleRef.current;
     if (!handle) return;
 
+    let pointerId: number | null = null;
+    let initialFraction = fraction;
+    let previousCursor = "";
+    let previousDragging: string | undefined;
+
     function write(f: number) {
       currentRef.current = f;
       containerRef.current?.style.setProperty("--lf", String(f));
     }
+    function finish(commit: boolean) {
+      if (!draggingRef.current) return;
+      draggingRef.current = false;
+      const releasedPointer = pointerId;
+      pointerId = null;
+      if (!commit) write(initialFraction);
+      if (previousDragging === undefined) delete document.body.dataset.dragging;
+      else document.body.dataset.dragging = previousDragging;
+      document.body.style.cursor = previousCursor;
+      if (releasedPointer !== null && handle!.hasPointerCapture(releasedPointer)) {
+        handle!.releasePointerCapture(releasedPointer);
+      }
+      if (commit) onCommit(currentRef.current);
+    }
     function onDown(e: PointerEvent) {
+      if (e.button !== 0 || !e.isPrimary || draggingRef.current) return;
       e.preventDefault();
+      // Keyboard changes are committed props; a new drag starts at that value.
+      initialFraction = fraction;
+      currentRef.current = fraction;
+      pointerId = e.pointerId;
+      previousCursor = document.body.style.cursor;
+      previousDragging = document.body.dataset.dragging;
       draggingRef.current = true;
-      handle!.setPointerCapture?.(e.pointerId);
+      handle!.setPointerCapture(e.pointerId);
       document.body.dataset.dragging = "true";
       document.body.style.cursor = "col-resize";
     }
     function onMove(e: PointerEvent) {
-      if (!draggingRef.current) return;
+      if (!draggingRef.current || e.pointerId !== pointerId) return;
       const rect = containerRef.current?.getBoundingClientRect();
       if (!rect || rect.width === 0) return;
       write(clamp((e.clientX - rect.left) / rect.width));
     }
-    function onUp() {
-      if (!draggingRef.current) return;
-      draggingRef.current = false;
-      delete document.body.dataset.dragging;
-      document.body.style.cursor = "";
-      onCommit(currentRef.current);
+    function onUp(e: PointerEvent) {
+      if (e.pointerId === pointerId) finish(true);
+    }
+    function onCancel(e: PointerEvent) {
+      if (e.pointerId === pointerId) finish(false);
+    }
+    function onBlur() { finish(false); }
+    function onKey(e: KeyboardEvent) {
+      if (e.key === "Escape" && draggingRef.current) {
+        e.preventDefault();
+        finish(false);
+      }
     }
 
     handle.addEventListener("pointerdown", onDown);
+    handle.addEventListener("lostpointercapture", onCancel);
     window.addEventListener("pointermove", onMove, { passive: true });
     window.addEventListener("pointerup", onUp, { passive: true });
+    window.addEventListener("pointercancel", onCancel);
+    window.addEventListener("blur", onBlur);
+    window.addEventListener("keydown", onKey, true);
     return () => {
       handle.removeEventListener("pointerdown", onDown);
+      handle.removeEventListener("lostpointercapture", onCancel);
       window.removeEventListener("pointermove", onMove);
       window.removeEventListener("pointerup", onUp);
-      delete document.body.dataset.dragging;
-      document.body.style.cursor = "";
+      window.removeEventListener("pointercancel", onCancel);
+      window.removeEventListener("blur", onBlur);
+      window.removeEventListener("keydown", onKey, true);
+      finish(false);
     };
-  }, [containerRef, onCommit]);
+  }, [containerRef, onCommit, fraction]);
 
   function onKeyDown(e: React.KeyboardEvent) {
     if (e.key === "ArrowLeft") {

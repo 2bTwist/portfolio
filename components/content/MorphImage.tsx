@@ -47,6 +47,11 @@ interface Entry {
 // Last on-screen rect per morph key. A module singleton: the leaving page
 // writes, the arriving page reads. Survives client navigation (same document).
 const store = new Map<string, Entry>();
+const activeMorphs = new Map<string, {
+  clone: HTMLImageElement;
+  animation: Animation;
+  destination: HTMLSpanElement;
+}>();
 // The path of the page we most recently left. Only entries recorded on THAT
 // page may morph, so old banner entries from detail pages visited earlier
 // (still in `store`) don't all fire when you return to the grid.
@@ -69,6 +74,18 @@ export function MorphRouteSync() {
   const pathname = usePathname();
   useInsertionEffect(() => {
     if (pathname !== currentPath) {
+      // A new route owns the screen immediately. Capture the current visual
+      // position before cancelling, so a quick reversal starts where the image is.
+      for (const [key, active] of activeMorphs) {
+        const entry = store.get(key);
+        if (entry?.from === currentPath) {
+          store.set(key, { ...entry, rect: active.clone.getBoundingClientRect() });
+        }
+        active.animation.cancel();
+        active.clone.remove();
+        active.destination.style.visibility = "";
+      }
+      activeMorphs.clear();
       lastLeftPath = currentPath;
       currentPath = pathname;
     }
@@ -200,9 +217,12 @@ export function MorphImage({
           ],
           { duration: DURATION, easing: EASING },
         );
+        activeMorphs.set(morphKey, { clone, animation: anim, destination: el });
         const done = () => {
           clone.remove();
-          if (ref.current) ref.current.style.visibility = "";
+          el.style.visibility = "";
+          // A cancelled animation may dispatch after its replacement starts.
+          if (activeMorphs.get(morphKey)?.animation === anim) activeMorphs.delete(morphKey);
         };
         anim.addEventListener("finish", done);
         anim.addEventListener("cancel", done);
@@ -216,9 +236,11 @@ export function MorphImage({
       // fires between the two mounts, and cancelling would kill the morph. The
       // rAF guards itself with el.isConnected for real unmounts.
       void raf;
-      const rect = el.getBoundingClientRect();
+      const active = activeMorphs.get(morphKey);
+      const presented = active?.destination === el ? active.clone : null;
+      const rect = (presented ?? el).getBoundingClientRect();
       const img = el.querySelector("img");
-      const loaded = img?.currentSrc || img?.src || src;
+      const loaded = presented?.currentSrc || img?.currentSrc || img?.src || src;
       if (rect.width > 0 && rect.height > 0) {
         // (lastLeftPath is owned by MorphRouteSync, not written here.)
         store.set(morphKey, { rect, src: loaded, t: Date.now(), from: here, kind });

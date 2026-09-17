@@ -8,9 +8,8 @@
    - desktop (md+): title bar, explorer, tabs, status bar, terminal drawer
    - mobile / no-JS: the plain stacked site with <SiteNav>
 
-   The route-enter animation is a transform-only CSS keyframe (no motion dep):
-   it paints immediately so LCP is unaffected, doesn't shift layout (CLS-safe),
-   and is reduced-motion gated. The palette and terminal are lazy-loaded. */
+   Route content lands at its final position; the shared-image morph owns the
+   travel so its destination stays stationary. Palette and terminal are lazy-loaded. */
 
 import dynamic from "next/dynamic";
 import { usePathname, useRouter } from "next/navigation";
@@ -44,7 +43,7 @@ function warmOverlays() {
   void import("./DragGhost");
 }
 
-/* Keyed wrapper: remounting on pathname change replays the CSS enter animation. */
+/* Keyed wrapper: reset page-local state and effects on navigation. */
 function EditorPane({ children }: { children: ReactNode }) {
   const pathname = usePathname();
   return (
@@ -165,7 +164,10 @@ export function Shell({
             <button
               type="button"
               className="ide-command-center"
-              onClick={toggleCmdk}
+              onClick={(event) => {
+                event.currentTarget.focus();
+                toggleCmdk();
+              }}
               aria-label={`${navLabel(pathname)}, search files and posts`}
               aria-keyshortcuts="Meta+K Control+K"
             >

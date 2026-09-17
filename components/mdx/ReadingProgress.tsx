@@ -1,32 +1,44 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef } from "react";
 
-/* Reading progress bar. The scroll handler is rAF-throttled so it does at most
-   one state update per frame instead of one per scroll event (perf nit from the
-   plan). */
+// Read the article's own scroll container on desktop and the document on mobile.
+// The visual follows the scroll directly without a React render or width animation.
 export function ReadingProgress() {
-  const [progress, setProgress] = useState(0);
+  const barRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     let frame = 0;
+    const pane = barRef.current?.closest<HTMLElement>("[data-editor-scroll]");
     const update = () => {
       frame = 0;
-      const total = document.documentElement.scrollHeight - window.innerHeight;
-      setProgress(total > 0 ? Math.min(100, (window.scrollY / total) * 100) : 0);
+      const inPane = !!pane && (pane.scrollTop > 0 || /auto|scroll/.test(getComputedStyle(pane).overflowY));
+      const total = inPane
+        ? pane.scrollHeight - pane.clientHeight
+        : document.documentElement.scrollHeight - window.innerHeight;
+      const position = inPane ? pane.scrollTop : window.scrollY;
+      const progress = total > 0 ? Math.max(0, Math.min(1, position / total)) : 0;
+      if (barRef.current) barRef.current.style.transform = `scaleX(${progress})`;
     };
-    const onScroll = () => {
+    const onScroll = (event: Event) => {
+      if (event.type === "scroll" && event.target !== document && event.target !== window && event.target !== pane) return;
       if (!frame) frame = requestAnimationFrame(update);
     };
     update();
-    window.addEventListener("scroll", onScroll, { passive: true });
+    document.addEventListener("scroll", onScroll, { passive: true, capture: true });
     window.addEventListener("resize", onScroll, { passive: true });
+    const observer = typeof ResizeObserver !== "undefined" ? new ResizeObserver(() => {
+      if (!frame) frame = requestAnimationFrame(update);
+    }) : null;
+    if (pane) observer?.observe(pane);
+    if (pane?.firstElementChild) observer?.observe(pane.firstElementChild);
     return () => {
       if (frame) cancelAnimationFrame(frame);
-      window.removeEventListener("scroll", onScroll);
+      observer?.disconnect();
+      document.removeEventListener("scroll", onScroll, true);
       window.removeEventListener("resize", onScroll);
     };
   }, []);
 
-  return <div className="reading-progress" style={{ width: `${progress}%` }} aria-hidden="true" />;
+  return <div ref={barRef} className="reading-progress" style={{ transform: "scaleX(0)" }} aria-hidden="true" />;
 }

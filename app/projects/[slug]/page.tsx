@@ -7,7 +7,8 @@ import { getProjectStory } from "@/app/lib/project-story";
 import { MDXComponents } from "@/components/mdx/MDXComponents";
 import { PageShell } from "@/components/site/PageShell";
 import { TagRow, ActionLink } from "@/components/content/ui";
-import { GitHubIcon, AppStoreIcon } from "@/components/content/tagIcons";
+import { GitHubIcon, AppStoreIcon, TagIcon } from "@/components/content/tagIcons";
+import { CogitoPreview } from "@/components/content/CogitoPreview";
 import { MorphImage } from "@/components/content/MorphImage";
 import { ArticleTocMount } from "@/components/content/ArticleTocMount";
 import { JsonLd } from "@/components/site/JsonLd";
@@ -72,23 +73,24 @@ export default async function ProjectPage({ params }: Params) {
           view-transition name so it can morph from the card on navigation. */}
       {project.image ? (
         <div className="project-banner mt-4">
-          <MorphImage
+          {project.preview === "cogito" ? <CogitoPreview replayControl /> : <MorphImage
             morphKey={`project-img-${project.id}`}
             src={project.image}
             alt={project.title}
             sizes="(min-width: 768px) 720px, 100vw"
             priority
             kind="banner"
-          />
+          />}
         </div>
       ) : null}
 
       <div className={project.image ? "mt-6" : "mt-4"}>
         <span
-          className="mono text-xs px-2 py-0.5 rounded-full"
+          className="mono text-xs px-2 py-0.5 rounded-full inline-flex items-center gap-1"
           style={{ background: "var(--surface)", color: "var(--muted)", border: "1px solid var(--border)" }}
         >
-          {project.kind}
+          <TagIcon name={project.kind} />
+          {project.status ? `${project.kind} · ${project.status}` : project.kind}
         </span>
       </div>
 

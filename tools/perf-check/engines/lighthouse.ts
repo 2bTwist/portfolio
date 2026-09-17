@@ -3,6 +3,7 @@ import { promisify } from "node:util";
 import { DEFAULT_RUNS } from "../../../perf/config";
 
 const run = promisify(execFile);
+const LIGHTHOUSE_TIMEOUT_MS = 120_000;
 
 function median(xs: number[]): number {
   const s = [...xs].sort((a, b) => a - b);
@@ -11,6 +12,13 @@ function median(xs: number[]): number {
 }
 
 export type LhResult = { lcp: number; cls: number; tbt: number; perfScore: number };
+
+function requireFiniteMetric(value: unknown, name: string): number {
+  if (typeof value !== "number" || !Number.isFinite(value)) {
+    throw new Error(`Lighthouse returned an unavailable ${name} metric`);
+  }
+  return value;
+}
 
 // Shell out to the lighthouse CLI (not the node API) — the API's browser-eval
 // code breaks under tsx/esbuild's name-keeping. Median-of-N (grilled decision 5).
@@ -25,15 +33,19 @@ async function once(url: string) {
       "--output-path=stdout",
       "--chrome-flags=--headless=new --no-sandbox",
     ],
-    { maxBuffer: 64 * 1024 * 1024 },
+    { maxBuffer: 64 * 1024 * 1024, timeout: LIGHTHOUSE_TIMEOUT_MS },
   );
-  const lhr = JSON.parse(stdout.slice(stdout.indexOf("{")));
+  const start = stdout.indexOf("{");
+  if (start === -1) {
+    throw new Error("Lighthouse returned no JSON output");
+  }
+  const lhr = JSON.parse(stdout.slice(start));
   const a = lhr.audits;
   return {
-    lcp: a["largest-contentful-paint"].numericValue ?? 0,
-    cls: a["cumulative-layout-shift"].numericValue ?? 0,
-    tbt: a["total-blocking-time"].numericValue ?? 0,
-    perf: (lhr.categories.performance.score ?? 0) * 100,
+    lcp: requireFiniteMetric(a["largest-contentful-paint"]?.numericValue, "LCP"),
+    cls: requireFiniteMetric(a["cumulative-layout-shift"]?.numericValue, "CLS"),
+    tbt: requireFiniteMetric(a["total-blocking-time"]?.numericValue, "TBT"),
+    perf: requireFiniteMetric(lhr.categories.performance?.score, "performance score") * 100,
   };
 }
 

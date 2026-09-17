@@ -98,7 +98,7 @@ export function Tabs({ className = "" }: { className?: string }) {
                 prefetch={false}
                 aria-current={active ? "page" : undefined}
                 onClick={(e) => {
-                  if (consumeSuppressClick()) {
+                  if (consumeSuppressClick(e)) {
                     e.preventDefault();
                     return;
                   }

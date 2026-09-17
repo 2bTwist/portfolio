@@ -70,6 +70,7 @@ function clientRows(): Row[] {
 export function DataReveal() {
   const [groups, setGroups] = useState<Group[] | null>(null);
   const closeRef = useRef<HTMLButtonElement>(null);
+  const dialogRef = useRef<HTMLDivElement>(null);
 
   const dismiss = useCallback(() => {
     try {
@@ -118,16 +119,37 @@ export function DataReveal() {
   // While open: lock body scroll, focus the close button, close on Esc.
   useEffect(() => {
     if (!groups) return;
+    const previousFocus = document.activeElement instanceof HTMLElement ? document.activeElement : null;
     const prevOverflow = document.body.style.overflow;
     document.body.style.overflow = "hidden";
     closeRef.current?.focus();
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") dismiss();
+      if (e.key === "Escape") {
+        e.preventDefault();
+        e.stopPropagation();
+        dismiss();
+      } else if (e.key === "Tab") {
+        const controls = dialogRef.current?.querySelectorAll<HTMLElement>(
+          'a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex="0"]',
+        );
+        if (!controls?.length) return;
+        const first = controls[0];
+        const last = controls[controls.length - 1];
+        const outside = !dialogRef.current?.contains(document.activeElement);
+        if (e.shiftKey && (document.activeElement === first || outside)) {
+          e.preventDefault();
+          last.focus();
+        } else if (!e.shiftKey && (document.activeElement === last || outside)) {
+          e.preventDefault();
+          first.focus();
+        }
+      }
     };
-    window.addEventListener("keydown", onKey);
+    window.addEventListener("keydown", onKey, true);
     return () => {
       document.body.style.overflow = prevOverflow;
-      window.removeEventListener("keydown", onKey);
+      window.removeEventListener("keydown", onKey, true);
+      if (previousFocus?.isConnected) previousFocus.focus({ preventScroll: true });
     };
   }, [groups, dismiss]);
 
@@ -136,6 +158,7 @@ export function DataReveal() {
   return (
     <div className="data-reveal-backdrop" onClick={dismiss}>
       <div
+        ref={dialogRef}
         className="data-reveal-card"
         role="dialog"
         aria-modal="true"

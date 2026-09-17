@@ -5,7 +5,7 @@
    merges lazily-loaded full-text post hits into one score-ranked list, then
    router.push()es. */
 
-import { useEffect, useMemo, useRef, useState, type KeyboardEvent } from "react";
+import { useEffect, useLayoutEffect, useMemo, useRef, useState, type KeyboardEvent } from "react";
 import { useRouter } from "next/navigation";
 import { searchStatic, searchPosts, type SearchResult } from "@/app/lib/search";
 import { SearchIcon } from "@/components/feel/animated-icons";
@@ -21,6 +21,7 @@ export default function CommandPalette() {
   // result is ignored at render time (no setState-in-effect to clear it).
   const [postHits, setPostHits] = useState<{ q: string; hits: SearchResult[] }>({ q: "", hits: [] });
   const inputRef = useRef<HTMLInputElement>(null);
+  const listRef = useRef<HTMLUListElement>(null);
 
   // Focus the input on open and restore focus to the trigger on close.
   useEffect(() => {
@@ -53,6 +54,32 @@ export default function CommandPalette() {
 
   // Clamp during render rather than resetting via an effect.
   const current = items.length === 0 ? 0 : Math.min(active, items.length - 1);
+
+  // Keyboard selection stays visible immediately, without moving focus or
+  // scrolling the page behind the palette.
+  useLayoutEffect(() => {
+    const list = listRef.current;
+    const selected = list?.querySelector<HTMLElement>('[aria-selected="true"]');
+    if (!list || !selected) return;
+
+    const keepSelectionVisible = () => {
+      const viewport = list.getBoundingClientRect();
+      const option = selected.getBoundingClientRect();
+      // The palette entrance scales the list. Rect deltas are therefore visual
+      // pixels while scrollTop takes layout pixels; convert before scrolling and
+      // round outward so a fractional WebKit delta never leaves the option cut off.
+      const scaleY = list.offsetHeight > 0 ? viewport.height / list.offsetHeight : 1;
+      if (option.top < viewport.top) {
+        list.scrollTop += Math.floor((option.top - viewport.top) / scaleY);
+      } else if (option.bottom > viewport.bottom) {
+        list.scrollTop += Math.ceil((option.bottom - viewport.bottom) / scaleY);
+      }
+    };
+
+    keepSelectionVisible();
+    const frame = requestAnimationFrame(keepSelectionVisible);
+    return () => cancelAnimationFrame(frame);
+  }, [current, items]);
 
   function onChangeQuery(v: string) {
     setQuery(v);
@@ -116,7 +143,7 @@ export default function CommandPalette() {
             spellCheck={false}
           />
         </div>
-        <ul id="cmdk-listbox" className="ide-palette-list" role="listbox" aria-label="Results">
+        <ul ref={listRef} id="cmdk-listbox" className="ide-palette-list" role="listbox" aria-label="Results">
           {items.map((r, i) => (
             <li key={`${r.kind}:${r.href}`} id={`cmdk-opt-${i}`} role="option" aria-selected={i === current}>
               <button

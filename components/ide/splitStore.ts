@@ -28,8 +28,12 @@ const listeners = new Set<() => void>();
 
 function readStoredFraction(): number {
   if (typeof window === "undefined") return DEFAULT_FRACTION;
-  const raw = Number(localStorage.getItem(RATIO_KEY));
-  return Number.isFinite(raw) && raw > 0 ? clampFraction(raw) : DEFAULT_FRACTION;
+  try {
+    const raw = Number(localStorage.getItem(RATIO_KEY));
+    return Number.isFinite(raw) && raw > 0 ? clampFraction(raw) : DEFAULT_FRACTION;
+  } catch {
+    return DEFAULT_FRACTION;
+  }
 }
 
 let hydratedFraction = false;
@@ -64,7 +68,11 @@ export function closeRight() {
  *  pointerup; mid-drag is imperative and does not touch the store). */
 export function setLeftFraction(f: number) {
   const next = clampFraction(f);
-  if (typeof window !== "undefined") localStorage.setItem(RATIO_KEY, String(next));
+  try {
+    if (typeof window !== "undefined") localStorage.setItem(RATIO_KEY, String(next));
+  } catch {
+    // Persistence is optional; the released divider still updates this session.
+  }
   setState({ leftFraction: next });
 }
 

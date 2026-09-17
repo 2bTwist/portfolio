@@ -18,11 +18,13 @@ export function SplitView({
   rightHref,
   leftFraction,
   showDrop,
+  primaryPaneRef,
   children,
 }: {
   rightHref: string;
   leftFraction: number;
   showDrop: boolean;
+  primaryPaneRef: (pane: HTMLDivElement | null) => void;
   children: ReactNode;
 }) {
   const containerRef = useRef<HTMLDivElement>(null);
@@ -33,7 +35,7 @@ export function SplitView({
   if (!rightBody) {
     return (
       <div className="relative flex flex-1 min-h-0 flex-col" data-editor-root>
-        <div className="flex-1 md:min-h-0 md:overflow-y-auto" data-editor-scroll>
+        <div ref={primaryPaneRef} className="flex-1 md:min-h-0 md:overflow-y-auto" data-editor-scroll>
           {children}
         </div>
         <div className={`ide-drop-overlay${showDrop ? " is-active" : ""}`} aria-hidden="true">
@@ -51,7 +53,7 @@ export function SplitView({
       style={{ "--lf": leftFraction } as CSSProperties}
       data-editor-root
     >
-      <div className="ide-split-left flex-1 md:min-h-0 md:overflow-y-auto" data-editor-scroll>
+      <div ref={primaryPaneRef} className="ide-split-left flex-1 md:min-h-0 md:overflow-y-auto" data-editor-scroll>
         {children}
       </div>
 

@@ -12,7 +12,8 @@ function sumKB(stdout: string): number | null {
     // cert-badge entry) are bounded by their own size-limit entry, not here, so
     // they must not inflate the route bundle metric.
     const initial = json.filter((e) => !e.name || e.name.startsWith("initial-load"));
-    return initial.reduce((s, e) => s + (e.size ?? 0), 0) / 1024;
+    // size-limit uses decimal kB for the same budget, so retain that unit.
+    return initial.reduce((s, e) => s + (e.size ?? 0), 0) / 1000;
   } catch {
     return null;
   }

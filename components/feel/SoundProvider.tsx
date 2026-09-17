@@ -24,13 +24,21 @@ const mutedListeners = new Set<() => void>();
 
 function readMuted(): boolean {
   if (mutedValue === null) {
-    mutedValue = typeof window !== "undefined" && localStorage.getItem(STORAGE_KEY) === "1";
+    try {
+      mutedValue = typeof window !== "undefined" && localStorage.getItem(STORAGE_KEY) === "1";
+    } catch {
+      mutedValue = false;
+    }
   }
   return mutedValue;
 }
 function writeMuted(next: boolean) {
   mutedValue = next;
-  if (typeof window !== "undefined") localStorage.setItem(STORAGE_KEY, next ? "1" : "0");
+  try {
+    if (typeof window !== "undefined") localStorage.setItem(STORAGE_KEY, next ? "1" : "0");
+  } catch {
+    // Keep the current session usable when browser storage is unavailable.
+  }
   mutedListeners.forEach((l) => l());
 }
 function subscribeMuted(cb: () => void) {

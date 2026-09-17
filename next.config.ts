@@ -17,7 +17,7 @@ const nextConfig: NextConfig = {
   // The FLIP version works on every navigation, so no viewTransition flag.
   // Dev-only: allow the LAN IP so the containerized browser used for agent
   // smoke-testing can load dev resources (lazy chunks / HMR). No prod effect.
-  allowedDevOrigins: ["192.168.1.185", "192.168.1.191", "100.98.111.54"],
+  allowedDevOrigins: ["127.0.0.1", "192.168.1.185", "192.168.1.191", "100.98.111.54"],
   // next-mdx-remote ships untranspiled ESM that must share Turbopack's React
   // instance, or compileMDX renders against a second copy of React.
   transpilePackages: ["next-mdx-remote"],

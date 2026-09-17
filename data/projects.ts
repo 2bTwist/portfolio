@@ -12,6 +12,8 @@ export type Project = {
   detail: string;
   tags: string[];
   featured?: boolean;
+  preview?: "cogito";
+  status?: "In progress";
   /* On-brand preview image (public/images/projects/<id>.png); falls back to a
      generated placeholder until the art is dropped in. */
   image?: string;
@@ -22,6 +24,18 @@ export type Project = {
 };
 
 export const PROJECTS: Project[] = [
+  {
+    id: "cogito",
+    title: "Cogito",
+    kind: "mobile",
+    featured: true,
+    status: "In progress",
+    preview: "cogito",
+    blurb: "An iPhone app in the making. A playful home for your ideas, bringing notes, images, and links together around what you want to create.",
+    detail: "Every idea deserves a proper home. I’m building Cogito to give scattered thoughts and saved inspiration a place to grow: gather the pieces into projects, arrange them on a visual canvas, and come back when you’re ready to take them further. These pocket toys are an early glimpse of the app’s playful personality.",
+    tags: ["swift", "swiftui", "ios"],
+    image: "/images/projects/cogito/cogito-transparent-poster.webp",
+  },
   {
     id: "cisco-mcp",
     title: "Cisco MCP Platform",

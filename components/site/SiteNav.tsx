@@ -17,7 +17,7 @@ const LINKS = [
 export function SiteNav() {
   return (
     <header
-      className="sticky top-0 z-30 flex items-center gap-4 px-4 sm:px-6 py-3 mono text-sm"
+      className="site-nav sticky top-0 z-30 px-4 sm:px-6 py-3 mono text-sm"
       style={{ borderBottom: "1px solid var(--border)", background: "var(--surface)" }}
     >
       {/* prefetch={false}: this is the mobile / no-JS fallback nav, hidden behind
@@ -26,13 +26,13 @@ export function SiteNav() {
       <Link href="/" prefetch={false} className="no-underline shrink-0" style={{ color: "var(--muted)" }}>
         ~/edmond
       </Link>
-      <nav aria-label="Primary" className="flex items-center gap-3 sm:gap-4 overflow-x-auto">
+      <nav aria-label="Primary" className="site-nav-links">
         {LINKS.map((l) => (
           <Link
             key={l.href}
             href={l.href}
             prefetch={false}
-            className="no-underline whitespace-nowrap hover:opacity-80"
+            className="inline-flex min-h-9 items-center no-underline whitespace-nowrap hover:opacity-80"
             style={{ color: "var(--text)" }}
           >
             {l.label}

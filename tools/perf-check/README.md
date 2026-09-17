@@ -14,11 +14,11 @@ read the built app and a running `pnpm start`).
 ```sh
 # Gate the current prod build against budgets.json (exit 1 on breach)
 pnpm perf:check                 # pretty table
-pnpm perf:check -- --json       # machine-readable, for the loop/agent
+pnpm perf:check --json          # machine-readable, for the loop/agent
 
 # Set budgets from a measured prod build (measure-then-ratchet, decision 10)
 pnpm perf:calibrate             # measured + 5% headroom, floored at target
-pnpm perf:calibrate -- --margin 3
+pnpm perf:calibrate --margin 3
 ```
 
 ## Flags
@@ -43,5 +43,6 @@ pnpm perf:calibrate -- --margin 3
 }
 ```
 
-`pass: null` means the metric isn't enforced yet (uncalibrated) or wasn't
-measured this run (e.g. INP needs `pnpm e2e:perf` first).
+`pass: null` means the metric is uncalibrated. A calibrated metric that cannot
+be measured fails the check. Run `pnpm e2e:perf` first to produce the build- and
+URL-bound interaction artifact required for INP-proxy evaluation.

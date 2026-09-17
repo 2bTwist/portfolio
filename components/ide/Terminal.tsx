@@ -255,8 +255,12 @@ export default function Terminal() {
     const out = outRef.current;
     if (!handle || !out) return;
     const maxH = () => Math.round(window.innerHeight * 0.7);
-    const saved = Number(localStorage.getItem(TERM_STORAGE));
-    if (saved >= TERM_MIN_H) out.style.height = `${Math.min(saved, maxH())}px`;
+    try {
+      const saved = Number(localStorage.getItem(TERM_STORAGE));
+      if (saved >= TERM_MIN_H) out.style.height = `${Math.min(saved, maxH())}px`;
+    } catch {
+      // The terminal remains usable with its default height.
+    }
 
     const d = dragRef.current;
     function onDown(e: PointerEvent) {
@@ -287,7 +291,11 @@ export default function Terminal() {
       delete handle!.dataset.dragging;
       delete document.body.dataset.dragging;
       delete document.documentElement.dataset.cursorGrabbing;
-      localStorage.setItem(TERM_STORAGE, String(Math.round(out!.offsetHeight)));
+      try {
+        localStorage.setItem(TERM_STORAGE, String(Math.round(out!.offsetHeight)));
+      } catch {
+        // Keep the resized height for this session.
+      }
     }
     handle.addEventListener("pointerdown", onDown);
     window.addEventListener("pointermove", onMove, { passive: true });

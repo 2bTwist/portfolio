@@ -33,7 +33,7 @@ function printConsoleGreeting() {
   const head = "color:#a04c39;font-size:14px;font-weight:700";
   const dim = "color:#726552;font-size:12px";
   console.log("%cHey, you opened the console 👋", head);
-  console.log("%cThe whole site is open source → https://github.com/2bTwist/portfolio", dim);
+  console.log("%cYou can read the source → https://github.com/2bTwist/portfolio", dim);
   console.log("%cLike what you see? Let's talk → ndanjiedmond@gmail.com", dim);
 }
 

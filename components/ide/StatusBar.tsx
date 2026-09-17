@@ -40,10 +40,14 @@ export function StatusBar({ className = "", git }: { className?: string; git: Gi
   const [pos, setPos] = useState({ ln: 1, col: 1 });
   const [selected, setSelected] = useState(0);
   useEffect(() => {
-    const pane = document.querySelector<HTMLElement>("[data-editor-scroll]");
-    const fromScroll = () =>
+    const primaryPane = () => document.querySelector<HTMLElement>("[data-editor-scroll]");
+    const fromScroll = (event?: Event) => {
+      const pane = primaryPane();
+      if (event && event.target !== pane && event.target !== document) return;
       setPos((p) => ({ ...p, ln: Math.floor((pane?.scrollTop ?? 0) / LINE_PX) + 1 }));
+    };
     function fromSelection() {
+      const pane = primaryPane();
       const sel = window.getSelection();
       setSelected(sel?.toString().length ?? 0);
       if (!sel || sel.rangeCount === 0 || !pane) return;
@@ -54,10 +58,10 @@ export function StatusBar({ className = "", git }: { className?: string; git: Gi
       setPos({ ln: Math.max(1, Math.round(relTop / LINE_PX) + 1), col: (sel.anchorOffset ?? 0) + 1 });
     }
     fromScroll();
-    pane?.addEventListener("scroll", fromScroll, { passive: true });
+    document.addEventListener("scroll", fromScroll, { passive: true, capture: true });
     document.addEventListener("selectionchange", fromSelection);
     return () => {
-      pane?.removeEventListener("scroll", fromScroll);
+      document.removeEventListener("scroll", fromScroll, true);
       document.removeEventListener("selectionchange", fromSelection);
     };
   }, []);

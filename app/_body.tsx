@@ -98,6 +98,7 @@ export function HomeBody() {
             // for the LCP image; sizes trims it to the real display width.
             sizes="(min-width: 640px) 330px, 240px"
             priority
+            fetchPriority="high"
           />
         </div>
 
@@ -114,7 +115,7 @@ export function HomeBody() {
       <ContributionPulse />
 
       <section className="mt-14">
-        <div className="flex items-baseline justify-between mb-4">
+        <div className="flex flex-wrap items-baseline justify-between gap-3 mb-4">
           <h2 className="mono text-xl font-semibold" style={{ color: "var(--text)" }}>
             Featured work
           </h2>
@@ -122,7 +123,7 @@ export function HomeBody() {
             all projects →
           </Link>
         </div>
-        <div className="grid gap-4 sm:grid-cols-2">
+        <div className="project-grid">
           {featured.map((p) => (
             <ProjectCard key={p.id} project={p} />
           ))}

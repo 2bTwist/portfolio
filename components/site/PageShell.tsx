@@ -19,8 +19,8 @@ export function PageShell({
   width?: keyof typeof WIDTHS;
 }) {
   return (
-    <main className="flex-1">
-      <div className={`mx-auto ${WIDTHS[width]} px-5 sm:px-8 py-10 sm:py-14 font-sans`}>
+    <main className="page-shell flex-1 min-w-0">
+      <div className={`page-content mx-auto ${WIDTHS[width]} font-sans`}>
         {children}
       </div>
     </main>

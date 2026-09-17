@@ -90,7 +90,12 @@ function SessionProvider({ children }: { children: ReactNode }) {
   // <body>; if the user picked another, apply it after mount (rAF defers the
   // setState out of the effect body and avoids a hydration mismatch).
   useEffect(() => {
-    const stored = Number(localStorage.getItem(PALETTE_KEY));
+    let stored: number;
+    try {
+      stored = Number(localStorage.getItem(PALETTE_KEY));
+    } catch {
+      return;
+    }
     if (!Number.isInteger(stored) || !PALETTES[stored] || stored === DEFAULT_PALETTE_INDEX) {
       return;
     }
@@ -109,6 +114,7 @@ function SessionProvider({ children }: { children: ReactNode }) {
   }, [paletteIndex]);
 
   const setPaletteIndex = useCallback((i: number) => {
+    if (!Number.isInteger(i) || !PALETTES[i]) return;
     setPaletteIndexState(i);
     try {
       localStorage.setItem(PALETTE_KEY, String(i));

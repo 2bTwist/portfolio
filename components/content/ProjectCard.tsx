@@ -4,6 +4,7 @@
 
 import Link from "next/link";
 import type { Project } from "@/data/projects";
+import { CogitoPreview } from "./CogitoPreview";
 import { MorphImage } from "./MorphImage";
 import { TagIcon } from "./tagIcons";
 
@@ -15,7 +16,9 @@ export function ProjectCard({ project }: { project: Project }) {
           the cursor and flickers up/down. */}
       <div className="proj-card-inner">
         <div className="proj-card-media">
-          {project.image ? (
+          {project.preview === "cogito" ? (
+            <CogitoPreview />
+          ) : project.image ? (
             <MorphImage
               morphKey={`project-img-${project.id}`}
               className="proj-card-img"
@@ -32,7 +35,10 @@ export function ProjectCard({ project }: { project: Project }) {
         <div className="proj-card-body">
           <div className="proj-card-top">
             <h3 className="proj-card-title">{project.title}</h3>
-            <span className="proj-card-kind mono">{project.kind}</span>
+            <span className="proj-card-kind mono inline-flex items-center gap-1">
+              <TagIcon name={project.kind} />
+              {project.status ?? project.kind}
+            </span>
           </div>
           <p className="proj-card-desc">{project.blurb}</p>
           {/* Tags pinned to the bottom (margin-top:auto) so the row sits at the

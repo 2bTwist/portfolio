@@ -95,7 +95,7 @@ export function ContributionPulse({
       </div>
 
       <p className="sr-only">{summary}</p>
-      <div className="pulse-grid" aria-label="GitHub contribution graph">
+      <div className="pulse-grid" role="img" aria-label="GitHub contribution graph">
               <div
                 className={`pulse-canvas${isRevealed ? " is-revealed" : ""}`}
                 style={{ "--week-count": data.weeks.length } as CSSProperties}
