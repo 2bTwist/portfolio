@@ -118,9 +118,24 @@ function SessionProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     const vars = PALETTES[paletteIndex]?.vars;
     if (!vars) return;
-    for (const [k, v] of Object.entries(vars)) {
-      document.body.style.setProperty(k, v);
+    const entries = Object.entries(vars);
+    if (entries.every(([key, value]) => document.body.style.getPropertyValue(key) === value)) return;
+
+    // Apply the palette together, without starting every control's hover fade.
+    // Keyframe animations keep running; normal transitions return next task.
+    const guard = document.createElement("style");
+    guard.textContent = "*,*::before,*::after{transition:none!important}";
+    document.head.appendChild(guard);
+    for (const [key, value] of entries) {
+      document.body.style.setProperty(key, value);
     }
+    // Commit the new styles while the guard is active, before restoring motion.
+    void getComputedStyle(document.body).backgroundColor;
+    const timer = setTimeout(() => guard.remove(), 0);
+    return () => {
+      clearTimeout(timer);
+      guard.remove();
+    };
   }, [paletteIndex]);
 
   const setPaletteIndex = useCallback((i: number) => {

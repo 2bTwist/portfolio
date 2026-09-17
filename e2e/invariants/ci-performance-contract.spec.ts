@@ -67,3 +67,93 @@ test("theme swatches visibly update, retain their pressed state, and persist", a
     await context.close();
   }
 });
+
+test("palette changes suppress global transitions without muting local interaction motion", async ({ browser, baseURL }) => {
+  const context = await browser.newContext({ reducedMotion: "no-preference" });
+  try {
+    const page = await context.newPage();
+    await page.goto(baseURL!);
+    const hero = page.locator(".hero-mascot");
+    await expect(hero).toHaveCSS("animation-name", /hero-bob/);
+    await expect(hero).toHaveCSS("animation-play-state", "running");
+    await page.evaluate(() => {
+      const state = window as typeof window & {
+        __transitionRuns?: { property: string; target: string }[];
+        __transitionRunObserverInstalled?: boolean;
+      };
+      state.__transitionRuns = [];
+      if (state.__transitionRunObserverInstalled) return;
+      document.addEventListener(
+        "transitionrun",
+        (event) => {
+          const target = event.target;
+          state.__transitionRuns?.push({
+            property: event.propertyName,
+            target: target instanceof Element ? target.getAttribute("class") ?? "" : "",
+          });
+        },
+        true,
+      );
+      state.__transitionRunObserverInstalled = true;
+    });
+
+    const switchPalette = async (name: string, expectedBackground: string) => {
+      await page.evaluate(() => {
+        (window as typeof window & { __transitionRuns?: unknown[] }).__transitionRuns = [];
+      });
+      const swatch = page.getByRole("button", { name: `Theme: ${name}` });
+      await swatch.click();
+      await expect(swatch).toHaveAttribute("aria-pressed", "true");
+      await expect.poll(() => page.locator("body").evaluate((body) => getComputedStyle(body).getPropertyValue("--bg").trim())).toBe(expectedBackground);
+      await page.evaluate(() => new Promise<void>((resolve) => requestAnimationFrame(() => requestAnimationFrame(() => resolve()))));
+      const transitions = await page.evaluate(
+        () => (window as typeof window & { __transitionRuns?: { property: string; target: string }[] }).__transitionRuns ?? [],
+      );
+      expect(transitions).toEqual([]);
+    };
+
+    await switchPalette("Latte", "#eef1f5");
+    await switchPalette("Frappe (soft dark)", "#303446");
+    await switchPalette("Latte", "#eef1f5");
+    await expect(hero).toHaveCSS("animation-name", /hero-bob/);
+    await expect(hero).toHaveCSS("animation-play-state", "running");
+
+    // Let the one-shot palette guard finish before driving ordinary local motion.
+    await page.evaluate(() => new Promise<void>((resolve) => requestAnimationFrame(() => requestAnimationFrame(() => resolve()))));
+    const row = page.locator(".ide-row").filter({ hasText: "about.md" }).first();
+    await page.evaluate(() => {
+      (window as typeof window & { __transitionRuns?: unknown[] }).__transitionRuns = [];
+    });
+    await row.hover();
+    await expect.poll(() =>
+      page.evaluate(() =>
+        (window as typeof window & { __transitionRuns?: { property: string; target: string }[] }).__transitionRuns?.some(
+          (transition) => transition.target.includes("ide-row") && transition.property === "transform",
+        ),
+      ),
+    ).toBe(true);
+
+    const button = page.locator(".btn").first();
+    await button.evaluate((element) => element.addEventListener("click", (event) => event.preventDefault(), { once: true }));
+    const box = await button.boundingBox();
+    if (!box) throw new Error("Expected an interactive button");
+    await page.evaluate(() => {
+      (window as typeof window & { __transitionRuns?: unknown[] }).__transitionRuns = [];
+    });
+    await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
+    await page.mouse.down();
+    await expect.poll(() =>
+      page.evaluate(() =>
+        (window as typeof window & { __transitionRuns?: { property: string; target: string }[] }).__transitionRuns?.some(
+          (transition) => transition.target.includes("btn__front") && transition.property === "transform",
+        ),
+      ),
+    ).toBe(true);
+    await page.mouse.up();
+
+    await page.reload();
+    await expect(page.getByRole("button", { name: "Theme: Latte" })).toHaveAttribute("aria-pressed", "true");
+  } finally {
+    await context.close();
+  }
+});
