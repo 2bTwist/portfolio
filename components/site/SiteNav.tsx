@@ -5,6 +5,7 @@
 
 import Link from "next/link";
 import { profile } from "@/data/profile";
+import { ThemeSwatches } from "@/components/ide/ThemeSwatches";
 
 const LINKS = [
   { href: "/", label: "README" },
@@ -39,15 +40,19 @@ export function SiteNav() {
           </Link>
         ))}
       </nav>
-      <a
-        href={profile.links.github}
-        target="_blank"
-        rel="noopener noreferrer"
-        className="ml-auto no-underline whitespace-nowrap hover:opacity-80"
-        style={{ color: "var(--muted)" }}
-      >
-        GitHub ↗
-      </a>
+      <div className="site-nav-actions">
+        {/* The desktop switcher lives in the status bar, which is hidden here. */}
+        <ThemeSwatches className="site-theme" swatchClassName="site-theme-swatch" />
+        <a
+          href={profile.links.github}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="no-underline whitespace-nowrap hover:opacity-80"
+          style={{ color: "var(--muted)" }}
+        >
+          GitHub ↗
+        </a>
+      </div>
     </header>
   );
 }

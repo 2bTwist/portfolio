@@ -2968,6 +2968,34 @@ body[data-dragging] iframe {
   gap: 0.5rem;
   min-width: 0;
 }
+.site-nav-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.75rem;
+}
+/* Compact theme switcher. Swatches sit 28px apart so their 28px touch targets
+   tile without overlapping. */
+.site-theme {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding-inline: 7px;
+}
+.site-theme-swatch {
+  position: relative;
+  width: 14px;
+  height: 14px;
+  border-radius: 4px;
+  border: 1px solid var(--border);
+  cursor: pointer;
+  padding: 0;
+}
+.site-theme-swatch::before {
+  content: "";
+  position: absolute;
+  inset: -7px;
+}
 @media (max-width: 359px) {
   .site-nav-links { font-size: 0.75rem; }
 }

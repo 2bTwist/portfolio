@@ -10,8 +10,8 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { PALETTES } from "@/app/lib/palette";
-import { useSession, useOverlay } from "./store";
+import { useOverlay } from "./store";
+import { ThemeSwatches } from "./ThemeSwatches";
 import { useSound } from "@/components/feel/SoundProvider";
 import type { GitInfo } from "@/app/lib/git";
 
@@ -29,7 +29,6 @@ const SVG = {
 } as const;
 
 export function StatusBar({ className = "", git }: { className?: string; git: GitInfo }) {
-  const { paletteIndex, setPaletteIndex } = useSession();
   const { openTerm } = useOverlay();
   const { muted, toggleMuted } = useSound();
 
@@ -151,23 +150,7 @@ export function StatusBar({ className = "", git }: { className?: string; git: Gi
             </g>
           </svg>
         </Link>
-        <div className="flex items-center gap-2 ml-1" role="group" aria-label="Theme">
-          {PALETTES.map((p, i) => (
-            <button
-              key={p.name}
-              type="button"
-              className="ide-swatch"
-              aria-label={`Theme: ${p.name}`}
-              aria-pressed={i === paletteIndex}
-              onClick={() => setPaletteIndex(i)}
-              style={{
-                background: p.vars["--accent"],
-                outline: i === paletteIndex ? "2px solid var(--text)" : undefined,
-                outlineOffset: "1px",
-              }}
-            />
-          ))}
-        </div>
+        <ThemeSwatches className="flex items-center gap-2 ml-1" swatchClassName="ide-swatch" />
       </div>
     </footer>
   );
