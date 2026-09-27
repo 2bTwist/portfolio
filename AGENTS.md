@@ -47,13 +47,18 @@ and dark appearance checks where both are supported.
 ## Preference state contract
 
 - Browser-local preferences are convenience state, not account, content, or analytics data.
-  `ide.palette` stores a palette index and `ide-split-ratio` stores the editor split ratio.
+  `ide.palette` stores a palette index, `ide-split-ratio` the editor split ratio,
+  `ide:explorer-width` the explorer width in base pixels (at a 16px root), and
+  `ide.terminal-height` the terminal output height in CSS pixels. A released drag, a key press, or
+  the explorer bouncer's lockout saves a size; an interrupted drag saves nothing.
   Open tabs and the right split pane are in-memory and reset on reload.
 - Palette values are accepted only when they are integer indexes of the current palette list.
   Split ratios must be finite positive numbers and are clamped to the declared minimum and maximum.
-  Missing or invalid values fall back to defaults.
+  Explorer widths are accepted between the minimum and the won maximum; one above the normal
+  maximum restores the won cap. Terminal heights at or above the minimum are clamped to the
+  output's rendered maximum. Missing or invalid values fall back to defaults.
 - Browser storage, clearing, retention, and recovery are host-owned. This repository has no
-  storage-key versioning, migration, backup, or deletion workflow. Removing either key resets the
+  storage-key versioning, migration, backup, or deletion workflow. Removing any key resets the
   related preference; do not treat a saved preference as an application guarantee.
 - The edge `whoami` route is dynamic, `no-store`, and returns request-derived fields only. It does
   not create repository-managed durable state. Verify preference behavior in a browser when the
