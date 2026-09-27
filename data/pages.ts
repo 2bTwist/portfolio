@@ -34,6 +34,9 @@ export const PAGES = [
   { href: "/terms", label: "terms.md", tree: null, listed: false, compact: null, splittable: false, noindex: true },
 ] as const satisfies readonly Page[];
 
+/* The top-level pages with a split-pane body; paneRegistry.ts must cover exactly these. */
+export type SplittableHref = Extract<(typeof PAGES)[number], { splittable: true }>["href"];
+
 /* Labels for the pages that expand from other data. */
 export const projectLabel = (p: Pick<Project, "id" | "kind">) => `${p.id}.${p.kind === "mobile" ? "tsx" : "ts"}`;
 export const postLabel = (slug: string) => `${slug}.md`;

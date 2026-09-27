@@ -2,11 +2,14 @@
    page's content in a split pane. lazy() keeps every pane body in its own chunk,
    so split-screen code stays out of the initial bundle until a pane is opened.
 
-   Phase 1: only the non-MDX, no-server-data routes are registered. Dropping any
-   other file (blog posts, project stories) is handled by the caller as a normal
-   navigation of the primary pane. */
+   The static pages here are exactly the ones data/pages.ts marks splittable; a
+   missing or extra body fails the type check. Anything else is handled by the
+   caller as a normal navigation of the primary pane. */
 
 import { lazy, type ComponentType, type LazyExoticComponent } from "react";
+import type { SplittableHref } from "@/data/pages";
+
+type PaneBody = LazyExoticComponent<ComponentType>;
 
 /* Blog posts + project stories render MDX server-side; their pane body fetches
    the rendered HTML from /api/pane (see MdxPaneBody). One lazy component handles
@@ -14,7 +17,7 @@ import { lazy, type ComponentType, type LazyExoticComponent } from "react";
 const MdxPaneBody = lazy(() => import("./MdxPaneBody").then((m) => ({ default: m.MdxPaneBody })));
 const MDX_HREF = /^\/(blog|projects)\/[^/]+$/;
 
-export const PANE_REGISTRY: Record<string, LazyExoticComponent<ComponentType>> = {
+const PANE_REGISTRY: Record<SplittableHref, PaneBody> = {
   "/": lazy(() => import("@/app/_body").then((m) => ({ default: m.HomeBody }))),
   "/about": lazy(() => import("@/app/about/_body").then((m) => ({ default: m.AboutBody }))),
   "/projects": lazy(() => import("@/app/projects/_body").then((m) => ({ default: m.ProjectsBody }))),
@@ -25,8 +28,10 @@ export const PANE_REGISTRY: Record<string, LazyExoticComponent<ComponentType>> =
   "/privacy": lazy(() => import("@/app/privacy/_body").then((m) => ({ default: m.PrivacyBody }))),
 };
 
-export function paneFor(href: string): LazyExoticComponent<ComponentType> | null {
-  if (PANE_REGISTRY[href]) return PANE_REGISTRY[href];
+const isSplittablePage = (href: string): href is SplittableHref => Object.hasOwn(PANE_REGISTRY, href);
+
+export function paneFor(href: string): PaneBody | null {
+  if (isSplittablePage(href)) return PANE_REGISTRY[href];
   if (MDX_HREF.test(href)) return MdxPaneBody;
   return null;
 }
