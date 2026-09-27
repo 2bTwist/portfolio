@@ -14,6 +14,16 @@
   --display: var(--font-display), var(--sans);
 }
 
+/* Large monitors: the whole rem-based UI scales up, so a big screen looks like
+   the laptop layout made bigger instead of a narrow column in a sea of margin.
+   100% (the reader's own browser size) up to 1920px wide, rising linearly to
+   125% at 2560px, capped there. The px term assumes the 16px default only for
+   the slope's anchor; a larger browser default still scales and still caps at
+   125% of itself. */
+html {
+  font-size: clamp(100%, calc(100% + 0.625vw - 12px), 125%);
+}
+
 body {
   font-family: var(--sans);
   min-height: 100vh;
@@ -139,7 +149,7 @@ body {
   position: relative;
   align-items: center;
   gap: 0.45rem;
-  height: 38px;
+  height: 2.375rem; /* 38px at the base scale */
   flex-shrink: 0;
   padding: 0 0.85rem;
   background: var(--surface);
@@ -273,7 +283,9 @@ body {
      re-places itself, it must slide under the opaque sidebar, never over it. */
   z-index: 10;
   flex-direction: column;
-  width: 220px;
+  /* 220px at the base scale; rem so it grows with the large-monitor root size
+     (Explorer.tsx keeps widths in base px and renders them as rem). */
+  width: 13.75rem;
   flex-shrink: 0;
   padding: 0.5rem 0.35rem;
   border-right: 1px solid var(--border);
@@ -559,7 +571,7 @@ button.ide-row {
   background: var(--surface);
   border-bottom: 1px solid var(--border);
   overflow-x: auto;
-  min-height: 33px;
+  min-height: 2.0625rem; /* 33px at the base scale */
   /* Chrome strip: scrollable but no visible scrollbar. Also load-bearing for
      the resume "hire me" bubble — a scrollbar appearing here steals row height
      mid-hover (Firefox), collapsing the hover target into a flicker loop. */

@@ -44,6 +44,10 @@ const DEFAULT_WIDTH = 220;
 const SLOP = 28; // how far past the limit before the bouncer reacts
 const COOLDOWN_MS = 8000;
 const STORAGE_KEY = "ide:explorer-width";
+// Widths (limits, default, the saved value) are base px at a 16px root. They
+// render as rem so the sidebar grows with the large-monitor root scale in
+// globals.css, and drag deltas are divided by that scale to stay in base px.
+const widthRem = (px: number) => `${px / 16}rem`;
 const INDENT_REM = 0.85;
 const BASE_PAD_REM = 0.45;
 
@@ -112,6 +116,7 @@ export function Explorer({
   const draggingRef = useRef(false);
   const startX = useRef(0);
   const startW = useRef(0);
+  const scaleRef = useRef(1); // root font size / 16, read at drag start
   const widthRef = useRef(DEFAULT_WIDTH);
   const pushing = useRef(false); // one reaction per shove
   const step = useRef(0);
@@ -129,7 +134,7 @@ export function Explorer({
       const saved = Number(localStorage.getItem(STORAGE_KEY));
       if (saved >= MIN_WIDTH && saved <= WON_MAX) {
         widthRef.current = saved;
-        if (asideRef.current) asideRef.current.style.width = `${saved}px`;
+        if (asideRef.current) asideRef.current.style.width = widthRem(saved);
       }
     } catch {
       // Keep the default width when browser storage is unavailable.
@@ -191,6 +196,7 @@ export function Explorer({
       setDragging(true);
       startX.current = e.clientX;
       startW.current = widthRef.current;
+      scaleRef.current = parseFloat(getComputedStyle(document.documentElement).fontSize) / 16 || 1;
       // Capture pointer + shield iframes so a PDF viewer can't swallow the drag.
       handle!.setPointerCapture?.(e.pointerId);
       document.body.dataset.dragging = "true";
@@ -204,10 +210,10 @@ export function Explorer({
       }
       if (!draggingRef.current) return;
       const maxW = won.current ? WON_MAX : MAX_WIDTH;
-      const raw = startW.current + (e.clientX - startX.current);
+      const raw = startW.current + (e.clientX - startX.current) / scaleRef.current;
       const w = Math.max(MIN_WIDTH, Math.min(maxW, raw));
       widthRef.current = w;
-      if (asideRef.current) asideRef.current.style.width = `${w}px`;
+      if (asideRef.current) asideRef.current.style.width = widthRem(w);
       if (!won.current && (raw > maxW + SLOP || raw < MIN_WIDTH - SLOP)) onShove(e.clientX, e.clientY);
       else pushing.current = false;
     }
