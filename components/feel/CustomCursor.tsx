@@ -57,6 +57,9 @@ export function CustomCursor() {
     // No event marks "the pointer stopped", so settle on the real position once
     // moves go quiet for a couple of frames.
     let settle: ReturnType<typeof setTimeout> | undefined;
+    let realX = 0;
+    let realY = 0;
+    const settleOnReal = () => place(realX, realY);
 
     const onMove = (e: PointerEvent) => {
       // Re-arm after a blur/screenshot dropped the class (see `hide`), so the
@@ -66,9 +69,10 @@ export function CustomCursor() {
       const ahead = predicted && predicted.length > 0 ? predicted[predicted.length - 1] : null;
       place(ahead?.clientX ?? e.clientX, ahead?.clientY ?? e.clientY);
       if (ahead) {
-        const { clientX, clientY } = e;
+        realX = e.clientX;
+        realY = e.clientY;
         clearTimeout(settle);
-        settle = setTimeout(() => place(clientX, clientY), 40);
+        settle = setTimeout(settleOnReal, 40);
       }
       setData("cursorHidden", "false");
       // While actively resizing, the drag owns the grab/axis flags (the pointer

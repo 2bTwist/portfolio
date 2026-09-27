@@ -12,6 +12,7 @@ export const OG_SIZE = { width: 1200, height: 630 };
 export const OG_CONTENT_TYPE = "image/png";
 
 const asset = (f: string) => readFileSync(join(process.cwd(), "app/og-assets", f));
+const dataUrl = (bytes: Buffer, mime: string) => `data:${mime};base64,${bytes.toString("base64")}`;
 
 /* Banner art lives under public/. Satori cannot decode WebP ("u2 is not
    iterable"), so only PNG/JPEG banners appear on the card; a WebP banner keeps
@@ -21,9 +22,7 @@ const OG_ART_MIME: Record<string, string> = { png: "image/png", jpg: "image/jpeg
 
 function ogArtDataUrl(src: string): string | null {
   const mime = OG_ART_MIME[src.split(".").pop()?.toLowerCase() ?? ""];
-  if (!mime) return null;
-  const data = readFileSync(join(process.cwd(), "public", src)).toString("base64");
-  return `data:${mime};base64,${data}`;
+  return mime ? dataUrl(readFileSync(join(process.cwd(), "public", src)), mime) : null;
 }
 
 /* Clash Display tops out around 88px; long titles need to step down so they
@@ -60,7 +59,7 @@ export function renderOgCard({ tab, eyebrow, title, summary, art }: OgCard) {
   const clash = asset("ClashDisplay-Bold.ttf");
   const satoshi = asset("Satoshi-Regular.ttf");
   const satoshiBold = asset("Satoshi-Bold.ttf");
-  const mascot = `data:image/png;base64,${asset("mascot.png").toString("base64")}`;
+  const mascot = dataUrl(asset("mascot.png"), "image/png");
   const artSrc = art ? ogArtDataUrl(art) : null;
 
   const dot = (bg: string) => ({ width: 15, height: 15, borderRadius: 999, background: bg });
@@ -108,54 +107,54 @@ export function renderOgCard({ tab, eyebrow, title, summary, art }: OgCard) {
 
           {/* Body */}
           <div style={{ flex: 1, display: "flex" }}>
-          <div style={{ flex: 1, display: "flex", flexDirection: "column", padding: artSrc ? "46px 20px 46px 66px" : "46px 66px" }}>
-            <div style={{ fontSize: 26, letterSpacing: 4, color: "#a04c39", fontWeight: 700 }}>
-              {eyebrow}
-            </div>
-            <div
-              style={{
-                fontFamily: "Clash",
-                fontSize: titleSize(title, !!artSrc),
-                color: "#463f33",
-                lineHeight: 1.08,
-                marginTop: 18,
-              }}
-            >
-              {title}
-            </div>
-            <div
-              style={{
-                fontSize: artSrc ? 24 : 28,
-                color: "#726552",
-                lineHeight: 1.35,
-                marginTop: artSrc ? 16 : 20,
-                maxWidth: 880,
-                display: "flex",
-              }}
-            >
-              {clamp(summary, artSrc ? 90 : 118)}
-            </div>
+            <div style={{ flex: 1, display: "flex", flexDirection: "column", padding: artSrc ? "46px 20px 46px 66px" : "46px 66px" }}>
+              <div style={{ fontSize: 26, letterSpacing: 4, color: "#a04c39", fontWeight: 700 }}>
+                {eyebrow}
+              </div>
+              <div
+                style={{
+                  fontFamily: "Clash",
+                  fontSize: titleSize(title, !!artSrc),
+                  color: "#463f33",
+                  lineHeight: 1.08,
+                  marginTop: 18,
+                }}
+              >
+                {title}
+              </div>
+              <div
+                style={{
+                  fontSize: artSrc ? 24 : 28,
+                  color: "#726552",
+                  lineHeight: 1.35,
+                  marginTop: artSrc ? 16 : 20,
+                  maxWidth: 880,
+                  display: "flex",
+                }}
+              >
+                {clamp(summary, artSrc ? 90 : 118)}
+              </div>
 
-            <div style={{ flex: 1 }} />
+              <div style={{ flex: 1 }} />
 
-            {/* Brand footer */}
-            <div style={{ display: "flex", alignItems: "center", gap: 18 }}>
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src={mascot} width={72} height={72} alt="" />
-              <div style={{ display: "flex", flexDirection: "column" }}>
-                <div style={{ fontSize: 30, color: "#463f33", fontWeight: 700 }}>Edmond Ndanji</div>
-                <div style={{ fontSize: 22, letterSpacing: 3, color: "#a04c39", fontWeight: 700 }}>
-                  EDDYB.DEV
+              {/* Brand footer */}
+              <div style={{ display: "flex", alignItems: "center", gap: 18 }}>
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src={mascot} width={72} height={72} alt="" />
+                <div style={{ display: "flex", flexDirection: "column" }}>
+                  <div style={{ fontSize: 30, color: "#463f33", fontWeight: 700 }}>Edmond Ndanji</div>
+                  <div style={{ fontSize: 22, letterSpacing: 3, color: "#a04c39", fontWeight: 700 }}>
+                    EDDYB.DEV
+                  </div>
                 </div>
               </div>
             </div>
-          </div>
-          {artSrc ? (
-            <div style={{ width: 480, display: "flex", alignItems: "center", justifyContent: "center", paddingRight: 30 }}>
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src={artSrc} width={450} height={253} style={{ objectFit: "contain" }} alt="" />
-            </div>
-          ) : null}
+            {artSrc ? (
+              <div style={{ width: 480, display: "flex", alignItems: "center", justifyContent: "center", paddingRight: 30 }}>
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src={artSrc} width={450} height={253} style={{ objectFit: "contain" }} alt="" />
+              </div>
+            ) : null}
           </div>
         </div>
       </div>

@@ -916,7 +916,10 @@ button.ide-row {
 .ide-pill--icon svg {
   display: block;
 }
-.ide-swatch {
+/* Theme swatch dot: the status bar's (.ide-swatch) and the compact header's
+   (.site-theme-swatch). */
+.ide-swatch,
+.site-theme-swatch {
   position: relative;
   width: 14px;
   height: 14px;
@@ -926,7 +929,8 @@ button.ide-row {
   padding: 0;
 }
 /* Extend the clickable area to a 24px touch target without enlarging the dot. */
-.ide-swatch::before {
+.ide-swatch::before,
+.site-theme-swatch::before {
   content: "";
   position: absolute;
   inset: -6px;
@@ -2274,6 +2278,7 @@ button.ide-row {
   transform-origin: 50% 50%; /* burst centre of the 24 viewBox */
 }
 .stack-item:hover .claude-spoke {
+  /* 1.25s = SPOKE_CYCLE_S in ClaudeBurst.tsx, which staggers --sd over it. */
   animation: claude-spoke 1.25s ease-in-out infinite;
   animation-delay: var(--sd, 0s);
 }
@@ -3116,18 +3121,7 @@ body[data-dragging] iframe {
   gap: 14px;
   padding-inline: 7px;
 }
-.site-theme-swatch {
-  position: relative;
-  width: 14px;
-  height: 14px;
-  border-radius: 4px;
-  border: 1px solid var(--border);
-  cursor: pointer;
-  padding: 0;
-}
 .site-theme-swatch::before {
-  content: "";
-  position: absolute;
   inset: -7px;
 }
 @media (max-width: 359px) {

@@ -74,7 +74,6 @@ export default function OpengraphImage() {
                 </div>
               </div>
             </div>
-            {/* eslint-disable-next-line @next/next/no-img-element */}
             <img src={mascot} width={360} height={360} alt="" style={{ marginLeft: 12 }} />
           </div>
         </div>

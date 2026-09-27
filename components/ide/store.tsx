@@ -18,7 +18,6 @@
 
 import {
   createContext,
-  useCallback,
   useContext,
   useEffect,
   useState,
@@ -97,47 +96,42 @@ function SessionProvider({ children }: { children: ReactNode }) {
     return () => cancelAnimationFrame(raf);
   }, []);
 
-  const openTab = useCallback((href: string) => {
+  // React Compiler memoizes these handlers and the context values below.
+  const openTab = (href: string) => {
     const t = tabFor(href);
     if (!t) return;
     setTabs((prev) => (prev.some((x) => x.href === href) ? prev : [...prev, t]));
-  }, []);
+  };
 
-  const closeTab = useCallback(
-    (href: string) => {
-      setTabs((prev) => {
-        const idx = prev.findIndex((t) => t.href === href);
-        if (idx === -1) return prev;
-        const next = prev.filter((t) => t.href !== href);
-        if (href === pathname) {
-          const neighbour = next[idx] ?? next[idx - 1];
-          router.push(neighbour ? neighbour.href : "/");
-        }
-        return next;
-      });
-    },
-    [pathname, router],
-  );
+  const closeTab = (href: string) => {
+    setTabs((prev) => {
+      const idx = prev.findIndex((t) => t.href === href);
+      if (idx === -1) return prev;
+      const next = prev.filter((t) => t.href !== href);
+      if (href === pathname) {
+        const neighbour = next[idx] ?? next[idx - 1];
+        router.push(neighbour ? neighbour.href : "/");
+      }
+      return next;
+    });
+  };
 
   // Keep only `href`, dropping every other tab; navigate to it if it isn't the
   // current route (it's about to be the only thing open).
-  const closeOthers = useCallback(
-    (href: string) => {
-      setTabs((prev) => {
-        const keep = prev.find((t) => t.href === href);
-        return keep ? [keep] : prev;
-      });
-      if (href !== pathname) router.push(href);
-    },
-    [pathname, router],
-  );
+  const closeOthers = (href: string) => {
+    setTabs((prev) => {
+      const keep = prev.find((t) => t.href === href);
+      return keep ? [keep] : prev;
+    });
+    if (href !== pathname) router.push(href);
+  };
 
   // Close every tab and return to the README home (mirrors closeTab's "/"
   // fallback when no tab is left to focus).
-  const closeAll = useCallback(() => {
+  const closeAll = () => {
     setTabs([]);
     router.push("/");
-  }, [router]);
+  };
 
   const session = { tabs, openTab, closeTab, closeOthers, closeAll, setPaletteIndex };
 
@@ -149,19 +143,19 @@ function OverlayProvider({ children }: { children: ReactNode }) {
   const [termOpen, setTermOpen] = useState(false);
   const [termMounted, setTermMounted] = useState(false);
 
-  const openCmdk = useCallback(() => setCmdkOpen(true), []);
-  const closeCmdk = useCallback(() => setCmdkOpen(false), []);
-  const toggleCmdk = useCallback(() => setCmdkOpen((o) => !o), []);
+  const openCmdk = () => setCmdkOpen(true);
+  const closeCmdk = () => setCmdkOpen(false);
+  const toggleCmdk = () => setCmdkOpen((o) => !o);
 
-  const openTerm = useCallback(() => {
+  const openTerm = () => {
     setTermMounted(true);
     setTermOpen(true);
-  }, []);
-  const closeTerm = useCallback(() => setTermOpen(false), []);
-  const toggleTerm = useCallback(() => {
+  };
+  const closeTerm = () => setTermOpen(false);
+  const toggleTerm = () => {
     setTermMounted(true);
     setTermOpen((o) => !o);
-  }, []);
+  };
 
   return (
     <OverlayContext.Provider
