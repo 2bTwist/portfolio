@@ -2938,6 +2938,26 @@ body[data-dragging] iframe {
 .prose-content :is(h1, h2, h3) {
   scroll-margin-top: 5rem;
 }
+/* Below md the compact header is sticky over the document scroll, so reserve
+   its height for every scroll-into-view (anchor jumps and keyboard focus
+   alike), and trim the heading margin so jumps land about where they did. The
+   header is one row (~3.8rem) from 640px and wraps to two (~5.5rem) below. */
+@media (max-width: 767px) {
+  html {
+    scroll-padding-top: 4.5rem;
+  }
+  .prose-content :is(h1, h2, h3) {
+    scroll-margin-top: 0.5rem;
+  }
+}
+@media (max-width: 639px) {
+  html {
+    scroll-padding-top: 6rem;
+  }
+  .prose-content :is(h1, h2, h3) {
+    scroll-margin-top: 1rem;
+  }
+}
 
 /* ── Highlighter-marker emphasis (inline, mid-sentence) ──────────────────────
    A terracotta highlight that sweeps in left-to-right behind the word on load.

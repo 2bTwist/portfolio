@@ -110,8 +110,10 @@ export function Shell({
 
   return (
     <>
-      {/* Mobile / no-JS fallback navigation */}
-      <div className="md:hidden">
+      {/* Mobile / no-JS fallback navigation. The wrapper is the sticky box: a
+          sticky element only sticks within its parent, and this wrapper is exactly
+          header-height, so stickiness on SiteNav itself never engaged. */}
+      <div className="md:hidden sticky top-0 z-30">
         <SiteNav />
       </div>
 

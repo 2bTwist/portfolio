@@ -18,7 +18,7 @@ const LINKS = [
 export function SiteNav() {
   return (
     <header
-      className="site-nav sticky top-0 z-30 px-4 sm:px-6 py-3 mono text-sm"
+      className="site-nav px-4 sm:px-6 py-3 mono text-sm"
       style={{ borderBottom: "1px solid var(--border)", background: "var(--surface)" }}
     >
       {/* prefetch={false}: this is the mobile / no-JS fallback nav, hidden behind
