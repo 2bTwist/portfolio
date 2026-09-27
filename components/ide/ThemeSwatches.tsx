@@ -1,12 +1,12 @@
 "use client";
 
-/* Palette swatches: the client theme switcher persisted in store.tsx. Shared by
+/* Palette swatches: the client theme switcher persisted in palette-store.ts. Shared by
    the desktop status bar and the compact site header so both drive one state.
    Only one of the two is displayed at any width, so role-based lookups stay
    unambiguous; each caller passes its own swatch class for sizing. */
 
 import { PALETTES } from "@/app/lib/palette";
-import { setPaletteIndex, usePaletteIndex } from "./store";
+import { setPaletteIndex, usePaletteIndex } from "./palette-store";
 
 export function ThemeSwatches({
   className = "",
