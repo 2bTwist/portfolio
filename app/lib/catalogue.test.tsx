@@ -24,25 +24,34 @@ import { SiteNav } from "@/components/site/SiteNav";
 // Routes that exist on purpose without being pages (none today).
 const NOT_PAGES = new Set<string>([]);
 
-// Every app/**/page.tsx as a route pattern: "/blog/[slug]" matches one segment.
-function appRoutes(): string[] {
+// Every app/**/page.* as a route pattern ("/blog/[slug]") and the file behind it.
+function appRoutes(): { route: string; file: string }[] {
   const appDir = join(process.cwd(), "app");
-  const found: string[] = [];
+  const found: { route: string; file: string }[] = [];
   const walk = (dir: string) => {
     for (const entry of readdirSync(dir, { withFileTypes: true })) {
       if (entry.isDirectory() && !entry.name.startsWith("_")) walk(join(dir, entry.name));
-      else if (entry.name === "page.tsx") {
+      else if (/^page\.(tsx?|jsx?|mdx)$/.test(entry.name)) {
         const segments = relative(appDir, dir).split(sep).filter((s) => s && !s.startsWith("("));
-        found.push(`/${segments.join("/")}`);
+        found.push({ route: `/${segments.join("/")}`, file: join(dir, entry.name) });
       }
     }
   };
   walk(appDir);
-  return found;
+  return found.filter((r) => !NOT_PAGES.has(r.route));
 }
 
 const matches = (route: string, href: string) =>
   new RegExp(`^${route.replace(/\[[^\]]+\]/g, "[^/]+")}$`).test(href);
+
+// The pages a dynamic route builds, from its generateStaticParams; null when it
+// has none, so its pages cannot be listed.
+async function builtHrefs(route: string, file: string): Promise<string[] | null> {
+  const page = await import(/* @vite-ignore */ file);
+  if (typeof page.generateStaticParams !== "function") return null;
+  const params: Record<string, string>[] = await page.generateStaticParams();
+  return params.map((p) => route.replace(/\[([^\]]+)\]/g, (_, name: string) => p[name]));
+}
 
 describe("page catalogue", () => {
   const catalogue = getCatalogue();
@@ -53,10 +62,21 @@ describe("page catalogue", () => {
   });
 
   it("covers every app route, and every entry is a real route", () => {
-    const routes = appRoutes().filter((r) => !NOT_PAGES.has(r));
+    const routes = appRoutes().map((r) => r.route);
     const unlisted = routes.filter((r) => !r.includes("[") && !hrefs.includes(r));
     const orphaned = hrefs.filter((h) => !routes.some((r) => matches(r, h)));
     expect({ unlisted, orphaned }).toEqual({ unlisted: [], orphaned: [] });
+  });
+
+  it("has an entry for every page a dynamic route builds", async () => {
+    const unenumerated: string[] = [];
+    const missing: string[] = [];
+    for (const { route, file } of appRoutes().filter((r) => r.route.includes("["))) {
+      const built = await builtHrefs(route, file);
+      if (built === null) unenumerated.push(route);
+      else missing.push(...built.filter((h) => !hrefs.includes(h)));
+    }
+    expect({ unenumerated, missing }).toEqual({ unenumerated: [], missing: [] });
   });
 
   it("puts exactly the indexable pages in the sitemap", () => {
