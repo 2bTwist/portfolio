@@ -46,8 +46,8 @@ export function CustomCursor() {
     root.dataset.cursorHidden = "true"; // hidden until the first move
     const el = elRef.current!;
 
-    // Compare against the live attribute, not a cache: Explorer and Terminal
-    // also write these flags during resize drags.
+    // Compare against the live attribute, not a cache: ResizeHandle also
+    // writes these flags during resize drags.
     const setData = (key: "cursorHidden" | "cursorHover" | "cursorGrab" | "cursorAxis", value: string) => {
       if (root.dataset[key] !== value) root.dataset[key] = value;
     };
@@ -80,14 +80,12 @@ export function CustomCursor() {
       if (root.dataset.cursorGrabbing === "true") return;
       const target = e.target as Element | null;
       setData("cursorHover", target?.closest?.(INTERACTIVE) ? "true" : "false");
-      // Over a resize handle, swap the arrow for the grab hand. The explorer
-      // handle grabs horizontally (hand faces left); the terminal handle grabs
-      // vertically (hand faces down) — set the axis so the CSS can orient it.
-      const xHandle = target?.closest?.(".ide-resize-handle") as HTMLElement | null;
-      const yHandle = target?.closest?.(".ide-terminal-resize") as HTMLElement | null;
-      const overX = !!xHandle && xHandle.dataset.locked !== "true";
-      setData("cursorGrab", overX || yHandle ? "true" : "false");
-      setData("cursorAxis", yHandle ? "y" : "x");
+      // Over a resize handle (ResizeHandle), swap the arrow for the grab hand,
+      // facing along the handle's axis: left for the explorer and split divider,
+      // down for the terminal. A locked handle keeps the arrow.
+      const handle = target?.closest?.("[data-resize-axis]") as HTMLElement | null;
+      setData("cursorGrab", handle && handle.dataset.locked !== "true" ? "true" : "false");
+      setData("cursorAxis", handle?.dataset.resizeAxis === "y" ? "y" : "x");
     };
     const onDown = () => (root.dataset.cursorActive = "true");
     const onUp = () => (root.dataset.cursorActive = "false");

@@ -10,17 +10,16 @@
    fixed width so every row aligns deterministically and nothing shifts when the
    client-only icons mount.
 
-   Resize: drag the right edge. Pointer move/up are NATIVE window listeners (not
-   React synthetic events) and the width is written straight to the DOM, so it
-   tracks the pointer 1:1 with no render lag — same technique as the custom
-   cursor. Shove past the range and a scripted bouncer escalates, eventually
-   revoking your privileges (a cooldown), then giving up. */
+   Resize: drag the right edge, or focus it and use the arrow keys (ResizeHandle
+   owns the drag and writes the width straight to the DOM). Shove the pointer past
+   the range and a scripted bouncer escalates, eventually revoking your privileges
+   (a cooldown), then giving up. Keys stop at the limit and never set it off. */
 
 import Link from "next/link";
 import dynamic from "next/dynamic";
 import { createPortal } from "react-dom";
 import { usePathname } from "next/navigation";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useSyncExternalStore } from "react";
 import type { TreeNode } from "@/app/lib/catalogue-view";
 import { useCatalogue } from "./CatalogueProvider";
 import { useMounted } from "@/components/hooks/useMounted";
@@ -28,6 +27,7 @@ import { useSound } from "@/components/feel/SoundProvider";
 import { FileIcon, FolderIcon } from "./FileIcon";
 import { useTabSession } from "./store";
 import { beginRowDrag, consumeSuppressClick } from "./rowDrag";
+import { ResizeHandle } from "./ResizeHandle";
 import { scrollEditorTop } from "./scroll";
 
 // Lazy like the mobile dock's mount: ssr:false keeps the widget + player store
@@ -62,6 +62,22 @@ const SCRIPT: { msg: string; lock?: boolean; won?: boolean }[] = [
   { msg: "okay, I give up. you win 🏳️", won: true },
 ];
 
+// The width saved on an earlier visit, read once per page load: null on the
+// server, and when nothing valid is saved.
+let savedWidth: number | null | undefined;
+function readSavedWidth(): number | null {
+  if (savedWidth === undefined) {
+    try {
+      const saved = Number(localStorage.getItem(STORAGE_KEY));
+      savedWidth = saved >= MIN_WIDTH && saved <= WON_MAX ? saved : null;
+    } catch {
+      savedWidth = null;
+    }
+  }
+  return savedWidth;
+}
+const neverChanges = () => () => {};
+
 function Chevron({ open }: { open: boolean }) {
   return (
     <span className="ide-twistie" aria-hidden="true">
@@ -90,149 +106,101 @@ export function Explorer({ className = "" }: { className?: string }) {
   const { play } = useSound();
   const { openTab } = useTabSession();
 
-  const [dragging, setDragging] = useState(false);
+  const saved = useSyncExternalStore(neverChanges, readSavedWidth, () => null);
+  const [committed, setCommitted] = useState<number | null>(null);
+  const width = committed ?? saved ?? DEFAULT_WIDTH;
+  const [beatBouncer, setBeatBouncer] = useState(false);
+  // A saved width only the won cap allows means they won on an earlier visit.
+  const won = beatBouncer || (saved !== null && saved > MAX_WIDTH);
   const [locked, setLocked] = useState(false);
   const [shake, setShake] = useState(false);
   const [bubble, setBubble] = useState<{ msg: string; x: number; y: number } | null>(null);
 
   const asideRef = useRef<HTMLElement>(null);
-  const handleRef = useRef<HTMLDivElement>(null);
   const bubbleRef = useRef<HTMLDivElement>(null);
-  const playRef = useRef(play);
-  useEffect(() => {
-    playRef.current = play;
-  }, [play]);
-  const draggingRef = useRef(false);
-  const startX = useRef(0);
-  const startW = useRef(0);
-  const scaleRef = useRef(1); // root font size / 16, read at drag start
-  const widthRef = useRef(DEFAULT_WIDTH);
   const pushing = useRef(false); // one reaction per shove
   const step = useRef(0);
-  const won = useRef(false);
-  const lockedRef = useRef(false);
   const hideTimer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
   const shakeTimer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
   const coolTimer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
 
-  // Width is owned imperatively (not React state) so mid-drag re-renders from the
-  // bouncer's setState never re-apply a stale width and fight the drag. CSS sets
-  // the default; this restores any saved width on mount.
+  // The aside follows the committed width; a drag writes it directly in between
+  // (ResizeHandle's preview), so bouncer re-renders mid-drag never touch it.
   useEffect(() => {
-    try {
-      const saved = Number(localStorage.getItem(STORAGE_KEY));
-      if (saved >= MIN_WIDTH && saved <= WON_MAX) {
-        widthRef.current = saved;
-        if (asideRef.current) asideRef.current.style.width = widthRem(saved);
-      }
-    } catch {
-      // Keep the default width when browser storage is unavailable.
-    }
-  }, []);
+    if (asideRef.current) asideRef.current.style.width = widthRem(width);
+  }, [width]);
 
-  // All pointer handling via native listeners (mount-once) so the drag tracks the
-  // pointer with zero React-event lag. Helpers below close only over refs +
-  // stable setState, so capturing them once is safe.
+  // Keep the bubble glued to the cursor while it shows.
   useEffect(() => {
-    const handle = handleRef.current;
-    if (!handle) return;
+    if (!bubble) return;
+    function follow(e: PointerEvent) {
+      if (!bubbleRef.current) return;
+      bubbleRef.current.style.left = `${e.clientX}px`;
+      bubbleRef.current.style.top = `${e.clientY}px`;
+    }
+    window.addEventListener("pointermove", follow, { passive: true });
+    return () => window.removeEventListener("pointermove", follow);
+  }, [bubble]);
 
-    function flash(msg: string, x: number, y: number) {
-      setBubble({ msg, x, y });
-      clearTimeout(hideTimer.current);
-      hideTimer.current = setTimeout(() => {
-        setBubble(null);
-        if (!won.current && step.current < 3) step.current = 0; // forgive shallow bumps
-      }, 2600);
-    }
-    function endDrag() {
-      draggingRef.current = false;
-      pushing.current = false;
-      setDragging(false);
-      delete document.body.dataset.dragging;
-      delete document.documentElement.dataset.cursorGrabbing;
-    }
-    function onShove(x: number, y: number) {
-      if (pushing.current || won.current) return;
-      pushing.current = true;
-      const s = SCRIPT[Math.min(step.current, SCRIPT.length - 1)];
-      flash(s.msg, x, y);
-      playRef.current("bonk");
-      setShake(true);
-      clearTimeout(shakeTimer.current);
-      shakeTimer.current = setTimeout(() => setShake(false), 420);
-      if (s.won) won.current = true;
-      if (s.lock) {
-        lockedRef.current = true;
-        setLocked(true);
-        endDrag();
-        clearTimeout(coolTimer.current);
-        coolTimer.current = setTimeout(() => {
-          lockedRef.current = false;
-          setLocked(false);
-        }, COOLDOWN_MS);
-      }
-      step.current = Math.min(step.current + 1, SCRIPT.length - 1);
-    }
-
-    function onDown(e: PointerEvent) {
-      e.preventDefault();
-      if (lockedRef.current) {
-        flash("🔒 you're on a timeout", e.clientX, e.clientY);
-        return;
-      }
-      draggingRef.current = true;
-      setDragging(true);
-      startX.current = e.clientX;
-      startW.current = widthRef.current;
-      scaleRef.current = parseFloat(getComputedStyle(document.documentElement).fontSize) / 16 || 1;
-      // Capture pointer + shield iframes so a PDF viewer can't swallow the drag.
-      handle!.setPointerCapture?.(e.pointerId);
-      document.body.dataset.dragging = "true";
-      document.documentElement.dataset.cursorGrabbing = "true";
-    }
-    function onMove(e: PointerEvent) {
-      // Keep the bubble glued to the cursor whenever it's showing.
-      if (bubbleRef.current) {
-        bubbleRef.current.style.left = `${e.clientX}px`;
-        bubbleRef.current.style.top = `${e.clientY}px`;
-      }
-      if (!draggingRef.current) return;
-      const maxW = won.current ? WON_MAX : MAX_WIDTH;
-      const raw = startW.current + (e.clientX - startX.current) / scaleRef.current;
-      const w = Math.max(MIN_WIDTH, Math.min(maxW, raw));
-      widthRef.current = w;
-      if (asideRef.current) asideRef.current.style.width = widthRem(w);
-      if (!won.current && (raw > maxW + SLOP || raw < MIN_WIDTH - SLOP)) onShove(e.clientX, e.clientY);
-      else pushing.current = false;
-    }
-    function onUp() {
-      if (!draggingRef.current) return;
-      endDrag();
-      try {
-        localStorage.setItem(STORAGE_KEY, String(Math.round(widthRef.current)));
-      } catch {
-        // Resizing still works for this session without persistence.
-      }
-    }
-
-    handle.addEventListener("pointerdown", onDown);
-    window.addEventListener("pointermove", onMove, { passive: true });
-    window.addEventListener("pointerup", onUp, { passive: true });
-    return () => {
-      handle.removeEventListener("pointerdown", onDown);
-      window.removeEventListener("pointermove", onMove);
-      window.removeEventListener("pointerup", onUp);
+  useEffect(
+    () => () => {
       clearTimeout(hideTimer.current);
       clearTimeout(shakeTimer.current);
       clearTimeout(coolTimer.current);
-      delete document.documentElement.dataset.cursorGrabbing;
-    };
-  }, []);
+    },
+    [],
+  );
+
+  function previewWidth(w: number) {
+    if (asideRef.current) asideRef.current.style.width = widthRem(w);
+  }
+  function commitWidth(w: number) {
+    setCommitted(w);
+    try {
+      localStorage.setItem(STORAGE_KEY, String(Math.round(w)));
+    } catch {
+      // Resizing still works for this session without persistence.
+    }
+  }
+
+  function flash(msg: string, x: number, y: number) {
+    setBubble({ msg, x, y });
+    clearTimeout(hideTimer.current);
+    hideTimer.current = setTimeout(() => {
+      setBubble(null);
+      if (step.current < 3) step.current = 0; // forgive shallow bumps
+    }, 2600);
+  }
+  // One bouncer reaction. Returns true when it revokes resizing, which ends the
+  // drag where it is.
+  function shove(x: number, y: number): boolean {
+    if (pushing.current || won) return false;
+    pushing.current = true;
+    const s = SCRIPT[Math.min(step.current, SCRIPT.length - 1)];
+    flash(s.msg, x, y);
+    play("bonk");
+    setShake(true);
+    clearTimeout(shakeTimer.current);
+    shakeTimer.current = setTimeout(() => setShake(false), 420);
+    if (s.won) setBeatBouncer(true);
+    step.current = Math.min(step.current + 1, SCRIPT.length - 1);
+    if (!s.lock) return false;
+    pushing.current = false;
+    setLocked(true);
+    clearTimeout(coolTimer.current);
+    coolTimer.current = setTimeout(() => setLocked(false), COOLDOWN_MS);
+    return true;
+  }
+  function onOvershoot(raw: number, at: { x: number; y: number }) {
+    if (!won && (raw > MAX_WIDTH + SLOP || raw < MIN_WIDTH - SLOP)) return shove(at.x, at.y);
+    pushing.current = false;
+    return false;
+  }
 
   return (
     <aside
       ref={asideRef}
+      id="ide-explorer"
       className={`${className}${shake ? " ide-explorer--shake" : ""}`}
       aria-label="File explorer"
     >
@@ -250,14 +218,23 @@ export function Explorer({ className = "" }: { className?: string }) {
 
       <NowPlayingCard />
 
-      <div
-        ref={handleRef}
+      <ResizeHandle
+        label="Resize file explorer"
         className="ide-resize-handle"
-        data-dragging={dragging}
-        data-locked={locked}
-        role="separator"
-        aria-orientation="vertical"
-        aria-label="Resize file explorer"
+        controls="ide-explorer"
+        orientation="vertical"
+        pane="before"
+        value={width}
+        min={MIN_WIDTH}
+        max={won ? WON_MAX : MAX_WIDTH}
+        step={16}
+        // Widths are base px; the large-monitor root scale stretches each CSS px.
+        unitsPerPx={() => 16 / (Number.parseFloat(getComputedStyle(document.documentElement).fontSize) || 16)}
+        preview={previewWidth}
+        commit={commitWidth}
+        onOvershoot={onOvershoot}
+        locked={locked}
+        onLockedPress={(at) => flash("🔒 you're on a timeout", at.x, at.y)}
       />
 
       {mounted && bubble

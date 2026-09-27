@@ -30,13 +30,15 @@ export function TryTheSite() {
       if ((e.target as Element | null)?.closest?.(TARGETS)) setFound(true);
     }
     // pointerdown catches the drag the moment it starts; click covers keyboard
-    // activation of a swatch.
+    // activation of a swatch, and keydown a keyboard resize of the edge.
     document.addEventListener("pointerdown", onInteract, true);
     document.addEventListener("click", onInteract, true);
+    document.addEventListener("keydown", onInteract, true);
     return () => {
       delete root.dataset.siteHint;
       document.removeEventListener("pointerdown", onInteract, true);
       document.removeEventListener("click", onInteract, true);
+      document.removeEventListener("keydown", onInteract, true);
     };
   }, [hinting]);
 

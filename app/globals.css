@@ -361,8 +361,13 @@ body {
   transition: var(--palette-transition, background 140ms ease-out);
 }
 .ide-resize-handle:hover::after,
+.ide-resize-handle:focus-visible::after,
 .ide-resize-handle[data-dragging="true"]::after {
   background: var(--accent);
+}
+/* Focusable (ResizeHandle): the accent line is the focus ring, as on the split divider. */
+.ide-resize-handle:focus-visible {
+  outline: none;
 }
 
 /* "Want to see one?" (components/mdx/TryTheSite.tsx): while the disclosure is
@@ -1382,6 +1387,10 @@ button.ide-row {
 /* dim the rail while privileges are revoked */
 .ide-resize-handle[data-locked="true"]::after {
   background: var(--border-press);
+}
+/* ...but keyboard focus still shows: keys keep working through the lockout */
+.ide-resize-handle[data-locked="true"]:focus-visible::after {
+  background: var(--accent);
 }
 /* Over the resize handle, swap the arrow for a custom grab hand (the OS cursor
    can't be oriented; this can). Driven by data-cursor-grab (hover the handle)
