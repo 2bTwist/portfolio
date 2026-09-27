@@ -1,10 +1,15 @@
-import { test, expect, type Locator } from "@playwright/test";
+import { test, expect, devices, type Locator, type Page, type CDPSession } from "@playwright/test";
 import { writeFileSync, mkdirSync, readFileSync } from "node:fs";
 import { createHash } from "node:crypto";
 
 // Deep measurement: drive several in-place interactions against the prod build
 // under CPU throttle, capture an Event Timing interaction proxy (the gate metric) and, best-effort, a
 // CPU flame-chart profile.
+//
+// The gate is the MEDIAN over budgets.measurement.runs fresh page loads of each
+// load's worst interaction, the same median-of-N contract Lighthouse uses
+// (perf/config.ts). A single load's worst interaction swung 80 -> 104 ms in CI on
+// identical app code, so one sample flipped the verdict on noise.
 //
 // This is a local lab proxy, not field INP. INP and the CPU profile are measured
 // in SEPARATE phases on purpose. An active
@@ -26,7 +31,21 @@ type ExercisedAction = {
   stateChanged: boolean;
 };
 
-test("homepage interaction perf (INP proxy + CPU profile)", async ({ page }) => {
+// Low-level page.mouse clicks (not locator.click) dispatch real input events.
+// Resolve the rectangle immediately before every click: folder expansion
+// changes row positions, so retained coordinates can otherwise hit a link.
+async function clickInPlace(page: Page, target: Locator) {
+  const box = await target.boundingBox();
+  if (!box) throw new Error("Expected an interaction target to be visible");
+  await page.mouse.click(box.x + box.width / 2, box.y + box.height / 2);
+  await page.waitForTimeout(120);
+  await expect(page).toHaveURL(/\/$/);
+}
+
+// One fresh page load: returns that load's worst interaction and its evidence.
+async function measureRun(page: Page): Promise<{
+  inp: number; events: MeasuredEvent[]; actions: ExercisedAction[]; client: CDPSession;
+}> {
   const client = await page.context().newCDPSession(page);
   await client.send("Emulation.setCPUThrottlingRate", { rate: CPU_THROTTLE });
 
@@ -44,7 +63,7 @@ test("homepage interaction perf (INP proxy + CPU profile)", async ({ page }) => 
     }).__events = [];
     new PerformanceObserver((list) => {
       for (const e of list.getEntries()) {
-        const event = e as MeasuredEvent;
+        const event = e as unknown as MeasuredEvent;
         if (["pointerdown", "pointerup", "click"].includes(event.name) && event.interactionId > 0) {
           (window as unknown as {
             __events: MeasuredEvent[];
@@ -63,18 +82,6 @@ test("homepage interaction perf (INP proxy + CPU profile)", async ({ page }) => 
   // the page and exactly what INP measures — a click's event-handler duration.
   // Nav links are intentionally excluded: they navigate (covered by LCP /
   // page-load) and would lose the observer.
-  //
-  // Low-level page.mouse clicks (not locator.click) dispatch real input events.
-  // Resolve the rectangle immediately before every click: folder expansion
-  // changes row positions, so retained coordinates can otherwise hit a link.
-  const clickInPlace = async (target: Locator) => {
-    const box = await target.boundingBox();
-    if (!box) throw new Error("Expected an interaction target to be visible");
-    await page.mouse.click(box.x + box.width / 2, box.y + box.height / 2);
-    await page.waitForTimeout(120);
-    await expect(page).toHaveURL(/\/$/);
-  };
-
   const swatches = page.locator(".ide-swatch");
   const swatchCount = await swatches.count();
   expect(swatchCount).toBeGreaterThan(0);
@@ -82,7 +89,7 @@ test("homepage interaction perf (INP proxy + CPU profile)", async ({ page }) => 
   for (let i = 0; i < swatchCount; i++) {
     const swatch = swatches.nth(i);
     const before = await swatch.getAttribute("aria-pressed");
-    await clickInPlace(swatch);
+    await clickInPlace(page, swatch);
     await expect(swatch).toHaveAttribute("aria-pressed", "true");
     const after = await swatch.getAttribute("aria-pressed");
     actions.push({
@@ -99,7 +106,7 @@ test("homepage interaction perf (INP proxy + CPU profile)", async ({ page }) => 
     const before = await row.getAttribute("aria-expanded");
     expect(before === "true" || before === "false").toBe(true);
     const expected = before === "true" ? "false" : "true";
-    await clickInPlace(twistie);
+    await clickInPlace(page, twistie);
     await expect(row).toHaveAttribute("aria-expanded", expected);
     const after = await row.getAttribute("aria-expanded");
     actions.push({
@@ -113,7 +120,7 @@ test("homepage interaction perf (INP proxy + CPU profile)", async ({ page }) => 
     const before = await row.getAttribute("aria-expanded");
     expect(before === "true" || before === "false").toBe(true);
     const expected = before === "true" ? "false" : "true";
-    await clickInPlace(twistie);
+    await clickInPlace(page, twistie);
     await expect(row).toHaveAttribute("aria-expanded", expected);
     const after = await row.getAttribute("aria-expanded");
     actions.push({
@@ -126,19 +133,52 @@ test("homepage interaction perf (INP proxy + CPU profile)", async ({ page }) => 
     () => (window as unknown as { __events: MeasuredEvent[] }).__events ?? [],
   );
   expect(events.length).toBeGreaterThan(0);
-  const inp = Math.max(...events.map((event) => event.duration));
+  return { inp: Math.max(...events.map((event) => event.duration)), events, actions, client };
+}
+
+test("homepage interaction perf (INP proxy + CPU profile)", async ({ page, browser: runBrowser, baseURL }) => {
+  const budgets = JSON.parse(readFileSync("budgets.json", "utf8"));
+  const runCount: number = budgets.measurement?.runs ?? 5;
+  // Each run is a fresh page load with the same CPU throttle (roughly 10 s).
+  test.setTimeout(60_000 + runCount * 20_000);
+
+  // Every run starts from the same clean state: fresh contexts built like the
+  // project's own (Desktop Chrome + baseURL), and the fixture page last so the
+  // diagnostics below continue on a warmed, measured page as before.
+  const runs: { inp: number; interactionCount: number; events: MeasuredEvent[]; actions: ExercisedAction[] }[] = [];
+  for (let i = 0; i < runCount - 1; i++) {
+    const context = await runBrowser.newContext({ ...devices["Desktop Chrome"], baseURL });
+    try {
+      const run = await measureRun(await context.newPage());
+      runs.push({ inp: run.inp, interactionCount: run.events.length, events: run.events, actions: run.actions });
+    } finally {
+      await context.close();
+    }
+  }
+  const last = await measureRun(page);
+  runs.push({ inp: last.inp, interactionCount: last.events.length, events: last.events, actions: last.actions });
+  const { client } = last;
+
+  const runInps = runs.map((run) => run.inp);
+  const sorted = [...runInps].sort((a, b) => a - b);
+  const inp = sorted[Math.floor(sorted.length / 2)]; // upper median when the count is even
+
   mkdirSync("perf-results", { recursive: true });
   const buildId = readFileSync(".next/BUILD_ID", "utf8").trim();
   writeFileSync(
     "perf-results/inp.json",
     JSON.stringify({
-      inp, url: page.url(), buildId, interactionCount: events.length, events, actions,
+      inp, aggregation: "median", runInps, url: page.url(), buildId, runs,
       specSha256: createHash("sha256").update(readFileSync("e2e/perf.spec.ts")).digest("hex"),
       browserVersion: page.context().browser()?.version(),
       measuredAt: new Date().toISOString(),
     }, null, 2),
   );
-  console.log(`INP proxy (max event duration): ${inp.toFixed(1)}ms`);
+  console.log(`INP proxy (median of ${runCount} loads' max event duration): ${inp.toFixed(1)}ms [${runInps.join(", ")}]`);
+
+  const swatches = page.locator(".ide-swatch");
+  const swatchCount = await swatches.count();
+  const twistie = page.locator(".ide-twistie-hit").first();
 
   // Best-effort CPU profile over a short window. Bounded so it can never hang
   // the test: if the profiler stalls under throttle, we skip the artifact and
@@ -154,7 +194,7 @@ test("homepage interaction perf (INP proxy + CPU profile)", async ({ page }) => 
         // but it must include the whole-shell work that a theme click performs.
         for (let i = 0; i < swatchCount; i++) {
           const swatch = swatches.nth(i);
-          await clickInPlace(swatch);
+          await clickInPlace(page, swatch);
           await expect(swatch).toHaveAttribute("aria-pressed", "true");
         }
         for (let i = 0; i < 3; i++) {
@@ -213,7 +253,7 @@ test("homepage interaction perf (INP proxy + CPU profile)", async ({ page }) => 
         tracingActive = false;
         await new Promise<void>((resolve, reject) => {
           endTimer = setTimeout(() => reject(new Error("Tracing.end timed out")), 1500);
-          void traceClient.send("Tracing.end").then(resolve, reject);
+          void traceClient.send("Tracing.end").then(() => resolve(), reject);
         }).finally(() => {
           if (endTimer) clearTimeout(endTimer);
         });
@@ -309,7 +349,6 @@ test("homepage interaction perf (INP proxy + CPU profile)", async ({ page }) => 
     }
   }
 
-  const budgets = JSON.parse(readFileSync("budgets.json", "utf8"));
   const inpBudget = budgets.metrics.inp.budget;
   if (inpBudget != null) expect(inp).toBeLessThanOrEqual(inpBudget);
 });
