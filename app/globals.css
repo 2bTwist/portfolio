@@ -1313,9 +1313,9 @@ button.ide-row {
 }
 
 /* ── Custom cursor (Phase 3) ─────────────────────────────────────────────────
-   A rounded arrow pointer that trails the real pointer with friction (physics
-   in CustomCursor.tsx). Inert until .cursor-custom is added to <html>
-   (pointer:fine), so touch / JS-off keep the native cursor. */
+   A rounded arrow pointer that tracks the real pointer 1:1 (CustomCursor.tsx).
+   Inert until .cursor-custom is added to <html> (pointer:fine), so touch /
+   JS-off keep the native cursor. */
 .cursor-arrow {
   position: fixed;
   top: 0;

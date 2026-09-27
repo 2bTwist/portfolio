@@ -5,7 +5,14 @@
    made the visual trail the real pointer, so clicks missed small targets).
    Desktop pointers only (pointer:fine). Hides when the pointer leaves the
    window / the tab blurs. Written straight to the DOM (no React state). The
-   "feel" comes from the hover/press scale, not from positional drag. */
+   "feel" comes from the hover/press scale, not from positional drag.
+
+   A DOM cursor under `cursor: none` always trails the hardware pointer by about
+   a frame. While moving, it draws at the browser's predicted position
+   (`getPredictedEvents`, Chromium) to win some of that back, then settles on
+   the real position once movement stops, so the resting tip is still exactly
+   where a click lands. Per-move attribute writes happen only on change, so an
+   ordinary move costs no style invalidation. */
 
 import { useEffect, useRef } from "react";
 import { useMounted } from "@/components/hooks/useMounted";
@@ -39,25 +46,44 @@ export function CustomCursor() {
     root.dataset.cursorHidden = "true"; // hidden until the first move
     const el = elRef.current!;
 
+    // Compare against the live attribute, not a cache: Explorer and Terminal
+    // also write these flags during resize drags.
+    const setData = (key: "cursorHidden" | "cursorHover" | "cursorGrab" | "cursorAxis", value: string) => {
+      if (root.dataset[key] !== value) root.dataset[key] = value;
+    };
+    const place = (x: number, y: number) => {
+      el.style.transform = `translate3d(${x}px, ${y}px, 0)`;
+    };
+    // No event marks "the pointer stopped", so settle on the real position once
+    // moves go quiet for a couple of frames.
+    let settle: ReturnType<typeof setTimeout> | undefined;
+
     const onMove = (e: PointerEvent) => {
       // Re-arm after a blur/screenshot dropped the class (see `hide`), so the
       // native cursor and the custom one are never drawn at the same time.
-      root.classList.add("cursor-custom");
-      el.style.transform = `translate3d(${e.clientX}px, ${e.clientY}px, 0)`;
-      root.dataset.cursorHidden = "false";
+      if (!root.classList.contains("cursor-custom")) root.classList.add("cursor-custom");
+      const predicted = e.getPredictedEvents?.();
+      const ahead = predicted && predicted.length > 0 ? predicted[predicted.length - 1] : null;
+      place(ahead?.clientX ?? e.clientX, ahead?.clientY ?? e.clientY);
+      if (ahead) {
+        const { clientX, clientY } = e;
+        clearTimeout(settle);
+        settle = setTimeout(() => place(clientX, clientY), 40);
+      }
+      setData("cursorHidden", "false");
       // While actively resizing, the drag owns the grab/axis flags (the pointer
       // leaves the thin handle mid-drag), so don't fight it here.
       if (root.dataset.cursorGrabbing === "true") return;
       const target = e.target as Element | null;
-      root.dataset.cursorHover = target?.closest?.(INTERACTIVE) ? "true" : "false";
+      setData("cursorHover", target?.closest?.(INTERACTIVE) ? "true" : "false");
       // Over a resize handle, swap the arrow for the grab hand. The explorer
       // handle grabs horizontally (hand faces left); the terminal handle grabs
       // vertically (hand faces down) — set the axis so the CSS can orient it.
       const xHandle = target?.closest?.(".ide-resize-handle") as HTMLElement | null;
       const yHandle = target?.closest?.(".ide-terminal-resize") as HTMLElement | null;
       const overX = !!xHandle && xHandle.dataset.locked !== "true";
-      root.dataset.cursorGrab = overX || yHandle ? "true" : "false";
-      root.dataset.cursorAxis = yHandle ? "y" : "x";
+      setData("cursorGrab", overX || yHandle ? "true" : "false");
+      setData("cursorAxis", yHandle ? "y" : "x");
     };
     const onDown = () => (root.dataset.cursorActive = "true");
     const onUp = () => (root.dataset.cursorActive = "false");
@@ -110,6 +136,7 @@ export function CustomCursor() {
     document.addEventListener("visibilitychange", onVisibility);
 
     return () => {
+      clearTimeout(settle);
       mo.disconnect();
       for (const f of attached) f.removeEventListener("pointerenter", hide);
       window.removeEventListener("pointermove", onMove);
