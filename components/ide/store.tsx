@@ -24,7 +24,7 @@ import {
   type ReactNode,
 } from "react";
 import { usePathname, useRouter } from "next/navigation";
-import { NAV } from "@/app/lib/nav";
+import { useCatalogue } from "./CatalogueProvider";
 import { setPaletteIndex, storedPaletteIndex } from "./palette-store";
 
 type Tab = { href: string; name: string };
@@ -70,14 +70,15 @@ export function useOverlay(): Overlay {
   return ctx;
 }
 
-function tabFor(href: string): Tab | null {
-  const item = NAV.find((n) => n.href === href);
-  return item ? { href: item.href, name: item.name } : null;
-}
-
 function SessionProvider({ children }: { children: ReactNode }) {
   const pathname = usePathname();
   const router = useRouter();
+  // Any page gets a tab, labelled from the catalogue; a 404 gets none.
+  const catalogue = useCatalogue();
+  const tabFor = (href: string): Tab | null => {
+    const entry = catalogue.find(href);
+    return entry ? { href: entry.href, name: entry.label } : null;
+  };
 
   // Seed a tab for the route we land on (lazy init = same on server + first
   // client render, so no hydration mismatch). Further tabs open on navigation.

@@ -8,8 +8,8 @@ import { CursorMount } from "@/components/feel/CursorMount";
 import { NowPlayingMount } from "@/components/music/NowPlayingMount";
 import { Shell } from "@/components/ide/Shell";
 import { getGitInfo } from "@/app/lib/git";
-import { getAllPosts } from "@/app/lib/posts";
-import type { TreeFile } from "@/app/lib/nav";
+import { getContentEntries } from "@/app/lib/catalogue";
+import { CatalogueProvider } from "@/components/ide/CatalogueProvider";
 import { PALETTES, DEFAULT_PALETTE_INDEX } from "@/app/lib/palette";
 import { clashDisplay, satoshi } from "@/app/fonts/fonts";
 import { SITE_URL } from "@/app/lib/site";
@@ -54,13 +54,6 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   const git = getGitInfo();
-  // The blog/ folder's children come from the fs-based posts module here
-  // (server side) and are handed to the client Explorer.
-  const blogFiles: TreeFile[] = getAllPosts().map((p) => ({
-    type: "file",
-    name: `${p.slug}.md`,
-    href: `/blog/${p.slug}`,
-  }));
   return (
     <html lang="en" className={`${clashDisplay.variable} ${satoshi.variable}`}>
       <body style={{ ...paletteVars, background: "var(--bg)", color: "var(--text)" }}>
@@ -73,11 +66,12 @@ export default function RootLayout({
           }}
         />
         <SoundProvider>
-          <IdeProvider>
-            <Shell git={git} blogFiles={blogFiles}>
-              {children}
-            </Shell>
-          </IdeProvider>
+          {/* Posts and tags are read here, on the server, for the shell's catalogue view. */}
+          <CatalogueProvider entries={getContentEntries()}>
+            <IdeProvider>
+              <Shell git={git}>{children}</Shell>
+            </IdeProvider>
+          </CatalogueProvider>
         </SoundProvider>
         <CursorMount />
         <NowPlayingMount />

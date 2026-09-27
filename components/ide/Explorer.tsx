@@ -21,7 +21,8 @@ import dynamic from "next/dynamic";
 import { createPortal } from "react-dom";
 import { usePathname } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
-import { TREE, NAV, type TreeNode, type TreeFile } from "@/app/lib/nav";
+import type { TreeNode } from "@/app/lib/catalogue-view";
+import { useCatalogue } from "./CatalogueProvider";
 import { useMounted } from "@/components/hooks/useMounted";
 import { useSound } from "@/components/feel/SoundProvider";
 import { FileIcon, FolderIcon } from "./FileIcon";
@@ -82,21 +83,9 @@ function Chevron({ open }: { open: boolean }) {
   );
 }
 
-export function Explorer({
-  className = "",
-  blogFiles = [],
-}: {
-  className?: string;
-  blogFiles?: TreeFile[];
-}) {
+export function Explorer({ className = "" }: { className?: string }) {
   const pathname = usePathname();
-  // Fill the blog/ folder with the server-provided blog posts (nav.ts can't
-  // read the fs-based posts module from a client module).
-  const tree: TreeNode[] = TREE.map((node) =>
-    node.type === "folder" && node.href === "/blog"
-      ? { ...node, children: blogFiles }
-      : node,
-  );
+  const { tree } = useCatalogue();
   const mounted = useMounted();
   const { play } = useSound();
   const { openTab } = useTabSession();
@@ -291,10 +280,8 @@ export function Explorer({
 
 /* Clickable path crumbs in the explorer header: `~/edmond / projects / ledger`.
    Each crumb navigates to (and opens a tab for) its cumulative route. A crumb is
-   only a link when that route is real — in NAV or the current page — so an
-   intermediate non-route (e.g. `/blog/tag`) renders as plain text, not a 404. */
-const NAV_HREFS = new Set(NAV.map((n) => n.href));
-
+   only a link when that route is a page in the catalogue, so an intermediate
+   non-route (e.g. `/blog/tag`) renders as plain text, not a 404. */
 function Breadcrumb({
   pathname,
   onOpen,
@@ -302,6 +289,7 @@ function Breadcrumb({
   pathname: string;
   onOpen: (href: string) => void;
 }) {
+  const catalogue = useCatalogue();
   const segs = pathname === "/" ? [] : pathname.slice(1).split("/");
   return (
     <div className="ide-explorer-title">
@@ -314,7 +302,7 @@ function Breadcrumb({
         // The current crumb is NOT a link — you're already here. This also stops
         // it from prefetching its own route, which on a 404 (force-dynamic) left a
         // hanging RSC request. Other crumbs use hover prefetch.
-        const navigable = !current && NAV_HREFS.has(href);
+        const navigable = !current && catalogue.find(href) !== undefined;
         return (
           <span key={href}>
             <span className="ide-crumb-sep">/</span>

@@ -11,7 +11,8 @@
 import { useEffect, useRef, useState, type ChangeEvent, type FormEvent, type KeyboardEvent } from "react";
 import { createPortal } from "react-dom";
 import { useRouter } from "next/navigation";
-import { TREE, type TreeNode, type TreeFolder } from "@/app/lib/nav";
+import type { TreeNode, TreeFolder } from "@/app/lib/catalogue-view";
+import { useCatalogue } from "./CatalogueProvider";
 import { searchStatic, searchPosts } from "@/app/lib/search";
 import { PALETTES } from "@/app/lib/palette";
 import { profile } from "@/data/profile";
@@ -37,9 +38,9 @@ const COMMANDS = ["help", "ls", "cd", "open", "cat", "pwd", "grep", "theme", "wh
 let sessionLines: Line[] = [GREETING];
 let sessionCwd: string[] = [];
 
-// ── tiny filesystem over the nav tree, indexed by cwd (array of folder names) ──
-function entriesAt(cwd: string[]): TreeNode[] {
-  let nodes: TreeNode[] = TREE;
+// ── tiny filesystem over the explorer tree, indexed by cwd (array of folder names) ──
+function entriesAt(tree: TreeNode[], cwd: string[]): TreeNode[] {
+  let nodes = tree;
   for (const seg of cwd) {
     const f = nodes.find((n) => n.type === "folder" && n.name === seg) as TreeFolder | undefined;
     if (!f) return [];
@@ -47,8 +48,8 @@ function entriesAt(cwd: string[]): TreeNode[] {
   }
   return nodes;
 }
-function routeForCwd(cwd: string[]): string {
-  let nodes: TreeNode[] = TREE;
+function routeForCwd(tree: TreeNode[], cwd: string[]): string {
+  let nodes = tree;
   let href = "/";
   for (const seg of cwd) {
     const f = nodes.find((n) => n.type === "folder" && n.name === seg) as TreeFolder | undefined;
@@ -62,20 +63,20 @@ function routeForCwd(cwd: string[]): string {
 function promptFor(cwd: string[]): string {
   return `${cwd.length ? cwd[cwd.length - 1] : "edmond"} %`;
 }
-function listing(cwd: string[]): string[] {
-  return entriesAt(cwd).map((n) => (n.type === "folder" ? `${n.name}/` : n.name));
+function listing(tree: TreeNode[], cwd: string[]): string[] {
+  return entriesAt(tree, cwd).map((n) => (n.type === "folder" ? `${n.name}/` : n.name));
 }
-function matchFile(cwd: string[], arg: string): TreeNode | undefined {
+function matchFile(tree: TreeNode[], cwd: string[], arg: string): TreeNode | undefined {
   const a = arg.replace(/^\.?\//, "").replace(/\/$/, "").toLowerCase();
   const bare = a.replace(STRIP_EXT, "");
-  return entriesAt(cwd).find(
+  return entriesAt(tree, cwd).find(
     (n) => n.name.toLowerCase() === a || n.name.toLowerCase().replace(STRIP_EXT, "") === bare,
   );
 }
-function candidatesFor(value: string, cwd: string[]): string[] {
+function candidatesFor(tree: TreeNode[], value: string, cwd: string[]): string[] {
   const tokens = value.split(" ");
   const cur = (tokens[tokens.length - 1] ?? "").toLowerCase();
-  const pool = tokens.length === 1 ? COMMANDS : listing(cwd);
+  const pool = tokens.length === 1 ? COMMANDS : listing(tree, cwd);
   return pool.filter((c) => c.toLowerCase().startsWith(cur));
 }
 function commonPrefix(xs: string[]): string {
@@ -93,6 +94,7 @@ export default function Terminal() {
   const router = useRouter();
   const { closeTerm, termOpen } = useOverlay();
   const { setPaletteIndex, openTab } = useSession();
+  const { tree } = useCatalogue();
   // Seed from the persisted session so a remount restores the scrollback + cwd.
   const [lines, setLines] = useState<Line[]>(sessionLines);
   const [value, setValue] = useState("");
@@ -327,7 +329,7 @@ export default function Terminal() {
         print("commands: ls, cd <dir>, open <file>, cat <file>, pwd, grep <term>, theme [name], whoami, clear");
         break;
       case "ls":
-        print(listing(cwd).join("   "));
+        print(listing(tree, cwd).join("   "));
         break;
       case "pwd":
         print(`~/edmond${cwd.length ? "/" + cwd.join("/") : ""}`);
@@ -346,7 +348,7 @@ export default function Terminal() {
         else if (arg === "..") next = cwd.slice(0, -1);
         else {
           const name = arg.replace(/\/$/, "");
-          const node = entriesAt(cwd).find((n) => n.name.toLowerCase() === name.toLowerCase());
+          const node = entriesAt(tree, cwd).find((n) => n.name.toLowerCase() === name.toLowerCase());
           if (!node) {
             print(`cd: no such file or directory: ${arg}`);
             break;
@@ -359,12 +361,12 @@ export default function Terminal() {
         }
         sessionCwd = next; // sync, before navigate may remount
         setCwd(next);
-        navigate(routeForCwd(next));
+        navigate(routeForCwd(tree, next));
         break;
       }
       case "open":
       case "cat": {
-        const file = matchFile(cwd, arg);
+        const file = matchFile(tree, cwd, arg);
         if (!file) {
           print(`${cmd}: no such file: ${arg || "(nothing)"}`);
           break;
@@ -436,7 +438,7 @@ export default function Terminal() {
       e.preventDefault();
       const tokens = value.split(" ");
       const cur = tokens[tokens.length - 1] ?? "";
-      const cands = candidatesFor(value, cwd);
+      const cands = candidatesFor(tree, value, cwd);
       if (!cands.length) return;
       const target = cands.length === 1 ? cands[0] : commonPrefix(cands);
       if (target.length > cur.length) {
@@ -453,7 +455,7 @@ export default function Terminal() {
   // caret (fish-style). Empty when there's nothing to suggest.
   const tokens = value.split(" ");
   const cur = tokens[tokens.length - 1] ?? "";
-  const cands = value && !value.endsWith(" ") ? candidatesFor(value, cwd) : [];
+  const cands = value && !value.endsWith(" ") ? candidatesFor(tree, value, cwd) : [];
   const ghost = cands.length ? cands[0].slice(cur.length) : "";
 
   return (

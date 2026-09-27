@@ -9,7 +9,7 @@
 
 import { createElement, Suspense, useRef, type ReactNode, type CSSProperties } from "react";
 import { FileIcon } from "./FileIcon";
-import { navLabel } from "@/app/lib/nav";
+import { useCatalogue } from "./CatalogueProvider";
 import { closeRight, setLeftFraction } from "./splitStore";
 import { paneFor } from "./paneRegistry";
 import { SplitDivider } from "./SplitDivider";
@@ -29,6 +29,7 @@ export function SplitView({
 }) {
   const containerRef = useRef<HTMLDivElement>(null);
   const rightBody = paneFor(rightHref);
+  const label = useCatalogue().label(rightHref);
 
   // Defensive: openRight is only called for splittable hrefs, but if the body
   // ever resolves to null, fall back to a single pane rather than a broken one.
@@ -45,7 +46,6 @@ export function SplitView({
     );
   }
 
-  const label = navLabel(rightHref);
   return (
     <div
       ref={containerRef}

@@ -1,8 +1,8 @@
 /* Unified palette/terminal search (Phase 4 + editor-chrome pass).
 
    Two indexes, one ranked result shape:
-   - STATIC (sync): nav files + project content (title/blurb/tags). Available
-     immediately because the data is client-importable.
+   - STATIC (sync): the catalogue's listed pages + project content
+     (title/blurb/tags). Available immediately because both are client-importable.
    - POSTS (async): full-text over the blog, fetched lazily on first use so post
      bodies live in neither the initial bundle nor any JS chunk.
 
@@ -12,8 +12,8 @@
    `score` (lower = better) so results merge into one intuitive ranked list. */
 
 import Fuse from "fuse.js";
-import { NAV } from "./nav";
 import { PROJECTS } from "@/data/projects";
+import { STATIC_ENTRIES, listedEntries } from "./catalogue-view";
 import type { SearchDoc } from "@/app/search-index.json/route";
 
 export type SearchKind = "file" | "folder" | "project" | "post";
@@ -25,27 +25,27 @@ export type SearchResult = {
   score: number;
 };
 
-// ---- Static index: nav files + project content (no fetch) ----
+// ---- Static index: listed catalogue pages + project content (no fetch) ----
 type StaticDoc = { kind: "file" | "folder" | "project"; name: string; href: string; sub: string; haystack: string };
 
 const projectByHref = new Map<string, (typeof PROJECTS)[number]>(
   PROJECTS.map((p) => [`/projects/${p.id}`, p]),
 );
 
-const STATIC_DOCS: StaticDoc[] = NAV.map((n) => {
-  const proj = projectByHref.get(n.href);
+const STATIC_DOCS: StaticDoc[] = listedEntries(STATIC_ENTRIES).map((e) => {
+  const proj = projectByHref.get(e.href);
   if (proj) {
     return {
       kind: "project",
-      name: n.name,
-      href: n.href,
+      name: e.label,
+      href: e.href,
       sub: proj.title,
-      haystack: `${n.name} ${proj.title} ${proj.blurb} ${proj.tags.join(" ")}`,
+      haystack: `${e.label} ${proj.title} ${proj.blurb} ${proj.tags.join(" ")}`,
     };
   }
   // A trailing slash marks a directory entry (e.g. "projects/").
-  const kind = n.name.endsWith("/") ? "folder" : "file";
-  return { kind, name: n.name, href: n.href, sub: n.href, haystack: n.name };
+  const kind = e.label.endsWith("/") ? "folder" : "file";
+  return { kind, name: e.label, href: e.href, sub: e.href, haystack: e.label };
 });
 
 const staticFuse = new Fuse(STATIC_DOCS, {

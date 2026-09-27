@@ -62,8 +62,8 @@ e2e/            Playwright invariants + perf specs
 
 Content is data-driven: edit the files in `data/` and the MDX in `content/blog/`,
 and the routes, file tree, and search index follow. A new top-level route also
-needs its entry in `data/pages.ts`, which places it in the sitemap and the phone
-nav (see `CONTEXT.md`).
+needs its entry in `data/pages.ts`, which places it in the file tree, tabs, search,
+the sitemap and the phone nav (see `CONTEXT.md`).
 
 ## License
 

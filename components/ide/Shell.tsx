@@ -17,7 +17,7 @@ import { useEffect, useLayoutEffect, type ReactNode } from "react";
 import { SiteNav } from "@/components/site/SiteNav";
 import { MorphRouteSync } from "@/components/content/MorphImage";
 import { BackToTop } from "./BackToTop";
-import { navLabel, type TreeFile } from "@/app/lib/nav";
+import { useCatalogue } from "./CatalogueProvider";
 import { Explorer } from "./Explorer";
 import { EditorArea } from "./EditorArea";
 import { Tabs } from "./Tabs";
@@ -56,13 +56,12 @@ function EditorPane({ children }: { children: ReactNode }) {
 export function Shell({
   children,
   git,
-  blogFiles = [],
 }: {
   children: ReactNode;
   git: GitInfo;
-  blogFiles?: TreeFile[];
 }) {
   const pathname = usePathname();
+  const pageLabel = useCatalogue().label(pathname);
   const router = useRouter();
   const isMac = useIsMac();
   const { cmdkOpen, toggleCmdk, closeCmdk, termOpen, termMounted, toggleTerm, closeTerm } =
@@ -170,7 +169,7 @@ export function Shell({
                 event.currentTarget.focus();
                 toggleCmdk();
               }}
-              aria-label={`${navLabel(pathname)}, search files and posts`}
+              aria-label={`${pageLabel}, search files and posts`}
               aria-keyshortcuts="Meta+K Control+K"
             >
               <span className="ide-command-center-icon" aria-hidden="true">
@@ -179,14 +178,14 @@ export function Shell({
                   <line x1="11" y1="11" x2="14.5" y2="14.5" />
                 </svg>
               </span>
-              <span className="ide-command-center-label">{navLabel(pathname)}</span>
+              <span className="ide-command-center-label">{pageLabel}</span>
               <kbd className="ide-command-center-kbd" aria-hidden="true">{chord(isMac, ["mod"], "K")}</kbd>
             </button>
           </div>
         </div>
 
         <div className="flex flex-1 min-h-0">
-          <Explorer className="ide-explorer hidden md:flex" blogFiles={blogFiles} />
+          <Explorer className="ide-explorer hidden md:flex" />
 
           <div className="flex flex-1 min-w-0 flex-col min-h-0">
             <Tabs className="ide-tabs hidden md:flex" />
