@@ -3,16 +3,16 @@
 /* The two-pane split layout: the active route on the left, the dropped file's
    body (from the client registry) on the right, with a draggable divider. This
    is lazily imported by EditorArea — it's only needed once a file has been
-   dropped into a split, so SplitDivider and the split chrome stay out of the
+   dropped into a split, so the divider and the split chrome stay out of the
    initial-load bundle (the SSR snapshot is always single-pane). Desktop-only
    (md+); the left pane stays the real SSR'd route, so SEO is unchanged. */
 
 import { createElement, Suspense, useRef, type ReactNode, type CSSProperties } from "react";
 import { FileIcon } from "./FileIcon";
 import { useCatalogue } from "./CatalogueProvider";
-import { closeRight, setLeftFraction } from "./splitStore";
+import { closeRight, setLeftFraction, MIN_FRACTION, MAX_FRACTION } from "./splitStore";
 import { paneFor } from "./paneRegistry";
-import { SplitDivider } from "./SplitDivider";
+import { ResizeHandle } from "./ResizeHandle";
 
 export function SplitView({
   rightHref,
@@ -53,11 +53,25 @@ export function SplitView({
       style={{ "--lf": leftFraction } as CSSProperties}
       data-editor-root
     >
-      <div ref={primaryPaneRef} className="ide-split-left flex-1 md:min-h-0 md:overflow-y-auto" data-editor-scroll>
+      <div ref={primaryPaneRef} id="ide-split-left" className="ide-split-left flex-1 md:min-h-0 md:overflow-y-auto" data-editor-scroll>
         {children}
       </div>
 
-      <SplitDivider containerRef={containerRef} fraction={leftFraction} onCommit={setLeftFraction} />
+      {/* The left pane's share as a percentage: 2% per key, like before. */}
+      <ResizeHandle
+        label="Resize split editor"
+        className="ide-split-divider"
+        controls="ide-split-left"
+        orientation="vertical"
+        pane="before"
+        value={leftFraction * 100}
+        min={MIN_FRACTION * 100}
+        max={MAX_FRACTION * 100}
+        step={2}
+        unitsPerPx={() => 100 / (containerRef.current?.getBoundingClientRect().width || Infinity)}
+        preview={(percent) => containerRef.current?.style.setProperty("--lf", String(percent / 100))}
+        commit={(percent) => setLeftFraction(percent / 100)}
+      />
 
       <div className="ide-split-right hidden min-w-0 flex-1 md:flex md:min-h-0 md:flex-col">
         <div className="ide-split-pane-header">

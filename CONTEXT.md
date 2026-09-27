@@ -17,3 +17,6 @@ Terms used when reasoning about this site's structure. Code and reviews use thes
   declared order.
 - **Indexable page**: a page listed in the sitemap. Pages are indexable unless they opt
   out.
+- **Resize handle**: a draggable, keyboard-operable separator that sizes part of the shell:
+  the explorer width, the terminal height, or the split divider. One module owns its
+  lifecycle; only a release commits, and any interruption rolls back.
