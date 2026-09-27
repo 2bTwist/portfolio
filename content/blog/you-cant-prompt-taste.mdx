@@ -1,0 +1,94 @@
+---
+title: "You can't prompt taste"
+date: "2026-09-27"
+summary: "An LLM can build something that looks right from far away, but it can't feel it. Taste has to come from you: engage with what you're building, be the one driving, and use the LLM as the powerful tool it is, not as a replacement for your own judgment."
+tags: ["craft", "ai", "design"]
+image: "/images/blog/you-cant-prompt-taste-bw.png"
+draft: false
+---
+
+I've used LLMs to design websites. I'd ask for a site for a business, or for some specific need, and what came back looked good. If you looked at it from far away, like a bird's eye view, it looked like a real site.
+
+Then I'd actually use it, and it was clear it didn't know what was going on. Buttons didn't work. The title was big in some places and normal in others. Some sections were just large for no reason. I would get frustrated, honestly angry at it, because I kept thinking "why don't you just know?"
+
+I had to sit down afterwards and figure out why that kept happening, and I landed on this: it can't know. You can't tell an LLM "know how I want this to look" or "this is how I want the page to feel." <Mark variant="bold">You must know how it should feel and dictate that specific feeling to the LLM, not leave the LLM to infer how it should feel for you.</Mark>
+
+Websites are just where I noticed it. The same thing shows up in any task, whether you're doing it with an LLM, with agents, or by yourself. And I think a lot of us are starting to forget that.
+
+## So what is taste?
+
+Taste gets defined in a lot of different ways depending on who you ask. In food or fashion it usually means personal preference, what you like. In design it often means an eye for aesthetics, like typography, spacing, and colour. In engineering people use it for knowing which abstractions and tradeoffs to pick. None of those are wrong.
+
+My understanding of taste is a bit different. Anything you make for people has a layer that isn't written down anywhere. In software it's the niceties in how you interact with it: how a button responds, how long you wait and what you see while you wait, whether things jump around. None of that is codified. It's an experience, and someone has to feel it to know if it's good.
+
+So for me, <Mark variant="bold">taste is the gap between something that feels like junk and something that feels over-engineered.</Mark> It's a bunch of well-intentioned, opinionated decisions, usually made because you've engaged with something like it before and felt its pain points, that come together into one cohesive thing that understands what using it should feel like.
+
+Good taste is also unique to every problem, so there's no checklist for it. But you can feel it. You can tell when something has been carefully crafted, the way you can tell something was made by a craftsman.
+
+## Why an LLM can't be your taste
+
+A lot of people are handing this part to LLMs right now. They generate the work, then ask an LLM to check it. I see it with front ends all the time: "go test my front end." It can check that the buttons work. It can't tell you whether the thing feels right.
+
+The easiest way I can explain why is with something most engineers already know: back ends and front ends. LLMs are good at back ends, and I think it's because a back end is how they already interact with software. They produce text, text turns into requests, and a back end is request and response, just strings and numbers. So an LLM can build one and test it too, because there's no other kind of experience involved. It's input and output.
+
+The front end is different. When you use what someone built, you don't receive a response, you feel it. An LLM can test that a button works on the page. You can't explain to it that the button flickering, or rendering late, causes friction and annoys you. It doesn't know what it means to click something and wait fifty milliseconds.
+
+And it's not really about back end versus front end. It's about whether the result gets judged by input and output, or by how a person experiences it. That second kind is everywhere: a doc someone has to read, an onboarding flow, a codebase another engineer has to live in.
+
+<Callout type="note">
+So when I say LLMs can't solve taste, I mean they can't understand the human experience. They can reason about it, but they can't experience it.
+</Callout>
+
+Agents are starting to use websites too. With <a href="https://webmachinelearning.github.io/webmcp/" target="_blank" rel="noreferrer noopener" className="txt-link">WebMCP</a>, a site can hand an agent its actions as tools to call directly, and designing for that is a different kind of design. I'm talking about building for humans. If a human is going to use what you make, you can't just slap an LLM on it to check it. You need to use it yourself and see how it feels.
+
+## Nobody can hand you taste
+
+This isn't only an LLM problem. It's the same with no AI involved at all, and I've noticed it in my own journey in CS.
+
+In school you get told things like: don't write N+1 queries, they're slow, just do it this way because it's standard practice. So you do it. But you haven't seen what it feels like when it's not optimized, so you don't really understand what the other side looks like. You know the rule, but only as a rule.
+
+Design is the same. I can tell you a page should load within a certain amount of time. But there are sites where taking a little longer is fine, because there's a good loading screen or you can see things coming together, and in that case you obviously won't follow the rule. You only know to break it if you've felt it.
+
+So I don't believe taste can be taught. People can tell you "this is how it's typically done," and that helps. But to actually get taste you have to experience it: engage, test, see what works and what doesn't, what feels okay and what doesn't. You can't slap an algorithm on it.
+
+That's also why an LLM and a junior engineer run into the same wall. Neither has the experience. The difference is you can go get it.
+
+## How I build taste
+
+These are the things I actually do, and you can start doing them today.
+
+### Put yourself in their shoes
+
+Before anything else, put yourself in the shoes of whoever is going to use what you're making, in their specific domain. What are they looking for? What do they need that they don't even know they need yet?
+
+### Get rid of your bias
+
+*Free yourself from the bias you've built up from everything you've used before.* I can't stress enough how important this is if you want to actually make things better. To build taste you need to know what good feels like, or at least what it shouldn't feel like. But a lot of us are used to a certain quality of software, and when that's normal, you stop being able to spot what bad looks like.
+
+### Go looking for good
+
+When's the last time you used an app and it felt good? Not the dopamine, but you actually enjoyed it and left feeling good. I'm crazy enough to say this on here: when that happens, I go back into the app, screenshot it, record it, and try to figure out why it felt good. What about this specific thing made me feel like, okay, this is a good piece of software? <Mark variant="highlight">Curiosity is primordial for taste.</Mark>
+
+### LLMs are a great A/B tester
+
+This is where LLMs actually shine. Sometimes you don't know yet what good should feel like, and that's fine. A/B test the shit out of everything. Pull out all the variables of the thing you're building, tweak them, move things around, and see what feels good and what doesn't. It used to take days to build three versions of something. Now it's easy, so there's no excuse not to try.
+
+The LLM builds the versions. You're the one who uses them and decides.
+
+I'll write another post on this, about my process for building <a href="/projects/cogito" className="txt-link">Cogito</a>, the iPhone app I'm working on, and how I've been using this there.
+
+## You're on an example right now
+
+Take a look around this site. I've spent a lot of time on it, and it's full of my taste. It's built to feel like a code editor, because that's where I spend my day. There's a command palette, a terminal with a few easter eggs, and themes you can switch without the whole page flashing. And underneath all of it, every page is still a normal page that works even with JavaScript turned off.
+
+<TryTheSite />
+
+You could point an LLM at this site and have it rebuild the same thing from scratch, and honestly it would do a pretty decent job. But there are specific, intentional things here that I thought about and changed because of interactions I've had with other software that I didn't like. That's what makes it mine. It's very opinionated, and an LLM wasn't going to come up with those opinions for me.
+
+## So what do you do?
+
+If you take one thing from this, let it be this: <Mark variant="bold">engage with what you're building.</Mark> Use it. Click through it. Feel where it's slow, where it's confusing, where it's annoying. Nobody else can do that part for you, and definitely not a model.
+
+<Mark variant="bold">Be the creator.</Mark> The LLM is not the creator. It's a tool, a very powerful one if you learn to harness it, but you're supposed to be at the front of the creativity. You're the one who has to pull out of the weights what your mind is already thinking of.
+
+So don't hand your mind over to the LLM. Take your time. Go find things that feel good and figure out why. Build five versions and throw four away. That's how you get taste, and it's the part you can't prompt.

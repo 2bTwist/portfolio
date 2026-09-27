@@ -353,6 +353,38 @@ body {
   background: var(--accent);
 }
 
+/* "Want to see one?" (components/mdx/TryTheSite.tsx): while the disclosure is
+   open, html[data-site-hint] lights the edge to drag (md+) or the compact
+   header's theme swatches. Only one of the two is ever on screen. */
+html[data-site-hint] .ide-resize-handle::after {
+  background: var(--accent);
+  box-shadow: 0 0 10px 1px var(--accent);
+  animation: siteHintPulse 1.6s ease-in-out infinite;
+}
+html[data-site-hint] .site-theme-swatch {
+  animation: siteHintRing 1.6s ease-in-out infinite;
+}
+/* A small left-to-right wave so the three squares read as one target. */
+html[data-site-hint] .site-theme-swatch:nth-child(2) { animation-delay: 0.15s; }
+html[data-site-hint] .site-theme-swatch:nth-child(3) { animation-delay: 0.3s; }
+@keyframes siteHintPulse {
+  0%, 100% { opacity: 0.35; }
+  50% { opacity: 1; }
+}
+@keyframes siteHintRing {
+  0%, 100% { transform: scale(1); box-shadow: 0 0 0 0 transparent; }
+  50% { transform: scale(1.18); box-shadow: 0 0 0 2px var(--surface), 0 0 0 4px var(--accent); }
+}
+@media (prefers-reduced-motion: reduce) {
+  html[data-site-hint] .ide-resize-handle::after,
+  html[data-site-hint] .site-theme-swatch {
+    animation: none;
+  }
+  html[data-site-hint] .site-theme-swatch {
+    box-shadow: 0 0 0 2px var(--surface), 0 0 0 4px var(--accent);
+  }
+}
+
 /* Shove-past-the-limit feedback: a quick shake + a dark speech bubble. */
 .ide-explorer--shake {
   animation: ideExplorerShake 0.4s cubic-bezier(0.36, 0.07, 0.19, 0.97);
@@ -1415,6 +1447,40 @@ button.ide-row {
 }
 .prose-content > * + * {
   margin-top: 1.15rem;
+}
+.try-site summary {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4em;
+  min-height: 2.25rem;
+  cursor: pointer;
+  color: var(--accent);
+  font-weight: 600;
+  list-style: none;
+}
+.try-site summary::-webkit-details-marker {
+  display: none;
+}
+.try-site summary::before {
+  content: "›";
+  display: inline-block;
+  transition: transform 150ms ease-out;
+}
+.try-site[open] summary::before {
+  transform: rotate(90deg);
+}
+.try-site > p {
+  margin-top: 0.4rem;
+}
+.try-site-wide {
+  display: none;
+}
+@media (min-width: 768px) {
+  .try-site-wide { display: block; }
+  .try-site-compact { display: none; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .try-site summary::before { transition: none; }
 }
 .prose-content h1,
 .prose-content h2,

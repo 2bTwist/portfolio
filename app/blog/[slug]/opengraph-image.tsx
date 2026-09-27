@@ -26,5 +26,6 @@ export default async function PostOgImage({ params }: { params: Promise<{ slug: 
     eyebrow: "BLOG",
     title: post.title,
     summary: post.summary,
+    art: post.image,
   });
 }

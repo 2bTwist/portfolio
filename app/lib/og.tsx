@@ -13,14 +13,26 @@ export const OG_CONTENT_TYPE = "image/png";
 
 const asset = (f: string) => readFileSync(join(process.cwd(), "app/og-assets", f));
 
+/* Banner art lives under public/. Satori cannot decode WebP ("u2 is not
+   iterable"), so only PNG/JPEG banners appear on the card; a WebP banner keeps
+   the text-only card. Save banners meant for sharing as PNG; next/image still
+   serves visitors an optimized AVIF/WebP. */
+const OG_ART_MIME: Record<string, string> = { png: "image/png", jpg: "image/jpeg", jpeg: "image/jpeg" };
+
+function ogArtDataUrl(src: string): string | null {
+  const mime = OG_ART_MIME[src.split(".").pop()?.toLowerCase() ?? ""];
+  if (!mime) return null;
+  const data = readFileSync(join(process.cwd(), "public", src)).toString("base64");
+  return `data:${mime};base64,${data}`;
+}
+
 /* Clash Display tops out around 88px; long titles need to step down so they
    never clip the card. Tuned against the real post/project titles. */
-function titleSize(title: string): number {
+function titleSize(title: string, withArt: boolean): number {
   const n = title.length;
-  if (n <= 24) return 88;
-  if (n <= 40) return 70;
-  if (n <= 60) return 56;
-  return 46;
+  const size = n <= 24 ? 88 : n <= 40 ? 70 : n <= 60 ? 56 : 46;
+  /* The art takes the right third of the card, so the text column is narrower. */
+  return withArt ? Math.round(size * 0.78) : size;
 }
 
 export type OgCard = {
@@ -31,6 +43,8 @@ export type OgCard = {
   title: string;
   /* One-line description under the title (post summary / project blurb). */
   summary: string;
+  /* Optional banner art (public/ path), shown on the right of the card. */
+  art?: string;
 };
 
 /* Satori has no reliable multi-line clamp, so trim to a safe single-card
@@ -42,11 +56,12 @@ function clamp(text: string, max = 118): string {
   return `${cut.slice(0, lastSpace > 0 ? lastSpace : max).trimEnd()}…`;
 }
 
-export function renderOgCard({ tab, eyebrow, title, summary }: OgCard) {
+export function renderOgCard({ tab, eyebrow, title, summary, art }: OgCard) {
   const clash = asset("ClashDisplay-Bold.ttf");
   const satoshi = asset("Satoshi-Regular.ttf");
   const satoshiBold = asset("Satoshi-Bold.ttf");
   const mascot = `data:image/png;base64,${asset("mascot.png").toString("base64")}`;
+  const artSrc = art ? ogArtDataUrl(art) : null;
 
   const dot = (bg: string) => ({ width: 15, height: 15, borderRadius: 999, background: bg });
 
@@ -92,14 +107,15 @@ export function renderOgCard({ tab, eyebrow, title, summary }: OgCard) {
           </div>
 
           {/* Body */}
-          <div style={{ flex: 1, display: "flex", flexDirection: "column", padding: "46px 66px" }}>
+          <div style={{ flex: 1, display: "flex" }}>
+          <div style={{ flex: 1, display: "flex", flexDirection: "column", padding: artSrc ? "46px 20px 46px 66px" : "46px 66px" }}>
             <div style={{ fontSize: 26, letterSpacing: 4, color: "#a04c39", fontWeight: 700 }}>
               {eyebrow}
             </div>
             <div
               style={{
                 fontFamily: "Clash",
-                fontSize: titleSize(title),
+                fontSize: titleSize(title, !!artSrc),
                 color: "#463f33",
                 lineHeight: 1.08,
                 marginTop: 18,
@@ -109,15 +125,15 @@ export function renderOgCard({ tab, eyebrow, title, summary }: OgCard) {
             </div>
             <div
               style={{
-                fontSize: 28,
+                fontSize: artSrc ? 24 : 28,
                 color: "#726552",
                 lineHeight: 1.35,
-                marginTop: 20,
+                marginTop: artSrc ? 16 : 20,
                 maxWidth: 880,
                 display: "flex",
               }}
             >
-              {clamp(summary)}
+              {clamp(summary, artSrc ? 90 : 118)}
             </div>
 
             <div style={{ flex: 1 }} />
@@ -133,6 +149,13 @@ export function renderOgCard({ tab, eyebrow, title, summary }: OgCard) {
                 </div>
               </div>
             </div>
+          </div>
+          {artSrc ? (
+            <div style={{ width: 480, display: "flex", alignItems: "center", justifyContent: "center", paddingRight: 30 }}>
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src={artSrc} width={450} height={253} style={{ objectFit: "contain" }} alt="" />
+            </div>
+          ) : null}
           </div>
         </div>
       </div>
