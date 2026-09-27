@@ -20,6 +20,7 @@ import { TerminalIcon } from "@/components/feel/animated-icons";
 import { playNote, FUR_ELISE } from "@/components/feel/sound";
 import { BANNER } from "./banner";
 import { useOverlay, useSession } from "./store";
+import { ResizeHandle } from "./ResizeHandle";
 
 const PIANO_GIF = "/images/grand-piano.gif";
 const MEOW_GIF = "/images/meow-party.gif";
@@ -101,8 +102,8 @@ export default function Terminal() {
   const [cwd, setCwd] = useState<string[]>(sessionCwd);
   const inputRef = useRef<HTMLInputElement>(null);
   const outRef = useRef<HTMLDivElement>(null);
-  const handleRef = useRef<HTMLDivElement>(null);
-  const dragRef = useRef({ active: false, startY: 0, startH: 0, h: 0 });
+  const [height, setHeight] = useState(0);
+  const [maxHeight, setMaxHeight] = useState(0);
 
   // ── Typing-as-piano + spaced, varied quips + a finale ─────────────────────
   // Each printable keystroke plays the next Für Elise note. Quips are spaced out
@@ -249,65 +250,49 @@ export default function Terminal() {
     sessionCwd = cwd;
   }, [cwd]);
 
-  // Drag-to-resize the output height. Imperative (refs + direct DOM writes),
-  // never React state, so the drag tracks the pointer 1:1 — same pattern as the
-  // explorer handle. Height persists in localStorage.
+  // The output's height, sized by its ResizeHandle. Until someone sizes it, it
+  // grows with its output up to the CSS max-height, which is also the drag
+  // limit. The observer tracks that growth for the handle, except while that
+  // handle is dragging and writes the height itself.
   useEffect(() => {
-    const handle = handleRef.current;
     const out = outRef.current;
-    if (!handle || !out) return;
-    const maxH = () => Math.round(window.innerHeight * 0.7);
+    if (!out) return;
+    const cap = () => {
+      const max = Number.parseFloat(getComputedStyle(out).maxHeight);
+      return Number.isFinite(max) ? max : window.innerHeight;
+    };
+    const measureMax = () => setMaxHeight(cap());
     try {
       const saved = Number(localStorage.getItem(TERM_STORAGE));
-      if (saved >= TERM_MIN_H) out.style.height = `${Math.min(saved, maxH())}px`;
+      if (saved >= TERM_MIN_H) out.style.height = `${Math.min(saved, cap())}px`;
     } catch {
       // The terminal remains usable with its default height.
     }
-
-    const d = dragRef.current;
-    function onDown(e: PointerEvent) {
-      e.preventDefault();
-      d.active = true;
-      d.startY = e.clientY;
-      d.startH = out!.offsetHeight;
-      handle!.dataset.dragging = "true";
-      // Capture the pointer to the handle so an <iframe> (e.g. the resume PDF
-      // viewer) can't swallow pointermove/up mid-drag and leave it stuck.
-      // body[data-dragging] also shields iframes from pointer events (CSS).
-      handle!.setPointerCapture?.(e.pointerId);
-      document.body.dataset.dragging = "true";
-      // Show the (face-up) grabbing hand for the whole drag, even once the
-      // pointer leaves the thin handle.
-      const root = document.documentElement;
-      root.dataset.cursorGrabbing = "true";
-      root.dataset.cursorAxis = "y";
-    }
-    function onMove(e: PointerEvent) {
-      if (!d.active) return;
-      d.h = Math.max(TERM_MIN_H, Math.min(maxH(), d.startH + (d.startY - e.clientY)));
-      out!.style.height = `${d.h}px`;
-    }
-    function onUp() {
-      if (!d.active) return;
-      d.active = false;
-      delete handle!.dataset.dragging;
-      delete document.body.dataset.dragging;
-      delete document.documentElement.dataset.cursorGrabbing;
-      try {
-        localStorage.setItem(TERM_STORAGE, String(Math.round(out!.offsetHeight)));
-      } catch {
-        // Keep the resized height for this session.
-      }
-    }
-    handle.addEventListener("pointerdown", onDown);
-    window.addEventListener("pointermove", onMove, { passive: true });
-    window.addEventListener("pointerup", onUp, { passive: true });
+    // Fires once on observe, then whenever the output's size changes.
+    const observer = new ResizeObserver(() => {
+      measureMax();
+      const handle = document.querySelector('[aria-controls="ide-terminal-out"]');
+      if (!handle?.hasAttribute("data-dragging")) setHeight(out.offsetHeight);
+    });
+    observer.observe(out);
+    window.addEventListener("resize", measureMax);
     return () => {
-      handle.removeEventListener("pointerdown", onDown);
-      window.removeEventListener("pointermove", onMove);
-      window.removeEventListener("pointerup", onUp);
+      observer.disconnect();
+      window.removeEventListener("resize", measureMax);
     };
   }, []);
+
+  function previewHeight(h: number) {
+    if (outRef.current) outRef.current.style.height = `${h}px`;
+  }
+  function commitHeight(h: number) {
+    setHeight(h);
+    try {
+      localStorage.setItem(TERM_STORAGE, String(Math.round(h)));
+    } catch {
+      // Keep the resized height for this session.
+    }
+  }
 
   function print(text: string) {
     setLines((l) => [...l, { kind: "out", text }]);
@@ -471,12 +456,19 @@ export default function Terminal() {
         inputRef.current?.focus();
       }}
     >
-      <div
-        ref={handleRef}
+      <ResizeHandle
+        label="Resize terminal"
         className="ide-terminal-resize"
-        role="separator"
-        aria-orientation="horizontal"
-        aria-label="Resize terminal"
+        controls="ide-terminal-out"
+        orientation="horizontal"
+        pane="after"
+        value={height}
+        min={TERM_MIN_H}
+        max={Math.max(TERM_MIN_H, maxHeight)}
+        step={16}
+        unitsPerPx={() => 1}
+        preview={previewHeight}
+        commit={commitHeight}
       />
       {quip
         ? createPortal(
@@ -530,7 +522,7 @@ export default function Terminal() {
           ×
         </button>
       </div>
-      <div ref={outRef} className="ide-terminal-out">
+      <div ref={outRef} id="ide-terminal-out" className="ide-terminal-out">
         <pre className="ide-terminal-banner" aria-hidden="true">{BANNER}</pre>
         {lines.map((l, i) => (
           <div key={i} className="ide-terminal-line" data-kind={l.kind}>

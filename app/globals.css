@@ -1174,8 +1174,12 @@ button.ide-row {
   transition: var(--palette-transition, background 140ms ease-out);
 }
 .ide-terminal-resize:hover::after,
+.ide-terminal-resize:focus-visible::after,
 .ide-terminal-resize[data-dragging="true"]::after {
   background: var(--accent);
+}
+.ide-terminal-resize:focus-visible {
+  outline: none;
 }
 .ide-terminal-bar {
   display: flex;
