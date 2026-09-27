@@ -592,15 +592,33 @@ button.ide-row {
   color: var(--text);
 }
 /* Right-aligned resume actions in the tab bar: the fixed "hire me" bubble +
-   Download PDF. */
+   Download PDF. Pinned to the strip's right edge so, once enough tabs overflow
+   the bar, tabs scroll under it and the bubble grows leftward over them instead
+   of pushing Download PDF out of view. Stretches to full row height so its
+   background covers the tabs sliding beneath; the ::before fade softens that
+   edge. */
 .ide-tab-cta {
+  position: sticky;
+  right: 0;
   margin-left: auto;
-  align-self: center;
+  align-self: stretch;
   display: inline-flex;
   align-items: center;
   gap: 0.55rem;
   flex-shrink: 0;
-  padding-right: 0.4rem;
+  padding: 0 0.4rem 0 0.55rem;
+  background: var(--surface);
+  transition: var(--palette-transition, background 160ms ease-out);
+}
+.ide-tab-cta::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  right: 100%;
+  width: 1.25rem;
+  background: linear-gradient(to right, transparent, var(--surface));
+  pointer-events: none;
 }
 /* Fixed bubble next to Download PDF, tail pointing right at the button. */
 .ide-hire {
