@@ -1,11 +1,13 @@
 "use client";
 
-/* IDE shell state, split into two contexts so an overlay toggle never re-renders
-   the explorer/tabs (proven by perf/shell-render.test.tsx):
+/* IDE shell state, split so an overlay toggle never re-renders the
+   explorer/tabs (proven by perf/shell-render.test.tsx):
 
-   - SessionContext: palette (theme) + open tabs. Changes when you navigate or
-     switch theme. TabSessionContext gives navigation-only readers a stable
-     subscription when just the palette changes.
+   - Palette (theme): an external store, not context. The palette lives outside
+     React (inline vars on <body>, localStorage), so a switch is a plain DOM
+     write plus a re-render of the usePaletteIndex() subscribers.
+   - SessionContext: open tabs (plus the stable palette setter). Changes when
+     you navigate.
    - OverlayContext: the ⌘K palette / terminal open flags. Changes constantly as
      you open/close them.
 
@@ -14,8 +16,8 @@
    consumers untouched and vice-versa.
 
    State updates happen in event handlers, never synchronously inside effects —
-   that keeps the React Compiler hooks lint happy. The only effects update
-   external systems (the <body> CSS vars) or read storage once on mount. */
+   that keeps the React Compiler hooks lint happy. The only effect reads the
+   stored palette once on mount. */
 
 import {
   createContext,
@@ -24,6 +26,7 @@ import {
   useEffect,
   useMemo,
   useState,
+  useSyncExternalStore,
   type ReactNode,
 } from "react";
 import { usePathname, useRouter } from "next/navigation";
@@ -33,7 +36,6 @@ import { NAV } from "@/app/lib/nav";
 type Tab = { href: string; name: string };
 
 type Session = {
-  paletteIndex: number;
   setPaletteIndex: (i: number) => void;
   tabs: Tab[];
   openTab: (href: string) => void;
@@ -55,8 +57,6 @@ type Overlay = {
 };
 
 const SessionContext = createContext<Session | null>(null);
-type TabSession = Omit<Session, "paletteIndex" | "setPaletteIndex">;
-const TabSessionContext = createContext<TabSession | null>(null);
 const OverlayContext = createContext<Overlay | null>(null);
 
 export function useSession(): Session {
@@ -65,10 +65,9 @@ export function useSession(): Session {
   return ctx;
 }
 
-export function useTabSession(): TabSession {
-  const ctx = useContext(TabSessionContext);
-  if (!ctx) throw new Error("useTabSession must be used within <IdeProvider>");
-  return ctx;
+// The tab API alone, for readers that never touch the palette.
+export function useTabSession(): Omit<Session, "setPaletteIndex"> {
+  return useSession();
 }
 
 export function useOverlay(): Overlay {
@@ -79,6 +78,61 @@ export function useOverlay(): Overlay {
 
 const PALETTE_KEY = "ide.palette";
 
+/* --- palette: module store (see header) --- */
+let paletteIndex = DEFAULT_PALETTE_INDEX;
+const paletteListeners = new Set<() => void>();
+let paletteWrites = 0;
+
+// Write the palette vars onto <body> (overriding the server default inline
+// vars). The recolour is one page-wide restyle, so it stays out of the click:
+// the frame that paints it also restyles it, with palette transitions held off
+// until that frame is done. Persisting waits too; it is not needed to paint.
+function applyPalette(i: number) {
+  const entries = Object.entries(PALETTES[i].vars);
+  if (entries.every(([key, value]) => document.body.style.getPropertyValue(key) === value)) return;
+
+  // Only palette-sensitive transition declarations opt into this guard.
+  // Avoid injecting a universal stylesheet, which invalidates every selector.
+  document.body.style.setProperty("--palette-transition", "none");
+  for (const [key, value] of entries) {
+    document.body.style.setProperty(key, value);
+  }
+  // A timeout queued from a frame callback runs after that frame's style and
+  // paint. A newer switch owns the guard until its own frame has painted.
+  const write = ++paletteWrites;
+  requestAnimationFrame(() =>
+    setTimeout(() => {
+      if (write !== paletteWrites) return;
+      document.body.style.removeProperty("--palette-transition");
+      try {
+        localStorage.setItem(PALETTE_KEY, String(paletteIndex));
+      } catch {
+        /* private mode / disabled storage — non-fatal */
+      }
+    }, 0),
+  );
+}
+
+export function setPaletteIndex(i: number) {
+  if (!Number.isInteger(i) || !PALETTES[i]) return;
+  if (i !== paletteIndex) {
+    paletteIndex = i;
+    paletteListeners.forEach((listener) => listener());
+  }
+  applyPalette(i);
+}
+
+function subscribePalette(listener: () => void) {
+  paletteListeners.add(listener);
+  return () => {
+    paletteListeners.delete(listener);
+  };
+}
+
+export function usePaletteIndex(): number {
+  return useSyncExternalStore(subscribePalette, () => paletteIndex, () => DEFAULT_PALETTE_INDEX);
+}
+
 function tabFor(href: string): Tab | null {
   const item = NAV.find((n) => n.href === href);
   return item ? { href: item.href, name: item.name } : null;
@@ -88,7 +142,6 @@ function SessionProvider({ children }: { children: ReactNode }) {
   const pathname = usePathname();
   const router = useRouter();
 
-  const [paletteIndex, setPaletteIndexState] = useState(DEFAULT_PALETTE_INDEX);
   // Seed a tab for the route we land on (lazy init = same on server + first
   // client render, so no hydration mismatch). Further tabs open on navigation.
   const [tabs, setTabs] = useState<Tab[]>(() => {
@@ -97,8 +150,8 @@ function SessionProvider({ children }: { children: ReactNode }) {
   });
 
   // One-time palette hydration. The default is already server-rendered on
-  // <body>; if the user picked another, apply it after mount (rAF defers the
-  // setState out of the effect body and avoids a hydration mismatch).
+  // <body>; if the user picked another, apply it after mount (rAF keeps the
+  // subscriber update out of the effect body and avoids a hydration mismatch).
   useEffect(() => {
     let stored: number;
     try {
@@ -109,42 +162,8 @@ function SessionProvider({ children }: { children: ReactNode }) {
     if (!Number.isInteger(stored) || !PALETTES[stored] || stored === DEFAULT_PALETTE_INDEX) {
       return;
     }
-    const raf = requestAnimationFrame(() => setPaletteIndexState(stored));
+    const raf = requestAnimationFrame(() => setPaletteIndex(stored));
     return () => cancelAnimationFrame(raf);
-  }, []);
-
-  // Apply palette vars onto <body> (external-system update — overrides the
-  // server default inline vars).
-  useEffect(() => {
-    const vars = PALETTES[paletteIndex]?.vars;
-    if (!vars) return;
-    const entries = Object.entries(vars);
-    if (entries.every(([key, value]) => document.body.style.getPropertyValue(key) === value)) return;
-
-    // Only palette-sensitive transition declarations opt into this guard.
-    // Avoid injecting a universal stylesheet, which invalidates every selector.
-    document.body.style.setProperty("--palette-transition", "none");
-    for (const [key, value] of entries) {
-      document.body.style.setProperty(key, value);
-    }
-    // Commit the new styles while the guard is active, before restoring motion.
-    void getComputedStyle(document.body).backgroundColor;
-    const restoreTransitions = () => document.body.style.removeProperty("--palette-transition");
-    const timer = setTimeout(restoreTransitions, 0);
-    return () => {
-      clearTimeout(timer);
-      restoreTransitions();
-    };
-  }, [paletteIndex]);
-
-  const setPaletteIndex = useCallback((i: number) => {
-    if (!Number.isInteger(i) || !PALETTES[i]) return;
-    setPaletteIndexState(i);
-    try {
-      localStorage.setItem(PALETTE_KEY, String(i));
-    } catch {
-      /* private mode / disabled storage — non-fatal */
-    }
   }, []);
 
   const openTab = useCallback((href: string) => {
@@ -189,22 +208,12 @@ function SessionProvider({ children }: { children: ReactNode }) {
     router.push("/");
   }, [router]);
 
-  // Navigation readers do not need to re-render for a palette update. Keep
-  // their subscription stable while the same provider continues to own both.
-  const tabSession = useMemo(
-    () => ({ tabs, openTab, closeTab, closeOthers, closeAll }),
+  const session = useMemo(
+    () => ({ tabs, openTab, closeTab, closeOthers, closeAll, setPaletteIndex }),
     [tabs, openTab, closeTab, closeOthers, closeAll],
   );
 
-  return (
-    <SessionContext.Provider
-      value={{ paletteIndex, setPaletteIndex, ...tabSession }}
-    >
-      <TabSessionContext.Provider value={tabSession}>
-        {children}
-      </TabSessionContext.Provider>
-    </SessionContext.Provider>
-  );
+  return <SessionContext.Provider value={session}>{children}</SessionContext.Provider>;
 }
 
 function OverlayProvider({ children }: { children: ReactNode }) {

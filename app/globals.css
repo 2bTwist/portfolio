@@ -2271,7 +2271,7 @@ button.ide-row {
    as a wave. No rotation. */
 .claude-spoke {
   transform-box: view-box;
-  transform-origin: 50% 50%; /* burst centre of the 248 viewBox */
+  transform-origin: 50% 50%; /* burst centre of the 24 viewBox */
 }
 .stack-item:hover .claude-spoke {
   animation: claude-spoke 1.25s ease-in-out infinite;

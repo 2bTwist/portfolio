@@ -6,7 +6,7 @@
    unambiguous; each caller passes its own swatch class for sizing. */
 
 import { PALETTES } from "@/app/lib/palette";
-import { useSession } from "./store";
+import { setPaletteIndex, usePaletteIndex } from "./store";
 
 export function ThemeSwatches({
   className = "",
@@ -15,7 +15,7 @@ export function ThemeSwatches({
   className?: string;
   swatchClassName: string;
 }) {
-  const { paletteIndex, setPaletteIndex } = useSession();
+  const paletteIndex = usePaletteIndex();
 
   return (
     <div className={className} role="group" aria-label="Theme">

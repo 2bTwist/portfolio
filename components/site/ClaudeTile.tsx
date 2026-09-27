@@ -60,7 +60,7 @@ export function ClaudeTile() {
   return (
     <li className="stack-item stack-item--claude" onPointerEnter={start} onPointerLeave={stop}>
       <span className="stack-tile" style={{ "--logo": color } as CSSProperties}>
-        <ClaudeBurst color={color} />
+        <ClaudeBurst color={color} animated={word !== null} />
       </span>
       {/* The animated dots are a CSS ::after so the gradient shimmer clips over
           the word AND the dots as one piece of text. */}
