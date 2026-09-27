@@ -26,7 +26,7 @@ export const STATIC_ENTRIES: CatalogueEntry[] = [
     label: p.label,
     kind: "page" as const,
     listed: p.listed,
-    indexable: !("noindex" in p),
+    indexable: !("noindex" in p && p.noindex),
   })),
   ...PROJECTS.map((p) => ({
     href: `/projects/${p.id}`,

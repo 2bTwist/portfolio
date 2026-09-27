@@ -1,5 +1,5 @@
 /* Blog data layer (Phase 4). Reads MDX files from content/blog at build time
-   (server-only: uses fs). Lives alongside nav.ts / palette.ts. NOTE: never
+   (server-only: uses fs). Feeds the page catalogue (catalogue.ts). NOTE: never
    import this from a client module — fs is server-only. The client search index
    gets post data over the wire via /search-index.json instead. */
 

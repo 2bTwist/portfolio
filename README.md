@@ -52,7 +52,7 @@ pnpm e2e         # accessibility invariants
 ## Project structure
 
 ```
-app/            App Router routes + lib (nav, posts, git, palette)
+app/            App Router routes + lib (catalogue, posts, git, palette)
 components/     IDE shell (ide/), content primitives, feel/ (sound, cursor)
 content/blog/   MDX posts
 data/           pages, projects, experience, skills, certs, profile

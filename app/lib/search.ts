@@ -12,6 +12,7 @@
    `score` (lower = better) so results merge into one intuitive ranked list. */
 
 import Fuse from "fuse.js";
+import { PAGES } from "@/data/pages";
 import { PROJECTS } from "@/data/projects";
 import { STATIC_ENTRIES, listedEntries } from "./catalogue-view";
 import type { SearchDoc } from "@/app/search-index.json/route";
@@ -28,6 +29,9 @@ export type SearchResult = {
 // ---- Static index: listed catalogue pages + project content (no fetch) ----
 type StaticDoc = { kind: "file" | "folder" | "project"; name: string; href: string; sub: string; haystack: string };
 
+// The explorer's folders, so the palette marks the same pages as directories.
+const FOLDER_HREFS = new Set<string>(PAGES.flatMap((p) => (p.tree === "folder" ? [p.href] : [])));
+
 const projectByHref = new Map<string, (typeof PROJECTS)[number]>(
   PROJECTS.map((p) => [`/projects/${p.id}`, p]),
 );
@@ -43,8 +47,7 @@ const STATIC_DOCS: StaticDoc[] = listedEntries(STATIC_ENTRIES).map((e) => {
       haystack: `${e.label} ${proj.title} ${proj.blurb} ${proj.tags.join(" ")}`,
     };
   }
-  // A trailing slash marks a directory entry (e.g. "projects/").
-  const kind = e.label.endsWith("/") ? "folder" : "file";
+  const kind = FOLDER_HREFS.has(e.href) ? "folder" : "file";
   return { kind, name: e.label, href: e.href, sub: e.href, haystack: e.label };
 });
 
