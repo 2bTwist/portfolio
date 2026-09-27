@@ -67,6 +67,10 @@ module.exports = {
       url: [budgets.url],
     },
     assert: { preset: "lighthouse:no-pwa", assertions },
-    upload: { target: "temporary-public-storage" },
+    // Filesystem, not temporary-public-storage: that target gets a public URL
+    // ("accessible to anyone with the URL" per LHCI docs), which conflicts
+    // with this repo's telemetry-off, sends-nothing-off-box posture
+    // (react-doctor.yml). CI uploads lhci-results/ as a build artifact.
+    upload: { target: "filesystem", outputDir: "./lhci-results" },
   },
 };

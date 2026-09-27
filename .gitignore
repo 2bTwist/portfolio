@@ -44,6 +44,7 @@ next-env.d.ts
 /perf-results
 /test-results
 /playwright-report
+/lhci-results
 
 # stray
 .swift-version
