@@ -55,13 +55,15 @@ pnpm e2e         # accessibility invariants
 app/            App Router routes + lib (nav, posts, git, palette)
 components/     IDE shell (ide/), content primitives, feel/ (sound, cursor)
 content/blog/   MDX posts
-data/           projects, experience, skills, certs, profile
+data/           pages, projects, experience, skills, certs, profile
 tools/          perf-check CLI and gate engines
 e2e/            Playwright invariants + perf specs
 ```
 
 Content is data-driven: edit the files in `data/` and the MDX in `content/blog/`,
-and the routes, file tree, and search index follow.
+and the routes, file tree, and search index follow. A new top-level route also
+needs its entry in `data/pages.ts`, which places it in the sitemap and the phone
+nav (see `CONTEXT.md`).
 
 ## License
 

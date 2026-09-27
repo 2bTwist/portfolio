@@ -1,19 +1,17 @@
 /* Plain-site navigation: works with JS off, crawlable, content in ~1 click.
    This is the fallback path the design law requires. In Phase 2 the IDE shell
    (file-tree explorer) layers over this on desktop; this nav stays for mobile
-   and no-JS. Server component. */
+   and no-JS. Rendered inside the client Shell, and still server-rendered. */
 
 import Link from "next/link";
 import { profile } from "@/data/profile";
+import { PAGES } from "@/data/pages";
 import { ThemeSwatches } from "@/components/ide/ThemeSwatches";
 
-const LINKS = [
-  { href: "/", label: "README" },
-  { href: "/projects", label: "projects" },
-  { href: "/about", label: "about" },
-  { href: "/experience", label: "experience" },
-  { href: "/blog", label: "blog" },
-];
+// The compact subset each page declares in data/pages.ts, in its declared order.
+const LINKS = PAGES.flatMap((p) => (p.compact ? [{ href: p.href, ...p.compact }] : [])).sort(
+  (a, b) => a.order - b.order,
+);
 
 export function SiteNav() {
   return (
