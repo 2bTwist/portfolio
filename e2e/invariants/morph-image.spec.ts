@@ -71,7 +71,7 @@ test("shared image morph lands on stationary destinations in both directions", a
   await page.waitForFunction(() => (window as Window & { __morphDestinationSpans?: unknown[] }).__morphDestinationSpans?.length === 2);
 
   const spans = await page.evaluate(
-    () => (window as Window & { __morphDestinationSpans: {
+    () => (window as unknown as { __morphDestinationSpans: {
       minTop: number; maxTop: number; frameCount: number;
       cloneFinish: { left: number; top: number; width: number; height: number };
       destinationAfterFinish: { left: number; top: number; width: number; height: number };

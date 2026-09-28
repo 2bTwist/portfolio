@@ -13,7 +13,7 @@ function stubClipboard(writeText: ReturnType<typeof vi.fn>) {
 
 afterEach(() => {
   if (clipboardDescriptor) Object.defineProperty(navigator, "clipboard", clipboardDescriptor);
-  else delete (navigator as Navigator & { clipboard?: Clipboard }).clipboard;
+  else delete (navigator as { clipboard?: Clipboard }).clipboard;
 });
 
 describe("CopyButton", () => {
