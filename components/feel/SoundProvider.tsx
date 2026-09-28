@@ -37,6 +37,10 @@ function readReduced(): boolean {
 }
 const serverFalse = () => false;
 
+function toggleMuted() {
+  setPreference(PREFERENCES.soundMuted, !getPreference(PREFERENCES.soundMuted));
+}
+
 export function SoundProvider({ children }: { children: ReactNode }) {
   const muted = usePreference(PREFERENCES.soundMuted);
   const reduced = useSyncExternalStore(subscribeReduced, readReduced, serverFalse);
@@ -116,8 +120,7 @@ export function SoundProvider({ children }: { children: ReactNode }) {
     };
   }, [allowed]);
 
-  // React Compiler memoizes these; no useCallback needed.
-  const toggleMuted = () => setPreference(PREFERENCES.soundMuted, !getPreference(PREFERENCES.soundMuted));
+  // React Compiler memoizes this; no useCallback needed.
   // Imperative one-shot for sounds not tied to a delegated click (e.g. the
   // sidebar limit bonk). Respects the same mute / reduced gates.
   const play = (kind: keyof typeof sfx) => {

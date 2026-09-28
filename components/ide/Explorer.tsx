@@ -49,6 +49,14 @@ const COOLDOWN_MS = 8000;
 // render as rem so the sidebar grows with the large-monitor root scale in
 // globals.css, and drag deltas are divided by that scale to stay in base px.
 const widthRem = (px: number) => `${px / 16}rem`;
+// The width lives in a variable on <body> (globals.css), which the pre-paint
+// script also sets.
+function showWidth(px: number) {
+  document.body.style.setProperty("--explorer-width", widthRem(px));
+}
+function saveWidth(px: number) {
+  setPreference(PREFERENCES.explorerWidth, px);
+}
 const INDENT_REM = 0.85;
 const BASE_PAD_REM = 0.45;
 
@@ -114,7 +122,7 @@ export function Explorer({ className = "" }: { className?: string }) {
   useLayoutEffect(() => {
     const saved = getPreference(PREFERENCES.explorerWidth);
     if (saved !== PREFERENCES.explorerWidth.fallback && !document.body.style.getPropertyValue("--explorer-width")) {
-      document.body.style.setProperty("--explorer-width", widthRem(saved));
+      showWidth(saved);
     }
   }, []);
 
@@ -138,13 +146,6 @@ export function Explorer({ className = "" }: { className?: string }) {
     },
     [],
   );
-
-  function previewWidth(w: number) {
-    document.body.style.setProperty("--explorer-width", widthRem(w));
-  }
-  function commitWidth(w: number) {
-    setPreference(PREFERENCES.explorerWidth, w);
-  }
 
   function flash(msg: string, x: number, y: number) {
     setBubble({ msg, x, y });
@@ -212,8 +213,8 @@ export function Explorer({ className = "" }: { className?: string }) {
         step={16}
         // Widths are base px; the large-monitor root scale stretches each CSS px.
         unitsPerPx={() => 16 / (Number.parseFloat(getComputedStyle(document.documentElement).fontSize) || 16)}
-        preview={previewWidth}
-        commit={commitWidth}
+        preview={showWidth}
+        commit={saveWidth}
         onOvershoot={onOvershoot}
         locked={locked}
         onLockedPress={(at) => flash("🔒 you're on a timeout", at.x, at.y)}
