@@ -5,7 +5,6 @@
 import type { ReactNode } from "react";
 import Link from "next/link";
 import { TagIcon } from "./tagIcons";
-import { soundProps } from "@/components/feel/soundProps";
 
 export function PageHeader({
   title,
@@ -92,13 +91,13 @@ export function ActionLink({
   const external = href.startsWith("http");
   if (external) {
     return (
-      <a href={href} className={className} target="_blank" rel="noopener noreferrer" {...soundProps("press")}>
+      <a href={href} className={className} target="_blank" rel="noopener noreferrer" data-sound="press">
         {inner}
       </a>
     );
   }
   return (
-    <Link href={href} prefetch={false} className={className} {...soundProps("press")}>
+    <Link href={href} prefetch={false} className={className} data-sound="press">
       {inner}
     </Link>
   );

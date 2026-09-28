@@ -24,7 +24,7 @@ Terms used when reasoning about this site's structure. Code and reviews use thes
   mute, a seen flag). Each is declared once in the preferences module; storage is the
   host's, so a missing or invalid value means the default.
 - **Interface sound**: the click a control plays when pressed with a pointer (or, for
-  tiles, hovered). The control declares it with `soundProps`; the sound provider plays
+  tiles, hovered). The control declares it with a typed `data-sound` attribute; the sound provider plays
   the innermost declared one. Class names are styling only, and keyboard use is silent.
 - **Tour anchor**: a named part of the site a post can point readers at (the explorer's
   resize edge, the compact theme swatches). The owner declares it with `tourAnchor`; the

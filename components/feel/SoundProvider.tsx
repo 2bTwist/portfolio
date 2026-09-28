@@ -1,7 +1,7 @@
 "use client";
 
 /* Subtle UI sound layer. A single delegated listener plays the synthesized click
-   each control declares with soundProps (soundProps.ts), so server-rendered
+   each control declares with a data-sound attribute (soundAttributes.ts), so server-rendered
    components (the tactile button, the tiles) need no client wiring. Default ON, but the AudioContext
    only unlocks on the first user gesture, so nothing ever plays on page load.
    Muting persists; reduced-motion and reduced-data disable it entirely.
@@ -12,7 +12,7 @@
 
 import { createContext, useContext, useEffect, useSyncExternalStore, type ReactNode } from "react";
 import { sfx, warmupSound } from "./sound";
-import { hoverOwner, hoverSound, pressSound } from "./soundProps";
+import { hoverOwner, hoverSound, pressSound } from "./soundAttributes";
 import { PREFERENCES } from "@/app/lib/preferences";
 import { getPreference, setPreference, usePreference } from "@/components/hooks/usePreference";
 
@@ -73,7 +73,7 @@ export function SoundProvider({ children }: { children: ReactNode }) {
     };
     for (const ev of warmEvents) window.addEventListener(ev, warm, { passive: true });
 
-    // Controls declare their sounds (soundProps.ts); the innermost one plays.
+    // Controls declare their sounds (soundAttributes.ts); the innermost one plays.
     function onPointerDown(e: PointerEvent) {
       if (!(e.target instanceof Element)) return;
       const sound = pressSound(e.target);

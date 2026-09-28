@@ -10,7 +10,6 @@ import { useRouter } from "next/navigation";
 import { searchStatic, searchPosts, type SearchResult } from "@/app/lib/search";
 import { SearchIcon } from "@/components/feel/animated-icons";
 import { useOverlay, useTabSession } from "./store";
-import { soundProps } from "@/components/feel/soundProps";
 
 export default function CommandPalette() {
   const router = useRouter();
@@ -115,10 +114,10 @@ export default function CommandPalette() {
   }
 
   return (
-    <div className="ide-overlay" {...soundProps("close")} onClick={() => closeCmdk()}>
+    <div className="ide-overlay" data-sound="close" onClick={() => closeCmdk()}>
       <div
         className="ide-palette"
-        {...soundProps(null)}
+        data-sound="none"
         role="dialog"
         aria-modal="true"
         aria-label="Command palette"
@@ -151,7 +150,7 @@ export default function CommandPalette() {
               <button
                 type="button"
                 className="ide-palette-item"
-                {...soundProps("view")}
+                data-sound="view"
                 data-active={i === current}
                 tabIndex={-1}
                 onMouseMove={() => setActive(i)}

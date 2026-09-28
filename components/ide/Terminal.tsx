@@ -21,7 +21,6 @@ import { playNote, FUR_ELISE } from "@/components/feel/sound";
 import { BANNER } from "./banner";
 import { useOverlay, useSession } from "./store";
 import { ResizeHandle } from "./ResizeHandle";
-import { soundProps } from "@/components/feel/soundProps";
 import { PREFERENCES, loadPreference, savePreference } from "@/app/lib/preferences";
 
 const PIANO_GIF = "/images/grand-piano.gif";
@@ -509,7 +508,7 @@ export default function Terminal() {
         <button
           type="button"
           className="ide-tab-close ml-auto"
-          {...soundProps("close")}
+          data-sound="close"
           aria-label="Close terminal"
           onClick={() => closeTerm()}
         >

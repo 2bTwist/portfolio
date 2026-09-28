@@ -1,5 +1,4 @@
 import { profile } from "@/data/profile";
-import { soundProps } from "@/components/feel/soundProps";
 
 /* Social buttons for the hero. Brand marks are inlined SVG (not a Phosphor brand
    pack — those cost a few KB each in the always-loaded bundle). Server component:
@@ -37,7 +36,7 @@ export function SocialLinks({
           target="_blank"
           rel="noreferrer noopener"
           className="ide-social"
-          {...soundProps("pop")}
+          data-sound="pop"
         >
           <svg width="17" height="17" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
             <path d={s.path} />

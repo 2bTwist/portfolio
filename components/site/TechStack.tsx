@@ -8,7 +8,6 @@
 import type { CSSProperties } from "react";
 import { STACK_LOGOS, STACK_ORDER } from "./stackLogos";
 import { ClaudeTile } from "./ClaudeTile";
-import { soundProps } from "@/components/feel/soundProps";
 
 // front id → back id for the flip tiles
 const FLIP: Record<string, string> = {
@@ -58,7 +57,7 @@ export function TechStack({ className = "" }: { className?: string }) {
           <li key={id} className="stack-item">
             {back ? (
               <>
-                <span className="stack-tile stack-tile--flip" {...soundProps("press", "flip")}>
+                <span className="stack-tile stack-tile--flip" data-sound="press" data-sound-hover="flip">
                   <span className="stack-flip">
                     <Face id={id} side="front" />
                     <Face id={backId!} side="back" />
@@ -72,7 +71,7 @@ export function TechStack({ className = "" }: { className?: string }) {
               </>
             ) : (
               <>
-                <span className="stack-tile" style={{ "--logo": front.color } as CSSProperties} {...soundProps("press", "slide")}>
+                <span className="stack-tile" style={{ "--logo": front.color } as CSSProperties} data-sound="press" data-sound-hover="slide">
                   <Logo id={id} />
                 </span>
                 <span className="stack-name mono">{front.name}</span>

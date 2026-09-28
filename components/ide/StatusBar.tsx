@@ -13,7 +13,6 @@ import Link from "next/link";
 import { useOverlay } from "./store";
 import { ThemeSwatches } from "./ThemeSwatches";
 import { useSound } from "@/components/feel/SoundProvider";
-import { soundProps } from "@/components/feel/soundProps";
 import type { GitInfo } from "@/app/lib/git";
 
 const LINE_PX = 24; // approx reading line height — maps scroll depth → "line"
@@ -109,7 +108,7 @@ export function StatusBar({ className = "", git }: { className?: string; git: Gi
         <button
           type="button"
           className="ide-pill ide-pill--icon"
-          {...soundProps("open")}
+          data-sound="open"
           onClick={() => openTerm()}
           aria-label="Open terminal"
         >
@@ -122,7 +121,7 @@ export function StatusBar({ className = "", git }: { className?: string; git: Gi
         <button
           type="button"
           className="ide-pill ide-pill--icon"
-          {...soundProps("switch")}
+          data-sound="switch"
           aria-pressed={!muted}
           aria-label={muted ? "Unmute UI sounds" : "Mute UI sounds"}
           onClick={() => toggleMuted()}
@@ -139,7 +138,7 @@ export function StatusBar({ className = "", git }: { className?: string; git: Gi
         <Link
           href="/rss.xml"
           className="ide-pill ide-pill--icon"
-          {...soundProps("open")}
+          data-sound="open"
           aria-label="RSS feed"
           prefetch={false}
         >

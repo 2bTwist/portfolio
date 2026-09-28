@@ -9,7 +9,6 @@
 import { useEffect, useRef, useState } from "react";
 import type { CSSProperties } from "react";
 import { ClaudeBurst } from "./ClaudeBurst";
-import { soundProps } from "@/components/feel/soundProps";
 
 // Inlined so this client tile doesn't pull the whole stackLogos module (every
 // brand SVG path) into the client bundle just for Claude's colour + label.
@@ -60,7 +59,7 @@ export function ClaudeTile() {
 
   return (
     <li className="stack-item stack-item--claude" onPointerEnter={start} onPointerLeave={stop}>
-      <span className="stack-tile" style={{ "--logo": color } as CSSProperties} {...soundProps("press", "slide")}>
+      <span className="stack-tile" style={{ "--logo": color } as CSSProperties} data-sound="press" data-sound-hover="slide">
         <ClaudeBurst color={color} animated={word !== null} />
       </span>
       {/* The animated dots are a CSS ::after so the gradient shimmer clips over
