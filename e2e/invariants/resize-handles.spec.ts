@@ -1,6 +1,6 @@
 import { expect, test, type Locator, type Page } from "@playwright/test";
 
-/* Resize handles (specs/decisions/2026-09-27-resize-handle.md). For every handle in
+/* Resize handles (CONTEXT.md: resize handle). For every handle in
    the shell: a release commits and saves; an interruption rolls back, saves nothing,
    and leaves no page-wide drag state; the keyboard reaches the same values. */
 

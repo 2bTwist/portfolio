@@ -1,7 +1,7 @@
 import { expect, test } from "@playwright/test";
 import { PALETTES } from "../../app/lib/palette";
 
-/* Preferences (specs/decisions/2026-09-27-preferences.md): a returning visitor's saved
+/* Preferences (CONTEXT.md: preference): a returning visitor's saved
    palette and explorer width are in place from the first painted frame and still
    there once the page is interactive, on a hydrated page and on the 404 page, which
    React renders on the client. Each frame is sampled in requestAnimationFrame, which

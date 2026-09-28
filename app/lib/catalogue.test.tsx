@@ -17,7 +17,7 @@ import sitemap from "@/app/sitemap";
 import { PAGES } from "@/data/pages";
 import { SiteNav } from "@/components/site/SiteNav";
 
-/* Parity gate for the page catalogue (specs/decisions/2026-09-27-page-catalogue.md).
+/* Parity gate for the page catalogue (CONTEXT.md: page catalogue).
    Every route list is a view of the catalogue; these checks catch the drift
    that once dropped /music from the sitemap and gave blog posts no tab. */
 

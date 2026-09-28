@@ -3,9 +3,9 @@ import { PREFERENCES, loadPreference, savePreference, type Preference } from "@/
 import { PRE_PAINT_SCRIPT } from "@/app/lib/pre-paint";
 import { DEFAULT_PALETTE_INDEX, PALETTES } from "@/app/lib/palette";
 
-/* The preference definitions are the contract for browser-local state
-   (specs/decisions/2026-09-27-preferences.md). Every check here runs over every
-   definition, so a new key is covered the moment it is declared. */
+/* The preference definitions are the contract for browser-local state (AGENTS.md,
+   preference state contract). Every check here runs over every definition, so a new
+   key is covered the moment it is declared. */
 
 type Store = Pick<Storage, "getItem" | "setItem">;
 

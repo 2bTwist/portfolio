@@ -3,8 +3,7 @@ import { loadPreference, savePreference, type Preference } from "@/app/lib/prefe
 
 /* A preference as React state. The client reads it from storage once and then keeps
    it in memory; the server and hydration see the fallback. Setting it saves it and
-   re-renders its readers in this tab only: tabs do not sync
-   (specs/decisions/2026-09-27-preferences.md). */
+   re-renders its readers in this tab only: tabs do not sync. */
 
 // Keyed by the definition object itself.
 const values = new Map<object, unknown>();
