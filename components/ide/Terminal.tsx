@@ -21,6 +21,7 @@ import { playNote, FUR_ELISE } from "@/components/feel/sound";
 import { BANNER } from "./banner";
 import { useOverlay, useSession } from "./store";
 import { ResizeHandle } from "./ResizeHandle";
+import { PREFERENCES, loadPreference, savePreference } from "@/app/lib/preferences";
 
 const PIANO_GIF = "/images/grand-piano.gif";
 const MEOW_GIF = "/images/meow-party.gif";
@@ -28,8 +29,7 @@ const MEOW_GIF = "/images/meow-party.gif";
 type Line = { kind: "in" | "out"; text: string; prompt?: string };
 
 const STRIP_EXT = /\.(tsx?|md)$/;
-const TERM_MIN_H = 90;
-const TERM_STORAGE = "ide.terminal-height";
+const [TERM_MIN_H] = PREFERENCES.terminalHeight.range;
 const GREETING: Line = { kind: "out", text: "type `help` to get started" };
 const COMMANDS = ["help", "ls", "cd", "open", "cat", "pwd", "grep", "theme", "whoami", "clear"];
 
@@ -262,12 +262,8 @@ export default function Terminal() {
       return Number.isFinite(max) ? max : window.innerHeight;
     };
     const measureMax = () => setMaxHeight(cap());
-    try {
-      const saved = Number(localStorage.getItem(TERM_STORAGE));
-      if (saved >= TERM_MIN_H) out.style.height = `${Math.min(saved, cap())}px`;
-    } catch {
-      // The terminal remains usable with its default height.
-    }
+    const saved = loadPreference(PREFERENCES.terminalHeight);
+    if (saved !== null) out.style.height = `${Math.min(saved, cap())}px`;
     // Fires once on observe, then whenever the output's size changes.
     const observer = new ResizeObserver(() => {
       measureMax();
@@ -287,11 +283,7 @@ export default function Terminal() {
   }
   function commitHeight(h: number) {
     setHeight(h);
-    try {
-      localStorage.setItem(TERM_STORAGE, String(Math.round(h)));
-    } catch {
-      // Keep the resized height for this session.
-    }
+    savePreference(PREFERENCES.terminalHeight, h);
   }
 
   function print(text: string) {

@@ -19,7 +19,7 @@ import Link from "next/link";
 import dynamic from "next/dynamic";
 import { createPortal } from "react-dom";
 import { usePathname } from "next/navigation";
-import { useEffect, useRef, useState, useSyncExternalStore } from "react";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import type { TreeNode } from "@/app/lib/catalogue-view";
 import { useCatalogue } from "./CatalogueProvider";
 import { useMounted } from "@/components/hooks/useMounted";
@@ -28,6 +28,8 @@ import { FileIcon, FolderIcon } from "./FileIcon";
 import { useTabSession } from "./store";
 import { beginRowDrag, consumeSuppressClick } from "./rowDrag";
 import { ResizeHandle } from "./ResizeHandle";
+import { PREFERENCES } from "@/app/lib/preferences";
+import { getPreference, setPreference, usePreference } from "@/components/hooks/usePreference";
 import { scrollEditorTop } from "./scroll";
 
 // Lazy like the mobile dock's mount: ssr:false keeps the widget + player store
@@ -38,13 +40,11 @@ const NowPlayingCard = dynamic(
   { ssr: false },
 );
 
-const MIN_WIDTH = 170;
-const MAX_WIDTH = 300;
-const WON_MAX = 460; // once they "win", the cap relaxes
-const DEFAULT_WIDTH = 220;
+// The saved width is a preference; its range runs to the won cap.
+const [MIN_WIDTH, WON_MAX] = PREFERENCES.explorerWidth.range;
+const MAX_WIDTH = 300; // the cap until they "win"
 const SLOP = 28; // how far past the limit before the bouncer reacts
 const COOLDOWN_MS = 8000;
-const STORAGE_KEY = "ide:explorer-width";
 // Widths (limits, default, the saved value) are base px at a 16px root. They
 // render as rem so the sidebar grows with the large-monitor root scale in
 // globals.css, and drag deltas are divided by that scale to stay in base px.
@@ -61,22 +61,6 @@ const SCRIPT: { msg: string; lock?: boolean; won?: boolean }[] = [
   { msg: "back at this again? 🙄" },
   { msg: "okay, I give up. you win 🏳️", won: true },
 ];
-
-// The width saved on an earlier visit, read once per page load: null on the
-// server, and when nothing valid is saved.
-let savedWidth: number | null | undefined;
-function readSavedWidth(): number | null {
-  if (savedWidth === undefined) {
-    try {
-      const saved = Number(localStorage.getItem(STORAGE_KEY));
-      savedWidth = saved >= MIN_WIDTH && saved <= WON_MAX ? saved : null;
-    } catch {
-      savedWidth = null;
-    }
-  }
-  return savedWidth;
-}
-const neverChanges = () => () => {};
 
 function Chevron({ open }: { open: boolean }) {
   return (
@@ -106,17 +90,17 @@ export function Explorer({ className = "" }: { className?: string }) {
   const { play } = useSound();
   const { openTab } = useTabSession();
 
-  const saved = useSyncExternalStore(neverChanges, readSavedWidth, () => null);
-  const [committed, setCommitted] = useState<number | null>(null);
-  const width = committed ?? saved ?? DEFAULT_WIDTH;
-  const [beatBouncer, setBeatBouncer] = useState(false);
-  // A saved width only the won cap allows means they won on an earlier visit.
-  const won = beatBouncer || (saved !== null && saved > MAX_WIDTH);
+  // The committed width. The layout reads it from --explorer-width on <body>, which
+  // the pre-paint script sets from the saved width and drags write directly.
+  const width = usePreference(PREFERENCES.explorerWidth);
+  const [won, setWon] = useState(false);
+  // A width only the won cap allows means they won, on this visit or an earlier
+  // one; the win holds for the visit even if they narrow it again.
+  if (!won && width > MAX_WIDTH) setWon(true);
   const [locked, setLocked] = useState(false);
   const [shake, setShake] = useState(false);
   const [bubble, setBubble] = useState<{ msg: string; x: number; y: number } | null>(null);
 
-  const asideRef = useRef<HTMLElement>(null);
   const bubbleRef = useRef<HTMLDivElement>(null);
   const pushing = useRef(false); // one reaction per shove
   const step = useRef(0);
@@ -124,11 +108,15 @@ export function Explorer({ className = "" }: { className?: string }) {
   const shakeTimer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
   const coolTimer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
 
-  // The aside follows the committed width; a drag writes it directly in between
-  // (ResizeHandle's preview), so bouncer re-renders mid-drag never touch it.
-  useEffect(() => {
-    if (asideRef.current) asideRef.current.style.width = widthRem(width);
-  }, [width]);
+  // The saved width goes back before paint when React has rendered <body> on the
+  // client and dropped the variable (see restoreSavedPalette). The hook value is
+  // still the server's during hydration, so this reads the saved one directly.
+  useLayoutEffect(() => {
+    const saved = getPreference(PREFERENCES.explorerWidth);
+    if (saved !== PREFERENCES.explorerWidth.fallback && !document.body.style.getPropertyValue("--explorer-width")) {
+      document.body.style.setProperty("--explorer-width", widthRem(saved));
+    }
+  }, []);
 
   // Keep the bubble glued to the cursor while it shows.
   useEffect(() => {
@@ -152,15 +140,10 @@ export function Explorer({ className = "" }: { className?: string }) {
   );
 
   function previewWidth(w: number) {
-    if (asideRef.current) asideRef.current.style.width = widthRem(w);
+    document.body.style.setProperty("--explorer-width", widthRem(w));
   }
   function commitWidth(w: number) {
-    setCommitted(w);
-    try {
-      localStorage.setItem(STORAGE_KEY, String(Math.round(w)));
-    } catch {
-      // Resizing still works for this session without persistence.
-    }
+    setPreference(PREFERENCES.explorerWidth, w);
   }
 
   function flash(msg: string, x: number, y: number) {
@@ -182,7 +165,7 @@ export function Explorer({ className = "" }: { className?: string }) {
     setShake(true);
     clearTimeout(shakeTimer.current);
     shakeTimer.current = setTimeout(() => setShake(false), 420);
-    if (s.won) setBeatBouncer(true);
+    if (s.won) setWon(true);
     step.current = Math.min(step.current + 1, SCRIPT.length - 1);
     if (!s.lock) return false;
     pushing.current = false;
@@ -199,7 +182,6 @@ export function Explorer({ className = "" }: { className?: string }) {
 
   return (
     <aside
-      ref={asideRef}
       id="ide-explorer"
       className={`${className}${shake ? " ide-explorer--shake" : ""}`}
       aria-label="File explorer"

@@ -284,8 +284,9 @@ body {
   z-index: 10;
   flex-direction: column;
   /* 220px at the base scale; rem so it grows with the large-monitor root size
-     (Explorer.tsx keeps widths in base px and renders them as rem). */
-  width: 13.75rem;
+     (Explorer.tsx keeps widths in base px and renders them as rem). A saved width
+     arrives as --explorer-width on <body>, set before the first paint. */
+  width: var(--explorer-width, 13.75rem);
   flex-shrink: 0;
   padding: 0.5rem 0.35rem;
   border-right: 1px solid var(--border);

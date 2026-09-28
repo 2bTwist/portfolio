@@ -11,6 +11,7 @@ import { getGitInfo } from "@/app/lib/git";
 import { getContentEntries } from "@/app/lib/catalogue";
 import { CatalogueProvider } from "@/components/ide/CatalogueProvider";
 import { PALETTES, DEFAULT_PALETTE_INDEX } from "@/app/lib/palette";
+import { PRE_PAINT_SCRIPT } from "@/app/lib/pre-paint";
 import { clashDisplay, satoshi } from "@/app/fonts/fonts";
 import { SITE_URL } from "@/app/lib/site";
 import { profile } from "@/data/profile";
@@ -45,7 +46,8 @@ export const metadata: Metadata = {
 };
 
 // Default palette injected as inline CSS vars (server-rendered, no JS, not
-// pruned by Lightning CSS). The Phase 2 switcher overrides these client-side.
+// pruned by Lightning CSS). A saved palette overrides them before the first
+// paint (PRE_PAINT_SCRIPT), and the switcher after that.
 const paletteVars = PALETTES[DEFAULT_PALETTE_INDEX].vars as CSSProperties;
 
 export default function RootLayout({
@@ -56,7 +58,10 @@ export default function RootLayout({
   const git = getGitInfo();
   return (
     <html lang="en" className={`${clashDisplay.variable} ${satoshi.variable}`}>
-      <body style={{ ...paletteVars, background: "var(--bg)", color: "var(--text)" }}>
+      {/* The pre-paint script restyles <body> before hydration. */}
+      <body style={{ ...paletteVars, background: "var(--bg)", color: "var(--text)" }} suppressHydrationWarning>
+        {/* A saved palette and explorer width, applied to <body> before the first paint. */}
+        <script dangerouslySetInnerHTML={{ __html: PRE_PAINT_SCRIPT }} />
         {/* A note for anyone who reads the source. */}
         <div
           hidden
