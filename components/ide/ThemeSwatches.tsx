@@ -7,6 +7,7 @@
 
 import { PALETTES } from "@/app/lib/palette";
 import { setPaletteIndex, usePaletteIndex } from "./palette-store";
+import { soundProps } from "@/components/feel/soundProps";
 
 export function ThemeSwatches({
   className = "",
@@ -24,6 +25,7 @@ export function ThemeSwatches({
           key={p.name}
           type="button"
           className={swatchClassName}
+          {...soundProps("switch")}
           aria-label={`Theme: ${p.name}`}
           aria-pressed={i === paletteIndex}
           onClick={() => setPaletteIndex(i)}

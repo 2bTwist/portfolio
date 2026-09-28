@@ -1,8 +1,8 @@
 "use client";
 
-/* Subtle UI sound layer. A single delegated listener plays synthesized clicks
-   for interactive targets, so server-rendered components (the tactile button,
-   explorer rows) need no per-element wiring. Default ON, but the AudioContext
+/* Subtle UI sound layer. A single delegated listener plays the synthesized click
+   each control declares with soundProps (soundProps.ts), so server-rendered
+   components (the tactile button, the tiles) need no client wiring. Default ON, but the AudioContext
    only unlocks on the first user gesture, so nothing ever plays on page load.
    Muting persists; reduced-motion and reduced-data disable it entirely.
 
@@ -12,6 +12,7 @@
 
 import { createContext, useContext, useEffect, useSyncExternalStore, type ReactNode } from "react";
 import { sfx, warmupSound } from "./sound";
+import { hoverOwner, hoverSound, pressSound } from "./soundProps";
 import { PREFERENCES } from "@/app/lib/preferences";
 import { getPreference, setPreference, usePreference } from "@/components/hooks/usePreference";
 
@@ -36,6 +37,13 @@ function readReduced(): boolean {
   );
 }
 const serverFalse = () => false;
+
+// Every sound goes through here. The mark lets tests see which sound played
+// without audio; it writes nothing to the DOM.
+function emit(kind: keyof typeof sfx) {
+  performance.mark(`sound:${kind}`);
+  sfx[kind]();
+}
 
 function toggleMuted() {
   setPreference(PREFERENCES.soundMuted, !getPreference(PREFERENCES.soundMuted));
@@ -65,50 +73,21 @@ export function SoundProvider({ children }: { children: ReactNode }) {
     };
     for (const ev of warmEvents) window.addEventListener(ev, warm, { passive: true });
 
+    // Controls declare their sounds (soundProps.ts); the innermost one plays.
     function onPointerDown(e: PointerEvent) {
-      const t = e.target as Element | null;
-      if (!t?.closest) return;
-      const folder = t.closest<HTMLElement>(".ide-row[aria-expanded]");
-      if (t.closest(".btn")) {
-        sfx.press();
-      } else if (folder) {
-        // state-aware: an open folder is about to collapse, and vice-versa
-        if (folder.getAttribute("aria-expanded") === "true") sfx.close();
-        else sfx.open();
-      } else if (t.closest(".ide-tab-close")) {
-        sfx.close();
-      } else if (t.closest(".ide-swatch")) {
-        sfx.switch();
-      } else if (t.closest(".ide-social")) {
-        sfx.pop(); // cute boop on the social buttons
-      } else if (t.closest(".stack-tile")) {
-        sfx.press(); // tactile tock when an app-icon tile is pressed
-      } else if (t.closest(".ide-tab-action")) {
-        sfx.press(); // tab-bar action (e.g. Download PDF)
-      } else if (t.closest(".ide-row, .ide-tab, .ide-palette-item")) {
-        sfx.view();
-      } else if (t.closest(".ide-overlay")) {
-        // clicking the backdrop dismisses the palette
-        sfx.close();
-      } else if (t.closest<HTMLElement>(".ide-pill")) {
-        const pill = t.closest<HTMLElement>(".ide-pill")!;
-        // ⌘K / terminal pills open overlays; the mute pill is a switch
-        if (/mute|sound/i.test(pill.getAttribute("aria-label") || "")) sfx.switch();
-        else sfx.open();
-      }
+      if (!(e.target instanceof Element)) return;
+      const sound = pressSound(e.target);
+      if (sound) emit(sound);
     }
 
-    // Sliding the pointer across the tech-stack tiles ticks once per tile. We
-    // dedupe on the tile element so moving WITHIN a tile (e.g. over its logo) is
-    // silent, and leaving to the gap resets so re-entering ticks again.
-    let lastTile: Element | null = null;
+    // Hover sounds play once per element: moving within it (a tile's logo) is
+    // silent, and leaving to the gap resets, so re-entering plays again.
+    let lastOwner: Element | null = null;
     function onPointerOver(e: PointerEvent) {
-      const tile = (e.target as Element | null)?.closest?.(".stack-tile") ?? null;
-      if (tile === lastTile) return;
-      lastTile = tile;
-      // Flip tiles whoosh as they turn; the rest tick as you slide across.
-      if (tile?.classList.contains("stack-tile--flip")) sfx.flip();
-      else if (tile) sfx.slide();
+      const owner = e.target instanceof Element ? hoverOwner(e.target) : null;
+      if (owner === lastOwner) return;
+      lastOwner = owner;
+      if (owner) emit(hoverSound(owner));
     }
 
     document.addEventListener("pointerdown", onPointerDown);
@@ -124,7 +103,7 @@ export function SoundProvider({ children }: { children: ReactNode }) {
   // Imperative one-shot for sounds not tied to a delegated click (e.g. the
   // sidebar limit bonk). Respects the same mute / reduced gates.
   const play = (kind: keyof typeof sfx) => {
-    if (allowed) sfx[kind]();
+    if (allowed) emit(kind);
   };
 
   return <Ctx.Provider value={{ muted, toggleMuted, play }}>{children}</Ctx.Provider>;

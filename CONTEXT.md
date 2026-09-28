@@ -23,3 +23,6 @@ Terms used when reasoning about this site's structure. Code and reviews use thes
 - **Preference**: a browser-local setting the site saves in localStorage (palette, sizes,
   mute, a seen flag). Each is declared once in the preferences module; storage is the
   host's, so a missing or invalid value means the default.
+- **Interface sound**: the click a control plays when pressed with a pointer (or, for
+  tiles, hovered). The control declares it with `soundProps`; the sound provider plays
+  the innermost declared one. Class names are styling only, and keyboard use is silent.

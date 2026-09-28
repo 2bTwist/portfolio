@@ -31,6 +31,7 @@ import { ResizeHandle } from "./ResizeHandle";
 import { PREFERENCES } from "@/app/lib/preferences";
 import { getPreference, setPreference, usePreference } from "@/components/hooks/usePreference";
 import { scrollEditorTop } from "./scroll";
+import { soundProps } from "@/components/feel/soundProps";
 
 // Lazy like the mobile dock's mount: ssr:false keeps the widget + player store
 // chunk off the initial bundle (the size budget is tight); it renders null
@@ -317,6 +318,7 @@ function Node({
         // a file — without the upfront request storm.
         prefetch={false}
         className="ide-row"
+        {...soundProps("view")}
         style={pad}
         aria-current={active ? "page" : undefined}
         onPointerDown={(e) => beginRowDrag(e, node.href, node.name)}
@@ -356,6 +358,7 @@ function Node({
         // a file — without the upfront request storm.
         prefetch={false}
         className="ide-row"
+        {...soundProps("toggle")}
         style={pad}
         aria-expanded={open}
         aria-current={pathname === node.href ? "page" : undefined}

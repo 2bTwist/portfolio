@@ -17,6 +17,7 @@ import { useTabSession } from "./store";
 import { beginRowDrag, consumeSuppressClick } from "./rowDrag";
 import { useIsMac, chord } from "./keys";
 import { scrollEditorTop } from "./scroll";
+import { soundProps } from "@/components/feel/soundProps";
 
 type MenuState = { href: string; name: string; x: number; y: number } | null;
 
@@ -86,6 +87,7 @@ export function Tabs({ className = "" }: { className?: string }) {
             <div
               key={tab.href}
               className="ide-tab"
+              {...soundProps("view")}
               data-active={active}
               onPointerDown={(e) => beginRowDrag(e, tab.href, tab.name)}
               onContextMenu={(e) => {
@@ -115,6 +117,7 @@ export function Tabs({ className = "" }: { className?: string }) {
               <button
                 type="button"
                 className="ide-tab-close"
+                {...soundProps("close")}
                 aria-label={`Close ${tab.name}`}
                 onClick={() => closeTab(tab.href)}
               >
@@ -138,7 +141,7 @@ export function Tabs({ className = "" }: { className?: string }) {
               />
               <span className="ide-hire-text">you better hire me!</span>
             </span>
-            <a className="ide-tab-action" href="/resume/download">
+            <a className="ide-tab-action" href="/resume/download" {...soundProps("press")}>
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
                 <path d="M12 3v12" />
                 <path d="M7 11l5 5 5-5" />
