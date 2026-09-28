@@ -1,14 +1,17 @@
 /* Palette (theme) store. The palette lives outside React (inline vars on
-   <body>, localStorage), so it is a module store read with
+   <body>, a saved preference), so it is a module store read with
    useSyncExternalStore: a switch is a plain DOM write plus a re-render of the
-   usePaletteIndex() subscribers, not a context update. */
+   usePaletteIndex() subscribers, not a context update.
+
+   The client starts from the saved palette, which the pre-paint script has
+   already applied (app/lib/preferences.ts); the server and hydration see the
+   default, so the swatches catch up one render after the colours. */
 
 import { useSyncExternalStore } from "react";
 import { PALETTES, DEFAULT_PALETTE_INDEX } from "@/app/lib/palette";
+import { PREFERENCES, loadPreference, savePreference } from "@/app/lib/preferences";
 
-const PALETTE_KEY = "ide.palette";
-
-let paletteIndex = DEFAULT_PALETTE_INDEX;
+let paletteIndex = loadPreference(PREFERENCES.palette);
 const listeners = new Set<() => void>();
 let writes = 0;
 
@@ -33,13 +36,16 @@ function applyPalette(i: number) {
     setTimeout(() => {
       if (write !== writes) return;
       document.body.style.removeProperty("--palette-transition");
-      try {
-        localStorage.setItem(PALETTE_KEY, String(paletteIndex));
-      } catch {
-        /* private mode / disabled storage — non-fatal */
-      }
+      savePreference(PREFERENCES.palette, paletteIndex);
     }, 0),
   );
+}
+
+// Puts the saved palette back after React has rendered <body> on the client (an
+// error page, or a root that failed to hydrate), which drops the variables the
+// pre-paint script set. After a normal hydration they are in place: a no-op.
+export function restoreSavedPalette() {
+  applyPalette(paletteIndex);
 }
 
 export function setPaletteIndex(i: number) {
@@ -49,19 +55,6 @@ export function setPaletteIndex(i: number) {
     listeners.forEach((listener) => listener());
   }
   applyPalette(i);
-}
-
-// The stored choice, when it is a valid palette other than the server default.
-export function storedPaletteIndex(): number | null {
-  let stored: number;
-  try {
-    stored = Number(localStorage.getItem(PALETTE_KEY));
-  } catch {
-    return null;
-  }
-  return Number.isInteger(stored) && PALETTES[stored] && stored !== DEFAULT_PALETTE_INDEX
-    ? stored
-    : null;
 }
 
 function subscribe(listener: () => void) {

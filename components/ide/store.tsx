@@ -19,13 +19,13 @@
 import {
   createContext,
   useContext,
-  useEffect,
+  useLayoutEffect,
   useState,
   type ReactNode,
 } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { useCatalogue } from "./CatalogueProvider";
-import { setPaletteIndex, storedPaletteIndex } from "./palette-store";
+import { restoreSavedPalette, setPaletteIndex } from "./palette-store";
 
 type Tab = { href: string; name: string };
 
@@ -87,15 +87,8 @@ function SessionProvider({ children }: { children: ReactNode }) {
     return t ? [t] : [];
   });
 
-  // One-time palette hydration. The default is already server-rendered on
-  // <body>; if the user picked another, apply it after mount (rAF keeps the
-  // subscriber update out of the effect body and avoids a hydration mismatch).
-  useEffect(() => {
-    const stored = storedPaletteIndex();
-    if (stored === null) return;
-    const raf = requestAnimationFrame(() => setPaletteIndex(stored));
-    return () => cancelAnimationFrame(raf);
-  }, []);
+  // Before the first paint React makes: see restoreSavedPalette.
+  useLayoutEffect(() => restoreSavedPalette(), []);
 
   // React Compiler memoizes these handlers and the context values below.
   const openTab = (href: string) => {

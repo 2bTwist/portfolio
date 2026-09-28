@@ -13,6 +13,24 @@ const eslintConfig = defineConfig([
       "react-hooks/exhaustive-deps": "error",
     },
   },
+  // Browser storage goes through app/lib/preferences.ts, so every saved key is
+  // declared, validated, and tested in one place (AGENTS.md, preference contract).
+  {
+    files: ["app/**/*.{ts,tsx}", "components/**/*.{ts,tsx}"],
+    ignores: ["app/lib/preferences.ts", "**/*.test.*"],
+    rules: {
+      "no-restricted-globals": [
+        "error",
+        { name: "localStorage", message: "Declare a preference in app/lib/preferences.ts instead." },
+        { name: "sessionStorage", message: "Declare a preference in app/lib/preferences.ts instead." },
+      ],
+      "no-restricted-properties": [
+        "error",
+        { object: "window", property: "localStorage", message: "Declare a preference in app/lib/preferences.ts instead." },
+        { object: "window", property: "sessionStorage", message: "Declare a preference in app/lib/preferences.ts instead." },
+      ],
+    },
+  },
   // Override default ignores of eslint-config-next.
   globalIgnores([
     // Default ignores of eslint-config-next:
