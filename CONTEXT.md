@@ -20,3 +20,6 @@ Terms used when reasoning about this site's structure. Code and reviews use thes
 - **Resize handle**: a draggable, keyboard-operable separator that sizes part of the shell:
   the explorer width, the terminal height, or the split divider. One module owns its
   lifecycle; only a release commits, and any interruption rolls back.
+- **Preference**: a browser-local setting the site saves in localStorage (palette, sizes,
+  mute, a seen flag). Each is declared once in the preferences module; storage is the
+  host's, so a missing or invalid value means the default.

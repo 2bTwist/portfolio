@@ -12,29 +12,18 @@
      on release, so dragging never re-renders the panes. */
 
 import { useSyncExternalStore } from "react";
+import { PREFERENCES, loadPreference, savePreference } from "@/app/lib/preferences";
 
 export type SplitState = { rightHref: string | null; leftFraction: number };
 
-const RATIO_KEY = "ide-split-ratio";
-const DEFAULT_FRACTION = 0.5;
-export const MIN_FRACTION = 0.2;
-export const MAX_FRACTION = 0.8;
+const DEFAULT_FRACTION = PREFERENCES.splitRatio.fallback;
+export const [MIN_FRACTION, MAX_FRACTION] = PREFERENCES.splitRatio.range;
 
 const clampFraction = (f: number) => Math.min(MAX_FRACTION, Math.max(MIN_FRACTION, f));
 
 let state: SplitState = { rightHref: null, leftFraction: DEFAULT_FRACTION };
 const SERVER_STATE: SplitState = state;
 const listeners = new Set<() => void>();
-
-function readStoredFraction(): number {
-  if (typeof window === "undefined") return DEFAULT_FRACTION;
-  try {
-    const raw = Number(localStorage.getItem(RATIO_KEY));
-    return Number.isFinite(raw) && raw > 0 ? clampFraction(raw) : DEFAULT_FRACTION;
-  } catch {
-    return DEFAULT_FRACTION;
-  }
-}
 
 let hydratedFraction = false;
 function setState(patch: Partial<SplitState>) {
@@ -46,7 +35,7 @@ function subscribe(cb: () => void) {
   // Pull the persisted fraction in on the first client subscription.
   if (!hydratedFraction) {
     hydratedFraction = true;
-    const stored = readStoredFraction();
+    const stored = loadPreference(PREFERENCES.splitRatio);
     if (stored !== state.leftFraction) state = { ...state, leftFraction: stored };
   }
   listeners.add(cb);
@@ -68,11 +57,7 @@ export function closeRight() {
  *  pointerup; mid-drag is imperative and does not touch the store). */
 export function setLeftFraction(f: number) {
   const next = clampFraction(f);
-  try {
-    if (typeof window !== "undefined") localStorage.setItem(RATIO_KEY, String(next));
-  } catch {
-    // Persistence is optional; the released divider still updates this session.
-  }
+  savePreference(PREFERENCES.splitRatio, next);
   setState({ leftFraction: next });
 }
 

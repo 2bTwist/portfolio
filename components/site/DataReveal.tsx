@@ -10,8 +10,7 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import Link from "next/link";
-
-const SEEN_KEY = "data-reveal-seen";
+import { PREFERENCES, loadPreference, savePreference } from "@/app/lib/preferences";
 
 interface Row {
   label: string;
@@ -73,23 +72,13 @@ export function DataReveal() {
   const dialogRef = useRef<HTMLDivElement>(null);
 
   const dismiss = useCallback(() => {
-    try {
-      localStorage.setItem(SEEN_KEY, "1");
-    } catch {
-      /* private mode */
-    }
+    savePreference(PREFERENCES.dataRevealSeen, true);
     setGroups(null);
   }, []);
 
   // First-visit gate + deferred build. Runs once.
   useEffect(() => {
-    let seen = false;
-    try {
-      seen = localStorage.getItem(SEEN_KEY) === "1";
-    } catch {
-      seen = false;
-    }
-    if (seen) return;
+    if (loadPreference(PREFERENCES.dataRevealSeen)) return;
 
     let cancelled = false;
     const timer = window.setTimeout(async () => {

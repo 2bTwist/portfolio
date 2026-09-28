@@ -6,47 +6,17 @@
    only unlocks on the first user gesture, so nothing ever plays on page load.
    Muting persists; reduced-motion and reduced-data disable it entirely.
 
-   Mute + the media gates are external state, read via useSyncExternalStore so
-   there's no setState-in-effect (matches the codebase's react-compiler
-   discipline) and no hydration mismatch (server snapshot = sound on, not muted). */
+   Mute is a preference (app/lib/preferences.ts) and the media gates are external
+   state, both read via useSyncExternalStore so there's no setState-in-effect and no
+   hydration mismatch (server snapshot = sound on, not muted). */
 
 import { createContext, useContext, useEffect, useSyncExternalStore, type ReactNode } from "react";
 import { sfx, warmupSound } from "./sound";
+import { PREFERENCES } from "@/app/lib/preferences";
+import { getPreference, setPreference, usePreference } from "@/components/hooks/usePreference";
 
 type SoundCtx = { muted: boolean; toggleMuted: () => void; play: (kind: keyof typeof sfx) => void };
 const Ctx = createContext<SoundCtx | null>(null);
-
-const STORAGE_KEY = "sound-muted";
-
-/* --- muted: persisted, locally mutable external store --- */
-let mutedValue: boolean | null = null;
-const mutedListeners = new Set<() => void>();
-
-function readMuted(): boolean {
-  if (mutedValue === null) {
-    try {
-      mutedValue = typeof window !== "undefined" && localStorage.getItem(STORAGE_KEY) === "1";
-    } catch {
-      mutedValue = false;
-    }
-  }
-  return mutedValue;
-}
-function writeMuted(next: boolean) {
-  mutedValue = next;
-  try {
-    if (typeof window !== "undefined") localStorage.setItem(STORAGE_KEY, next ? "1" : "0");
-  } catch {
-    // Keep the current session usable when browser storage is unavailable.
-  }
-  mutedListeners.forEach((l) => l());
-}
-function subscribeMuted(cb: () => void) {
-  mutedListeners.add(cb);
-  return () => {
-    mutedListeners.delete(cb);
-  };
-}
 
 /* --- reduced motion / data external store --- */
 function subscribeReduced(cb: () => void) {
@@ -68,7 +38,7 @@ function readReduced(): boolean {
 const serverFalse = () => false;
 
 export function SoundProvider({ children }: { children: ReactNode }) {
-  const muted = useSyncExternalStore(subscribeMuted, readMuted, serverFalse);
+  const muted = usePreference(PREFERENCES.soundMuted);
   const reduced = useSyncExternalStore(subscribeReduced, readReduced, serverFalse);
   const allowed = !muted && !reduced;
 
@@ -147,7 +117,7 @@ export function SoundProvider({ children }: { children: ReactNode }) {
   }, [allowed]);
 
   // React Compiler memoizes these; no useCallback needed.
-  const toggleMuted = () => writeMuted(!readMuted());
+  const toggleMuted = () => setPreference(PREFERENCES.soundMuted, !getPreference(PREFERENCES.soundMuted));
   // Imperative one-shot for sounds not tied to a delegated click (e.g. the
   // sidebar limit bonk). Respects the same mute / reduced gates.
   const play = (kind: keyof typeof sfx) => {
