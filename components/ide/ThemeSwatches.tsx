@@ -12,14 +12,17 @@ import { soundProps } from "@/components/feel/soundProps";
 export function ThemeSwatches({
   className = "",
   swatchClassName,
+  ...data
 }: {
   className?: string;
   swatchClassName: string;
+  /* Passed through to the group, such as a tour anchor. */
+  [attribute: `data-${string}`]: string;
 }) {
   const paletteIndex = usePaletteIndex();
 
   return (
-    <div className={className} role="group" aria-label="Theme">
+    <div className={className} role="group" aria-label="Theme" {...data}>
       {PALETTES.map((p, i) => (
         <button
           key={p.name}

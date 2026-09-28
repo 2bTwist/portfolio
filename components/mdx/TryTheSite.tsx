@@ -2,19 +2,20 @@
 
 import { useEffect, useState, type SyntheticEvent } from "react";
 import { useMounted } from "@/components/hooks/useMounted";
+import { tourSelector } from "@/components/site/tour";
 
 /* In-post disclosure that points the reader at a piece of the site's own taste.
    A native <details>, so it opens and reads fine with JS off; CSS picks the copy
    for the current layout (sidebar at md+, compact header below), so crossing
    the breakpoint needs no JS either.
 
-   With JS, opening it lights up the matching target through one attribute on
-   <html>: the explorer's resize edge (drag it past its limit to meet the
-   bouncer) or the compact header's theme swatches, which stay in view because
+   With JS, opening it lights up the matching tour anchor (tour.ts) through one
+   attribute on <html>: the explorer's resize edge (drag it past its limit to meet
+   the bouncer) or the compact header's theme swatches, which stay in view because
    that header is sticky. The hint clears as soon as the reader touches either
    target, closes the disclosure, or leaves the page. */
 
-const TARGETS = ".ide-resize-handle, .site-theme-swatch";
+const TARGETS = tourSelector("explorer-edge", "themes");
 
 export function TryTheSite() {
   const mounted = useMounted();

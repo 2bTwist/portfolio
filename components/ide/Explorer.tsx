@@ -32,6 +32,7 @@ import { PREFERENCES } from "@/app/lib/preferences";
 import { getPreference, setPreference, usePreference } from "@/components/hooks/usePreference";
 import { scrollEditorTop } from "./scroll";
 import { soundProps } from "@/components/feel/soundProps";
+import { tourAnchor } from "@/components/site/tour";
 
 // Lazy like the mobile dock's mount: ssr:false keeps the widget + player store
 // chunk off the initial bundle (the size budget is tight); it renders null
@@ -205,6 +206,7 @@ export function Explorer({ className = "" }: { className?: string }) {
       <ResizeHandle
         label="Resize file explorer"
         className="ide-resize-handle"
+        {...tourAnchor("explorer-edge")}
         controls="ide-explorer"
         orientation="vertical"
         pane="before"

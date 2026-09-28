@@ -26,3 +26,6 @@ Terms used when reasoning about this site's structure. Code and reviews use thes
 - **Interface sound**: the click a control plays when pressed with a pointer (or, for
   tiles, hovered). The control declares it with `soundProps`; the sound provider plays
   the innermost declared one. Class names are styling only, and keyboard use is silent.
+- **Tour anchor**: a named part of the site a post can point readers at (the explorer's
+  resize edge, the compact theme swatches). The owner declares it with `tourAnchor`; the
+  post and its styles select on the name, never on the owner's classes.

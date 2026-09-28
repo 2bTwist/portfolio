@@ -373,13 +373,13 @@ body {
 
 /* "Want to see one?" (components/mdx/TryTheSite.tsx): while the disclosure is
    open, html[data-site-hint] marks the edge to drag (md+) or the compact
-   header's theme swatches. Only one of the two is ever on screen. One motion
+   header's theme swatches, by their tour anchors (components/site/tour.ts). Only one of the two is ever on screen. One motion
    to catch the eye, then a still marker until the reader acts: no loop, no
    glow.
 
    The edge shows its own hover state (the accent rail), drawn down once so
    the reader sees exactly the line they will grab. */
-html[data-site-hint] .ide-resize-handle::after {
+html[data-site-hint] [data-tour="explorer-edge"]::after {
   background: var(--accent);
   /* ease-in-out, not ease-out: a strong ease-out finishes this 800px line in
      under 100ms, so the draw read as a flash instead of travel. */
@@ -391,10 +391,10 @@ html[data-site-hint] .ide-resize-handle::after {
 }
 /* One outline around the three squares, so they read as a single target. It
    leaves the way it arrived when the hint clears. */
-.site-theme {
+[data-tour="themes"] {
   position: relative;
 }
-.site-theme::after {
+[data-tour="themes"]::after {
   content: "";
   position: absolute;
   inset: -5px 0;
@@ -407,15 +407,15 @@ html[data-site-hint] .ide-resize-handle::after {
     opacity 200ms cubic-bezier(0.23, 1, 0.32, 1),
     transform 200ms cubic-bezier(0.23, 1, 0.32, 1);
 }
-html[data-site-hint] .site-theme::after {
+html[data-site-hint] [data-tour="themes"]::after {
   opacity: 1;
   transform: none;
 }
 @media (prefers-reduced-motion: reduce) {
-  html[data-site-hint] .ide-resize-handle::after {
+  html[data-site-hint] [data-tour="explorer-edge"]::after {
     animation: none;
   }
-  .site-theme::after {
+  [data-tour="themes"]::after {
     transform: none;
     transition: opacity 200ms ease;
   }

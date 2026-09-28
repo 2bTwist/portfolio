@@ -42,6 +42,9 @@ export type ResizeHandleProps = {
   /* A locked handle ignores the pointer (keys still work); onLockedPress hears the attempt. */
   locked?: boolean;
   onLockedPress?: (at: Point) => void;
+} & {
+  /* Passed through to the element, such as a tour anchor. */
+  [attribute: `data-${string}`]: string;
 };
 
 // One resize at a time across every handle: each drag restores the page state
@@ -58,6 +61,7 @@ export function ResizeHandle(props: ResizeHandleProps) {
   const { label, className, controls, orientation, pane, value, min, max, step, preview, commit, locked = false } = props;
   const ref = useRef<HTMLDivElement>(null);
   const axis = orientation === "vertical" ? "x" : "y";
+  const data = Object.fromEntries(Object.entries(props).filter(([key]) => key.startsWith("data-")));
   // Listeners live for the whole mount; this reads the current render's props.
   const latest = useEffectEvent(() => props);
 
@@ -199,6 +203,7 @@ export function ResizeHandle(props: ResizeHandleProps) {
       aria-valuenow={Math.round(value)}
       aria-valuemin={Math.round(min)}
       aria-valuemax={Math.round(max)}
+      {...data}
       data-resize-axis={axis}
       data-locked={locked}
       onKeyDown={onKeyDown}
