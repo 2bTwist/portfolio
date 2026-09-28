@@ -35,6 +35,7 @@ Run the smallest relevant check while working, then the applicable repository ga
 
 ```sh
 pnpm lint
+pnpm typecheck
 pnpm test
 pnpm build
 pnpm size
