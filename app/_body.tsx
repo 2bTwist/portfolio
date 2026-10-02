@@ -17,7 +17,7 @@ export function HomeBody() {
     <PageShell width="wide">
       <header className="hero">
         <div className="hero-copy">
-          <h1 className="display text-5xl sm:text-6xl font-bold" style={{ color: "var(--text)" }}>
+          <h1 className="display text-5xl sm:text-6xl font-bold" style={{ color: "var(--text-strong)" }}>
             {profile.name}
           </h1>
           <p className="mono mt-2" style={{ color: "var(--accent)" }}>

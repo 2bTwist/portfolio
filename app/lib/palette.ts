@@ -7,9 +7,9 @@
    Latte / Frappe are kept for the Phase 2 switcher and get the same treatment
    when switching returns.
 
-   --prose-text / --prose-strong are the reading inks for article bodies
-   (.prose-content): a step deeper than --text so long-form copy and headings
-   stand off the tinted page instead of blending into it. */
+   --text and --muted are set a step deeper than the prototype so long-form copy
+   stands off the tinted page instead of blending into it; --text-strong is the
+   heading and emphasis ink above them. */
 
 export type Palette = {
   name: string;
@@ -24,10 +24,9 @@ export const PALETTES: Palette[] = [
     vars: {
       "--bg": "#f3ecdd",
       "--surface": "#fbf6ea",
-      "--text": "#463f33",
-      "--muted": "#726552",
-      "--prose-text": "#3a3329",
-      "--prose-strong": "#221d16",
+      "--text": "#3a3329",
+      "--text-strong": "#221d16",
+      "--muted": "#5f5343",
       "--accent": "#a04c39",
       "--accent-press": "#823c2c",
       "--on-accent": "#fdf6ee",
@@ -47,10 +46,9 @@ export const PALETTES: Palette[] = [
     vars: {
       "--bg": "#eef1f5",
       "--surface": "#ffffff",
-      "--text": "#4c4f69",
-      "--muted": "#66697e",
-      "--prose-text": "#3a3d54",
-      "--prose-strong": "#1e2030",
+      "--text": "#3a3d54",
+      "--text-strong": "#1e2030",
+      "--muted": "#56596e",
       "--accent": "#7a36d6",
       "--accent-press": "#6c28c4",
       "--on-accent": "#ffffff",
@@ -70,10 +68,9 @@ export const PALETTES: Palette[] = [
     vars: {
       "--bg": "#303446",
       "--surface": "#292c3c",
-      "--text": "#c6d0f5",
-      "--muted": "#a5adce",
-      "--prose-text": "#d3daf6",
-      "--prose-strong": "#eef1fd",
+      "--text": "#d3daf6",
+      "--text-strong": "#eef1fd",
+      "--muted": "#b4bbda",
       "--accent": "#ef9f76",
       "--accent-press": "#c87f5d",
       "--on-accent": "#232634",

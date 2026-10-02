@@ -20,7 +20,7 @@ export default function NotFound() {
         <p className="mono text-sm" style={{ color: "var(--accent)" }}>
           404
         </p>
-        <h1 className="display text-4xl sm:text-5xl font-bold mt-2" style={{ color: "var(--text)" }}>
+        <h1 className="display text-4xl sm:text-5xl font-bold mt-2" style={{ color: "var(--text-strong)" }}>
           This file isn&apos;t in the tree.
         </h1>
         <p className="mt-4 leading-relaxed" style={{ color: "var(--muted)" }}>
