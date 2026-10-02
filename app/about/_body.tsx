@@ -12,7 +12,7 @@ import { SocialLinks } from "@/components/site/SocialLinks";
 export function AboutBody() {
   return (
     <PageShell width="wide">
-      <h1 className="display text-4xl sm:text-5xl font-bold mb-8" style={{ color: "var(--text)" }}>
+      <h1 className="display text-4xl sm:text-5xl font-bold mb-8" style={{ color: "var(--text-strong)" }}>
         About
       </h1>
 

@@ -109,7 +109,7 @@ export default async function BlogPost({ params }: Params) {
 
         <h1
           className={`display text-3xl sm:text-4xl font-bold ${post.image ? "mt-6" : "mt-4"}`}
-          style={{ color: "var(--text)" }}
+          style={{ color: "var(--text-strong)" }}
         >
           {post.title}
         </h1>

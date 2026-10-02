@@ -15,7 +15,7 @@ export function PageHeader({
 }) {
   return (
     <header className="mb-8">
-      <h1 className="display text-4xl sm:text-5xl font-bold" style={{ color: "var(--text)" }}>
+      <h1 className="display text-4xl sm:text-5xl font-bold" style={{ color: "var(--text-strong)" }}>
         {title}
       </h1>
       {lead ? (

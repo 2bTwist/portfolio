@@ -94,7 +94,7 @@ export default async function ProjectPage({ params }: Params) {
         </span>
       </div>
 
-      <h1 className="display text-3xl sm:text-4xl font-bold mt-3" style={{ color: "var(--text)" }}>
+      <h1 className="display text-3xl sm:text-4xl font-bold mt-3" style={{ color: "var(--text-strong)" }}>
         {project.title}
       </h1>
       <p className="mt-3 text-lg leading-relaxed" style={{ color: "var(--muted)" }}>

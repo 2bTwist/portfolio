@@ -4,7 +4,7 @@ import { VinylPlayer } from "@/components/music/VinylPlayer";
 export function MusicBody() {
   return (
     <PageShell width="wide">
-      <h1 className="display text-4xl sm:text-5xl font-bold mb-2" style={{ color: "var(--text)" }}>
+      <h1 className="display text-4xl sm:text-5xl font-bold mb-2" style={{ color: "var(--text-strong)" }}>
         On repeat
       </h1>
       <p className="mb-8 font-sans" style={{ color: "var(--muted)" }}>

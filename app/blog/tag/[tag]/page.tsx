@@ -32,7 +32,7 @@ export default async function TagPage({ params }: Params) {
         <div className="space-y-8">
           {posts.map((post) => (
             <Link key={post.slug} href={`/blog/${post.slug}`} prefetch={false} className="block group no-underline">
-              <h2 className="display text-2xl font-semibold transition-opacity group-hover:opacity-70" style={{ color: "var(--text)" }}>
+              <h2 className="display text-2xl font-semibold transition-opacity group-hover:opacity-70" style={{ color: "var(--text-strong)" }}>
                 {post.title}
               </h2>
               <p className="mt-2 leading-relaxed" style={{ color: "var(--muted)" }}>

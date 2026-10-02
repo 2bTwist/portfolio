@@ -37,7 +37,24 @@ body {
    stay .mono so the editor identity reads. */
 .display {
   font-family: var(--display);
-  letter-spacing: -0.01em;
+}
+/* Clash Display sets its word spaces tight; at title sizes the words run
+   together ("EdmondNdanji", "Sowhatistaste?"), so every Clash title opens them
+   up and keeps its letters at their drawn spacing. */
+.display,
+.cert-card-name,
+.proj-card-title,
+.xp-org,
+.prose-content :is(h1, h2, h3) {
+  letter-spacing: 0;
+  word-spacing: 0.12em;
+  text-wrap: balance;
+}
+
+/* Page copy reads in Satoshi Medium: Regular is thin on the tinted pages at
+   body size. The editor chrome around .page-content keeps its own weights. */
+.page-content {
+  font-weight: 500;
 }
 
 /* Tactile press button — Comeau three-layer technique (shadow / edge / front).
@@ -1490,11 +1507,15 @@ button.ide-row {
 
 .prose-content {
   color: var(--text);
-  line-height: 1.75;
-  font-size: 1.02rem;
+  line-height: 1.7;
+  font-size: 1.0625rem;
+  -webkit-font-smoothing: antialiased;
+}
+.prose-content p {
+  text-wrap: pretty;
 }
 .prose-content > * + * {
-  margin-top: 1.15rem;
+  margin-top: 1.3rem;
 }
 .try-site summary {
   display: inline-flex;
@@ -1535,39 +1556,63 @@ button.ide-row {
 .prose-content h3 {
   font-family: var(--display);
   font-weight: 600;
-  letter-spacing: -0.01em;
-  color: var(--text);
+  color: var(--text-strong);
   line-height: 1.25;
 }
 .prose-content h1 {
   font-size: 1.9rem;
-  margin-top: 2.5rem;
+  margin-top: 2.75rem;
 }
 .prose-content h2 {
-  font-size: 1.5rem;
-  margin-top: 2.25rem;
+  font-size: 1.55rem;
+  margin-top: 2.75rem;
+}
+/* Editor-style "##" marker: a quiet accent cue that a new section starts. The
+   alt text after the slash keeps screen readers from announcing it. */
+.prose-content h2::before {
+  content: "## ";
+  content: "## " / "";
+  font-family: var(--mono);
+  font-size: 0.7em;
+  font-weight: 500;
+  color: var(--accent);
+  vertical-align: 0.12em;
+  word-spacing: 0;
 }
 .prose-content h3 {
   font-size: 1.2rem;
-  margin-top: 1.75rem;
+  margin-top: 2rem;
+}
+/* Pull the first paragraph under a heading closer, so the heading reads as
+   belonging to the text below it rather than floating between sections. */
+.prose-content :is(h1, h2, h3) + * {
+  margin-top: 0.75rem;
 }
 .prose-content a {
   color: var(--accent);
-  text-underline-offset: 2px;
+  font-weight: 500;
+  text-decoration-line: underline;
+  text-decoration-color: color-mix(in srgb, var(--accent) 40%, transparent);
+  text-decoration-thickness: 1.5px;
+  text-underline-offset: 3px;
+  transition: text-decoration-color 150ms ease-out;
 }
 .prose-content a:hover {
-  opacity: 0.8;
+  text-decoration-color: var(--accent);
 }
 .prose-content strong {
-  color: var(--text);
-  font-weight: 600;
+  color: var(--text-strong);
+  font-weight: 700;
 }
 .prose-content ul,
 .prose-content ol {
   padding-left: 1.4rem;
 }
 .prose-content li + li {
-  margin-top: 0.4rem;
+  margin-top: 0.5rem;
+}
+.prose-content li::marker {
+  color: var(--accent);
 }
 .prose-content ul {
   list-style: disc;
@@ -1576,10 +1621,11 @@ button.ide-row {
   list-style: decimal;
 }
 .prose-content blockquote {
-  border-left: 3px solid var(--border-press);
-  padding-left: 1rem;
-  color: var(--muted);
-  font-style: italic;
+  border-left: 3px solid var(--accent);
+  border-radius: 0 8px 8px 0;
+  padding: 0.85rem 1.1rem;
+  background: color-mix(in srgb, var(--accent) 6%, transparent);
+  color: var(--text-strong);
 }
 .prose-content hr {
   border: none;
@@ -1590,7 +1636,8 @@ button.ide-row {
 .prose-content :not(pre) > code {
   font-family: var(--mono);
   font-size: 0.85em;
-  background: var(--bg);
+  color: var(--text-strong);
+  background: color-mix(in srgb, var(--accent) 8%, var(--surface));
   border: 1px solid var(--border);
   border-radius: 5px;
   padding: 0.1em 0.35em;
@@ -1856,7 +1903,7 @@ button.ide-row {
   font-weight: 600;
   font-size: 1.02rem;
   line-height: 1.3;
-  color: var(--text);
+  color: var(--text-strong);
 }
 .cert-card-meta {
   margin-top: 0.3rem;
@@ -2916,7 +2963,7 @@ body[data-dragging] iframe {
   font-family: var(--display);
   font-weight: 600;
   font-size: 1.15rem;
-  color: var(--text);
+  color: var(--text-strong);
 }
 .proj-card-kind {
   flex-shrink: 0;
@@ -3424,7 +3471,7 @@ body[data-dragging] iframe {
   font-family: var(--display);
   font-weight: 600;
   font-size: 1.15rem;
-  color: var(--text);
+  color: var(--text-strong);
   text-decoration: none;
 }
 a.xp-org:hover {
@@ -3652,7 +3699,7 @@ a.xp-org:hover {
   font-size: clamp(1.4rem, 4vw, 1.8rem);
   font-weight: 700;
   line-height: 1.1;
-  color: var(--text);
+  color: var(--text-strong);
   margin: 0;
 }
 .data-reveal-sub {

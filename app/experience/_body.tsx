@@ -5,7 +5,7 @@ import { PageShell } from "@/components/site/PageShell";
 export function ExperienceBody() {
   return (
     <PageShell>
-      <h1 className="display text-4xl sm:text-5xl font-bold mb-8" style={{ color: "var(--text)" }}>
+      <h1 className="display text-4xl sm:text-5xl font-bold mb-8" style={{ color: "var(--text-strong)" }}>
         Experience
       </h1>
 
