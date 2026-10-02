@@ -5,7 +5,11 @@
    The Cream default's --muted / --accent were darkened from the prototype to
    pass the axe color-contrast invariant (4.5:1 on body text and button labels).
    Latte / Frappe are kept for the Phase 2 switcher and get the same treatment
-   when switching returns. */
+   when switching returns.
+
+   --prose-text / --prose-strong are the reading inks for article bodies
+   (.prose-content): a step deeper than --text so long-form copy and headings
+   stand off the tinted page instead of blending into it. */
 
 export type Palette = {
   name: string;
@@ -22,6 +26,8 @@ export const PALETTES: Palette[] = [
       "--surface": "#fbf6ea",
       "--text": "#463f33",
       "--muted": "#726552",
+      "--prose-text": "#3a3329",
+      "--prose-strong": "#221d16",
       "--accent": "#a04c39",
       "--accent-press": "#823c2c",
       "--on-accent": "#fdf6ee",
@@ -43,6 +49,8 @@ export const PALETTES: Palette[] = [
       "--surface": "#ffffff",
       "--text": "#4c4f69",
       "--muted": "#66697e",
+      "--prose-text": "#3a3d54",
+      "--prose-strong": "#1e2030",
       "--accent": "#7a36d6",
       "--accent-press": "#6c28c4",
       "--on-accent": "#ffffff",
@@ -64,6 +72,8 @@ export const PALETTES: Palette[] = [
       "--surface": "#292c3c",
       "--text": "#c6d0f5",
       "--muted": "#a5adce",
+      "--prose-text": "#d3daf6",
+      "--prose-strong": "#eef1fd",
       "--accent": "#ef9f76",
       "--accent-press": "#c87f5d",
       "--on-accent": "#232634",

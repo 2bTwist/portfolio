@@ -1489,12 +1489,18 @@ button.ide-row {
 }
 
 .prose-content {
-  color: var(--text);
-  line-height: 1.75;
-  font-size: 1.02rem;
+  color: var(--prose-text, var(--text));
+  line-height: 1.7;
+  font-size: 1.0625rem;
+  /* Satoshi Medium: Regular reads thin on the tinted pages at body size. */
+  font-weight: 500;
+  -webkit-font-smoothing: antialiased;
+}
+.prose-content p {
+  text-wrap: pretty;
 }
 .prose-content > * + * {
-  margin-top: 1.15rem;
+  margin-top: 1.3rem;
 }
 .try-site summary {
   display: inline-flex;
@@ -1530,44 +1536,78 @@ button.ide-row {
 @media (prefers-reduced-motion: reduce) {
   .try-site summary::before { transition: none; }
 }
+/* Clash Display sets its word spaces tight; at heading sizes the words run
+   together ("Sowhatistaste?"), so open them up and keep letters at their drawn
+   spacing. Shared with the post title (.prose-title). */
 .prose-content h1,
 .prose-content h2,
-.prose-content h3 {
+.prose-content h3,
+.prose-title {
   font-family: var(--display);
   font-weight: 600;
-  letter-spacing: -0.01em;
-  color: var(--text);
+  letter-spacing: 0;
+  word-spacing: 0.12em;
+  color: var(--prose-strong, var(--text));
   line-height: 1.25;
+  text-wrap: balance;
+}
+.prose-title {
+  font-weight: 700;
 }
 .prose-content h1 {
   font-size: 1.9rem;
-  margin-top: 2.5rem;
+  margin-top: 2.75rem;
 }
 .prose-content h2 {
-  font-size: 1.5rem;
-  margin-top: 2.25rem;
+  font-size: 1.55rem;
+  margin-top: 2.75rem;
+}
+/* Editor-style "##" marker: a quiet accent cue that a new section starts. The
+   alt text after the slash keeps screen readers from announcing it. */
+.prose-content h2::before {
+  content: "## ";
+  content: "## " / "";
+  font-family: var(--mono);
+  font-size: 0.7em;
+  font-weight: 500;
+  color: var(--accent);
+  vertical-align: 0.12em;
+  word-spacing: 0;
 }
 .prose-content h3 {
   font-size: 1.2rem;
-  margin-top: 1.75rem;
+  margin-top: 2rem;
+}
+/* Pull the first paragraph under a heading closer, so the heading reads as
+   belonging to the text below it rather than floating between sections. */
+.prose-content :is(h1, h2, h3) + * {
+  margin-top: 0.75rem;
 }
 .prose-content a {
   color: var(--accent);
-  text-underline-offset: 2px;
+  font-weight: 500;
+  text-decoration-line: underline;
+  text-decoration-color: color-mix(in srgb, var(--accent) 40%, transparent);
+  text-decoration-thickness: 1.5px;
+  text-underline-offset: 3px;
+  transition: text-decoration-color 150ms ease-out;
 }
 .prose-content a:hover {
-  opacity: 0.8;
+  text-decoration-color: var(--accent);
 }
 .prose-content strong {
-  color: var(--text);
-  font-weight: 600;
+  color: var(--prose-strong, var(--text));
+  font-weight: 700;
 }
 .prose-content ul,
 .prose-content ol {
   padding-left: 1.4rem;
 }
 .prose-content li + li {
-  margin-top: 0.4rem;
+  margin-top: 0.5rem;
+}
+.prose-content li::marker {
+  color: var(--accent);
 }
 .prose-content ul {
   list-style: disc;
@@ -1576,10 +1616,11 @@ button.ide-row {
   list-style: decimal;
 }
 .prose-content blockquote {
-  border-left: 3px solid var(--border-press);
-  padding-left: 1rem;
-  color: var(--muted);
-  font-style: italic;
+  border-left: 3px solid var(--accent);
+  border-radius: 0 8px 8px 0;
+  padding: 0.85rem 1.1rem;
+  background: color-mix(in srgb, var(--accent) 6%, transparent);
+  color: var(--prose-strong, var(--text));
 }
 .prose-content hr {
   border: none;
@@ -1590,7 +1631,8 @@ button.ide-row {
 .prose-content :not(pre) > code {
   font-family: var(--mono);
   font-size: 0.85em;
-  background: var(--bg);
+  color: var(--prose-strong, var(--text));
+  background: color-mix(in srgb, var(--accent) 8%, var(--surface));
   border: 1px solid var(--border);
   border-radius: 5px;
   padding: 0.1em 0.35em;
