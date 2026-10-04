@@ -785,9 +785,13 @@ html[data-site-hint] [data-tour="themes"]::after {
   padding: 0.4rem 0.55rem;
   border-radius: 5px;
 }
-.ide-tab-menu-item:hover:not(:disabled) {
+/* The focused item is the menu's active item however the menu was opened, so it
+   highlights on :focus, the same as hover. */
+.ide-tab-menu-item:hover:not(:disabled),
+.ide-tab-menu-item:focus {
   background: var(--bg);
   color: var(--accent);
+  outline: none;
 }
 .ide-tab-menu-item:disabled {
   color: var(--muted);
@@ -1344,7 +1348,8 @@ html[data-site-hint] [data-tour="themes"]::after {
 @media (prefers-reduced-motion: reduce) {
   .ide-enter,
   .ide-overlay,
-  .ide-palette {
+  .ide-palette,
+  .ide-tab-menu {
     animation: none;
   }
   .ide-row,

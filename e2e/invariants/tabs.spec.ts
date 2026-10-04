@@ -79,3 +79,71 @@ test("compact layouts can mute interface sounds", async ({ page }) => {
   await expect(nav.getByRole("button", { name: "Unmute UI sounds" })).toBeVisible();
   expect(await soundsFromThemeClick(/^Theme: Cream/)).toBe(0);
 });
+
+test.describe("the tab context menu", () => {
+  async function twoTabs(page: Page) {
+    await load(page, "/about");
+    await page.locator("#ide-explorer").getByRole("link", { name: "experience.md" }).click();
+    await expect(currentTab(page)).toHaveAttribute("href", "/experience");
+  }
+  const menu = (page: Page) => page.getByRole("menu");
+
+  test("opens from the keyboard (Shift+F10 and the menu key) and moves focus through its items", async ({ page }) => {
+    await twoTabs(page);
+    const aboutTab = tabs(page).getByRole("link", { name: "about.md" });
+    await aboutTab.focus();
+    await page.keyboard.press("Shift+F10");
+    await expect(menu(page)).toBeVisible();
+    // Anchored under the tab, not at the viewport origin (measured loosely: the
+    // menu's entrance nudges it a few pixels while it plays).
+    const [m, t] = await Promise.all([menu(page).boundingBox(), aboutTab.boundingBox()]);
+    expect(m!.y).toBeGreaterThan(t!.y + t!.height / 2);
+    expect(Math.abs(m!.x - t!.x)).toBeLessThan(40);
+
+    const item = (name: RegExp) => menu(page).getByRole("menuitem", { name });
+    await expect(item(/^Close\b(?! Others| All)/)).toBeFocused();
+    await page.keyboard.press("ArrowDown");
+    await expect(item(/Close Others/)).toBeFocused();
+    await page.keyboard.press("End");
+    await expect(item(/Close All/)).toBeFocused();
+    await page.keyboard.press("ArrowDown");
+    await expect(item(/^Close\b(?! Others| All)/)).toBeFocused();
+    await page.keyboard.press("ArrowUp");
+    await expect(item(/Close All/)).toBeFocused();
+
+    await page.keyboard.press("Escape");
+    await expect(menu(page)).toHaveCount(0);
+    await expect(aboutTab).toBeFocused();
+
+    await page.keyboard.press("ContextMenu");
+    await expect(item(/^Close\b(?! Others| All)/)).toBeFocused();
+    await page.keyboard.press("Tab");
+    await expect(menu(page)).toHaveCount(0);
+    await expect(aboutTab).toBeFocused();
+  });
+
+  test("skips a disabled item", async ({ page }) => {
+    await load(page, "/about");
+    await tabs(page).getByRole("link", { name: "about.md" }).focus();
+    await page.keyboard.press("Shift+F10");
+    await expect(menu(page).getByRole("menuitem", { name: /Close Others/ })).toBeDisabled();
+    await page.keyboard.press("ArrowDown");
+    await expect(menu(page).getByRole("menuitem", { name: /Close All/ })).toBeFocused();
+  });
+
+  test("closing a tab from the menu leaves focus on the current tab", async ({ page }) => {
+    await twoTabs(page);
+    await tabs(page).getByRole("link", { name: "about.md" }).focus();
+    await page.keyboard.press("Shift+F10");
+    await page.keyboard.press("Enter");
+    await expect(tabs(page).getByRole("link", { name: "about.md" })).toHaveCount(0);
+    await expect(currentTab(page)).toBeFocused();
+  });
+
+  test("has no entrance animation with reduced motion", async ({ page }) => {
+    await page.emulateMedia({ reducedMotion: "reduce" });
+    await load(page, "/about");
+    await tabs(page).locator(".ide-tab").first().click({ button: "right" });
+    await expect(menu(page)).toHaveCSS("animation-name", "none");
+  });
+});
