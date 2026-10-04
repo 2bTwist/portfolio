@@ -111,7 +111,7 @@ const cases: Case[] = [
   },
   {
     name: "a command palette item views",
-    run: async (p) => press(p, (await openPalette(p)).getByRole("option").first().getByRole("button")),
+    run: async (p) => press(p, (await openPalette(p)).getByRole("option").first()),
     expected: ["view"],
   },
   {

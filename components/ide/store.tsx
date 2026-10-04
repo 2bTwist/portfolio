@@ -26,6 +26,7 @@ import {
 import { usePathname, useRouter } from "next/navigation";
 import { useCatalogue } from "./CatalogueProvider";
 import { restoreSavedPalette, setPaletteIndex } from "./palette-store";
+import { claimModal, releaseModal, type ReleaseReason } from "./modal-owner";
 
 type Tab = { href: string; name: string };
 
@@ -41,7 +42,8 @@ type Session = {
 type Overlay = {
   cmdkOpen: boolean;
   openCmdk: () => void;
-  closeCmdk: () => void;
+  /* Pass "navigation" when the palette closes to leave the page. */
+  closeCmdk: (reason?: ReleaseReason) => void;
   toggleCmdk: () => void;
   termOpen: boolean;
   termMounted: boolean;
@@ -137,9 +139,15 @@ function OverlayProvider({ children }: { children: ReactNode }) {
   const [termOpen, setTermOpen] = useState(false);
   const [termMounted, setTermMounted] = useState(false);
 
-  const openCmdk = () => setCmdkOpen(true);
-  const closeCmdk = () => setCmdkOpen(false);
-  const toggleCmdk = () => setCmdkOpen((o) => !o);
+  // The palette is a modal: it opens only when no other modal owns input.
+  const openCmdk = () => {
+    if (claimModal("palette")) setCmdkOpen(true);
+  };
+  const closeCmdk = (reason?: ReleaseReason) => {
+    setCmdkOpen(false);
+    releaseModal("palette", reason);
+  };
+  const toggleCmdk = () => (cmdkOpen ? closeCmdk() : openCmdk());
 
   const openTerm = () => {
     setTermMounted(true);

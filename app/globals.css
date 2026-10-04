@@ -1040,10 +1040,16 @@ html[data-site-hint] [data-tour="themes"]::after {
   border-color: color-mix(in srgb, var(--accent) 40%, var(--border));
 }
 .ide-palette-empty {
+  margin: 0;
   font-family: var(--mono);
   font-size: 0.82rem;
   color: var(--muted);
-  padding: 0.6rem;
+  padding: 0 0.95rem 0.6rem;
+}
+/* Stays mounted (a live region must exist before it speaks); takes no room
+   while there is nothing to say. */
+.ide-palette-empty:empty {
+  padding: 0;
 }
 
 /* Dark console — reads as a terminal, palette-aware (--term-* per theme) so it

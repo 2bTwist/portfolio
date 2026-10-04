@@ -6,11 +6,16 @@
    Shows ONCE per browser (remembered in localStorage). Gathers what the browser
    exposes client-side and what the server saw (IP + coarse geo, from
    /api/whoami), shows it back to you, and stores or sends none of it. Dismiss
-   with the button, the backdrop, or Esc. */
+   with the button, the backdrop, or Esc. It never opens over another modal: if
+   the palette is open when it is ready, it waits for the palette to close. */
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { PREFERENCES, loadPreference, savePreference } from "@/app/lib/preferences";
+import { claimModal, onModalRelease, releaseModal } from "@/components/ide/modal-owner";
+
+// How long the optional server lookup may hold the reveal back.
+const WHOAMI_TIMEOUT_MS = 2000;
 
 interface Row {
   label: string;
@@ -40,6 +45,7 @@ function clientRows(): Row[] {
     deviceMemory?: number;
     connection?: { effectiveType?: string };
   };
+  const gpu = gpuRenderer();
   const rows: (Row | null)[] = [
     { label: "Browser + OS", value: nav.userAgent },
     {
@@ -56,7 +62,7 @@ function clientRows(): Row[] {
     nav.connection?.effectiveType
       ? { label: "Connection", value: nav.connection.effectiveType }
       : null,
-    gpuRenderer() ? { label: "Graphics card", value: gpuRenderer()! } : null,
+    gpu ? { label: "Graphics card", value: gpu } : null,
     {
       label: "Touchscreen",
       value: "ontouchstart" in window || nav.maxTouchPoints > 0 ? "yes" : "no",
@@ -74,18 +80,39 @@ export function DataReveal() {
   const dismiss = useCallback(() => {
     savePreference(PREFERENCES.dataRevealSeen, true);
     setGroups(null);
+    releaseModal("privacy");
   }, []);
 
-  // First-visit gate + deferred build. Runs once.
+  // First-visit gate + deferred build. Runs once. The server lookup is optional
+  // enrichment, so it is bounded: a slow or failed whoami shows the browser's
+  // rows alone rather than holding the reveal back.
   useEffect(() => {
     if (loadPreference(PREFERENCES.dataRevealSeen)) return;
 
     let cancelled = false;
+    let stopWaiting: (() => void) | undefined;
+    const lookup = new AbortController();
+    // Wait for any open modal (the palette) to close rather than open over it.
+    const show = (built: Group[]) => {
+      if (cancelled) return;
+      if (claimModal("privacy")) {
+        stopWaiting?.();
+        setGroups(built);
+      } else if (!stopWaiting) {
+        stopWaiting = onModalRelease((reason) => {
+          // The visitor is leaving this page; unmounting cancels the reveal,
+          // which then shows on a later visit (it was never marked seen).
+          if (reason === "navigation") return;
+          show(built);
+        });
+      }
+    };
     const timer = window.setTimeout(async () => {
       const client: Group = { title: "What your browser just told it", rows: clientRows() };
       let server: Group | null = null;
+      const giveUp = window.setTimeout(() => lookup.abort(), WHOAMI_TIMEOUT_MS);
       try {
-        const res = await fetch("/api/whoami", { cache: "no-store" });
+        const res = await fetch("/api/whoami", { cache: "no-store", signal: lookup.signal });
         const d = (await res.json()) as Record<string, string | null>;
         const rows: Row[] = [];
         if (d.ip) rows.push({ label: "IP address", value: d.ip });
@@ -94,14 +121,19 @@ export function DataReveal() {
         if (d.timezone) rows.push({ label: "Located in", value: d.timezone });
         if (rows.length) server = { title: "What the server already knows", rows };
       } catch {
-        /* offline / local dev: just show client data */
+        /* offline, slow, or local dev: just show client data */
+      } finally {
+        window.clearTimeout(giveUp);
       }
-      if (!cancelled) setGroups(server ? [server, client] : [client]);
+      show(server ? [server, client] : [client]);
     }, 3500);
 
     return () => {
       cancelled = true;
       window.clearTimeout(timer);
+      lookup.abort();
+      stopWaiting?.();
+      releaseModal("privacy");
     };
   }, []);
 

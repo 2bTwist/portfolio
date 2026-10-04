@@ -6,20 +6,25 @@
    router.push()es. */
 
 import { useEffect, useLayoutEffect, useMemo, useRef, useState, type KeyboardEvent } from "react";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { searchStatic, searchPosts, type SearchResult } from "@/app/lib/search";
 import { SearchIcon } from "@/components/feel/animated-icons";
 import { useOverlay, useTabSession } from "./store";
 
 export default function CommandPalette() {
   const router = useRouter();
+  const pathname = usePathname();
   const { closeCmdk } = useOverlay();
   const { openTab } = useTabSession();
   const [query, setQuery] = useState("");
   const [active, setActive] = useState(0);
   // Post hits are tagged with the query they belong to, so a stale in-flight
   // result is ignored at render time (no setState-in-effect to clear it).
-  const [postHits, setPostHits] = useState<{ q: string; hits: SearchResult[] }>({ q: "", hits: [] });
+  // `failed` marks a query whose post index could not load; the next query retries.
+  const [postHits, setPostHits] = useState<{ q: string; hits: SearchResult[]; failed?: boolean }>({
+    q: "",
+    hits: [],
+  });
   const inputRef = useRef<HTMLInputElement>(null);
   const listRef = useRef<HTMLUListElement>(null);
 
@@ -35,9 +40,14 @@ export default function CommandPalette() {
     const q = query.trim();
     if (!q) return;
     let stale = false;
-    searchPosts(q).then((hits) => {
-      if (!stale) setPostHits({ q, hits });
-    });
+    searchPosts(q).then(
+      (hits) => {
+        if (!stale) setPostHits({ q, hits });
+      },
+      () => {
+        if (!stale) setPostHits({ q, hits: [], failed: true });
+      },
+    );
     return () => {
       stale = true;
     };
@@ -51,6 +61,16 @@ export default function CommandPalette() {
     const posts = postHits.q === trimmed ? postHits.hits : [];
     return [...staticHits, ...posts].sort((a, b) => a.score - b.score);
   }, [staticHits, postHits, query]);
+
+  const postsFailed = query.trim() !== "" && postHits.q === query.trim() && postHits.failed === true;
+  const status =
+    items.length === 0
+      ? postsFailed
+        ? "no matches; blog posts couldn't load"
+        : "no matches"
+      : postsFailed
+        ? "blog posts couldn't load; keep typing to retry"
+        : null;
 
   // Clamp during render rather than resetting via an effect.
   const current = items.length === 0 ? 0 : Math.min(active, items.length - 1);
@@ -87,7 +107,8 @@ export default function CommandPalette() {
   }
 
   function go(href: string) {
-    closeCmdk();
+    // Leaving the page: a modal waiting on it (the privacy reveal) stays closed.
+    closeCmdk(href === pathname ? "closed" : "navigation");
     openTab(href);
     router.push(href);
   }
@@ -145,27 +166,31 @@ export default function CommandPalette() {
           />
         </div>
         <ul ref={listRef} id="cmdk-listbox" className="ide-palette-list" role="listbox" aria-label="Results">
+          {/* Options are the click targets themselves: focus stays in the input
+              (aria-activedescendant), so nothing inside an option is focusable. */}
           {items.map((r, i) => (
-            <li key={`${r.kind}:${r.href}`} id={`cmdk-opt-${i}`} role="option" aria-selected={i === current}>
-              <button
-                type="button"
-                className="ide-palette-item"
-                data-sound="view"
-                data-active={i === current}
-                tabIndex={-1}
-                onMouseMove={() => setActive(i)}
-                onClick={() => go(r.href)}
-              >
-                <span className="ide-palette-name">{r.name}</span>
-                <span className="ide-palette-sub">{r.sub}</span>
-                <span className="ide-palette-kind" data-kind={r.kind}>
-                  {r.kind}
-                </span>
-              </button>
+            <li
+              key={`${r.kind}:${r.href}`}
+              id={`cmdk-opt-${i}`}
+              role="option"
+              aria-selected={i === current}
+              className="ide-palette-item"
+              data-sound="view"
+              data-active={i === current}
+              onMouseMove={() => setActive(i)}
+              onClick={() => go(r.href)}
+            >
+              <span className="ide-palette-name">{r.name}</span>
+              <span className="ide-palette-sub">{r.sub}</span>
+              <span className="ide-palette-kind" data-kind={r.kind}>
+                {r.kind}
+              </span>
             </li>
           ))}
-          {items.length === 0 ? <li className="ide-palette-empty">no matches</li> : null}
         </ul>
+        <p className="ide-palette-empty" role="status">
+          {status}
+        </p>
       </div>
     </div>
   );
