@@ -12,7 +12,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useOverlay } from "./store";
 import { ThemeSwatches } from "./ThemeSwatches";
-import { useSound } from "@/components/feel/SoundProvider";
+import { MuteToggle } from "@/components/feel/MuteToggle";
 import type { GitInfo } from "@/app/lib/git";
 
 const LINE_PX = 24; // approx reading line height — maps scroll depth → "line"
@@ -30,7 +30,6 @@ const SVG = {
 
 export function StatusBar({ className = "", git }: { className?: string; git: GitInfo }) {
   const { openTerm } = useOverlay();
-  const { muted, toggleMuted } = useSound();
 
   // Editor-position readout (VS Code-style). No literal text caret on a rendered
   // page, so Ln/Col follow the real text selection/caret inside the content
@@ -118,23 +117,7 @@ export function StatusBar({ className = "", git }: { className?: string; git: Gi
             <path d="M13 16h6" />
           </svg>
         </button>
-        <button
-          type="button"
-          className="ide-pill ide-pill--icon"
-          data-sound="switch"
-          aria-pressed={!muted}
-          aria-label={muted ? "Unmute UI sounds" : "Mute UI sounds"}
-          onClick={() => toggleMuted()}
-        >
-          <svg {...SVG} aria-hidden="true">
-            <path d="M4 9h3l5-4v14l-5-4H4z" />
-            {muted ? (
-              <path d="M16 9l5 6M21 9l-5 6" />
-            ) : (
-              <path d="M15.5 9.5a4 4 0 010 5" />
-            )}
-          </svg>
-        </button>
+        <MuteToggle className="ide-pill ide-pill--icon" />
         <Link
           href="/rss.xml"
           className="ide-pill ide-pill--icon"

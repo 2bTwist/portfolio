@@ -16,6 +16,7 @@ import { SITE_URL } from "@/app/lib/site";
 import sitemap from "@/app/sitemap";
 import { PAGES } from "@/data/pages";
 import { SiteNav } from "@/components/site/SiteNav";
+import { SoundProvider } from "@/components/feel/SoundProvider";
 
 /* Parity gate for the page catalogue (CONTEXT.md: page catalogue).
    Every route list is a view of the catalogue; these checks catch the drift
@@ -89,7 +90,20 @@ describe("page catalogue", () => {
   });
 
   it("renders the declared compact subset as the phone nav, in order", () => {
-    const { container } = render(<SiteNav />);
+    // The header's sound switch reads SoundProvider, which wraps it in the app;
+    // the provider reads media queries, which jsdom lacks.
+    vi.stubGlobal("matchMedia", (media: string) => ({
+      matches: false,
+      media,
+      addEventListener() {},
+      removeEventListener() {},
+    }));
+    const { container } = render(
+      <SoundProvider>
+        <SiteNav />
+      </SoundProvider>,
+    );
+    vi.unstubAllGlobals();
     const rendered = [...container.querySelectorAll('nav[aria-label="Primary"] a')].map((a) => [
       a.getAttribute("href"),
       a.textContent,

@@ -82,51 +82,65 @@ function SessionProvider({ children }: { children: ReactNode }) {
     return entry ? { href: entry.href, name: entry.label } : null;
   };
 
-  // Seed a tab for the route we land on (lazy init = same on server + first
-  // client render, so no hydration mismatch). Further tabs open on navigation.
+  // Tabs follow the route: the page on screen always has a tab, however it was
+  // reached (explorer, card, inline link, back/forward). Seed the landing route
+  // (lazy init = same on server + first client render, so no hydration
+  // mismatch), then add the tab for each new route during render, React's
+  // pattern for adjusting state to a changed input.
   const [tabs, setTabs] = useState<Tab[]>(() => {
     const t = tabFor(pathname);
     return t ? [t] : [];
   });
+  const [tabbedPath, setTabbedPath] = useState(pathname);
+  if (pathname !== tabbedPath) {
+    setTabbedPath(pathname);
+    const t = tabFor(pathname);
+    if (t && !tabs.some((x) => x.href === t.href)) setTabs([...tabs, t]);
+  }
 
   // Before the first paint React makes: see restoreSavedPalette.
   useLayoutEffect(() => restoreSavedPalette(), []);
 
-  // React Compiler memoizes these handlers and the context values below.
-  const openTab = (href: string) => {
+  // `withTab` keeps the invariant when a close navigates: the destination's tab
+  // is present before the route changes.
+  const withTab = (list: Tab[], href: string): Tab[] => {
     const t = tabFor(href);
-    if (!t) return;
-    setTabs((prev) => (prev.some((x) => x.href === href) ? prev : [...prev, t]));
+    return t && !list.some((x) => x.href === t.href) ? [...list, t] : list;
   };
 
+  // React Compiler memoizes these handlers and the context values below.
+  // Opening ahead of navigation shows the tab on the click, not after the route.
+  const openTab = (href: string) => setTabs((prev) => withTab(prev, href));
+
+  // Closing the current page's tab moves to its neighbour, or to README when it
+  // was the last one, which then keeps its tab: an empty strip never sits over a
+  // page.
   const closeTab = (href: string) => {
-    setTabs((prev) => {
-      const idx = prev.findIndex((t) => t.href === href);
-      if (idx === -1) return prev;
-      const next = prev.filter((t) => t.href !== href);
-      if (href === pathname) {
-        const neighbour = next[idx] ?? next[idx - 1];
-        router.push(neighbour ? neighbour.href : "/");
-      }
-      return next;
-    });
+    const idx = tabs.findIndex((t) => t.href === href);
+    if (idx === -1) return;
+    const rest = tabs.filter((t) => t.href !== href);
+    if (href !== pathname) {
+      setTabs(rest);
+      return;
+    }
+    const destination = (rest[idx] ?? rest[idx - 1])?.href ?? "/";
+    setTabs(withTab(rest, destination));
+    if (destination !== pathname) router.push(destination);
   };
 
   // Keep only `href`, dropping every other tab; navigate to it if it isn't the
   // current route (it's about to be the only thing open).
   const closeOthers = (href: string) => {
-    setTabs((prev) => {
-      const keep = prev.find((t) => t.href === href);
-      return keep ? [keep] : prev;
-    });
+    const keep = tabs.find((t) => t.href === href);
+    if (!keep) return;
+    setTabs([keep]);
     if (href !== pathname) router.push(href);
   };
 
-  // Close every tab and return to the README home (mirrors closeTab's "/"
-  // fallback when no tab is left to focus).
+  // Close every tab and return to README, which keeps its own tab.
   const closeAll = () => {
-    setTabs([]);
-    router.push("/");
+    setTabs(withTab([], "/"));
+    if (pathname !== "/") router.push("/");
   };
 
   const session = { tabs, openTab, closeTab, closeOthers, closeAll, setPaletteIndex };
