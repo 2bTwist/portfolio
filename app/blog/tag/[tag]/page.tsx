@@ -12,10 +12,13 @@ export async function generateStaticParams() {
 
 export async function generateMetadata({ params }: Params): Promise<Metadata> {
   const { tag } = await params;
+  // A tag no post carries still renders its empty state, but is not indexed.
+  const known = getAllTags().includes(tag);
   return {
     title: `#${tag} - Blog`,
     description: `Posts tagged #${tag}.`,
     alternates: { canonical: `/blog/tag/${tag}` },
+    ...(known ? {} : { robots: { index: false, follow: true } }),
   };
 }
 

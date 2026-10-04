@@ -67,10 +67,21 @@ for (const width of widths) {
   });
 }
 
+// A tag some post carries, read from the first post's own tag links.
+async function knownTag(page: import("@playwright/test").Page) {
+  await page.goto("/blog");
+  await page.goto((await page.locator('main a[href^="/blog/"]:not([href^="/blog/tag/"])').first().getAttribute("href"))!);
+  const href = await page.locator('main a[href^="/blog/tag/"]').first().getAttribute("href");
+  return href!.split("/").pop()!;
+}
+
 test("empty tag pages render as public empty states and unknown routes return 404", async ({ page }) => {
   const emptyTag = await page.goto("/blog/tag/unknown", { waitUntil: "domcontentloaded" });
   expect(emptyTag?.status()).toBe(200);
   await expect(page.getByText("No posts with this tag.")).toBeVisible();
+  await expect(page.locator('meta[name="robots"]')).toHaveAttribute("content", /noindex/);
+  await page.goto(`/blog/tag/${await knownTag(page)}`);
+  await expect(page.locator('meta[name="robots"]')).not.toHaveAttribute("content", /noindex/);
 
   const missing = await page.goto("/this-route-does-not-exist", { waitUntil: "domcontentloaded" });
   expect(missing?.status()).toBe(404);
