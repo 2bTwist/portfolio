@@ -144,3 +144,23 @@ test("with reduced motion the palette icon does not scale or rotate", async ({ p
   }
   expect(transforms.filter((t) => t !== "none" && t !== "matrix(1, 0, 0, 1, 0, 0)")).toEqual([]);
 });
+
+test("the palette and terminal code waits for the visitor's first move, not page load", async ({ page }) => {
+  await page.setViewportSize({ width: 1280, height: 800 });
+  const scripts: string[] = [];
+  page.on("request", (r) => {
+    if (r.resourceType() === "script") scripts.push(r.url());
+  });
+  await page.goto("/");
+  await page.locator(".ide-row-icon svg").first().waitFor({ state: "visible" });
+  // Well past the old idle-time warm-up (requestIdleCallback, 2.5 s timeout).
+  await page.waitForTimeout(3000);
+  const atRest = scripts.length;
+
+  await page.mouse.move(200, 200);
+  await expect.poll(() => scripts.length).toBeGreaterThan(atRest);
+
+  // And the first open is still immediate.
+  await page.keyboard.press("ControlOrMeta+k");
+  await expect(palette(page)).toBeVisible();
+});

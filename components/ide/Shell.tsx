@@ -93,19 +93,20 @@ export function Shell({
     return () => window.removeEventListener("keydown", onKey);
   }, [toggleCmdk, closeCmdk, toggleTerm, closeTerm]);
 
-  // Warm the lazy palette/terminal chunks during idle time so the first open is
-  // instant. They stay off the initial critical path + size budget — loaded
-  // after first paint, never referenced by the prerendered HTML. (Measured: this
-  // adds no meaningful TBT — the chunks are small and requestIdleCallback runs
-  // after the blocking load work.)
+  // Warm the lazy palette/terminal chunks on the visitor's first sign of use
+  // (a pointer move, key, touch or focus), so the first open is still instant.
+  // Not on first idle: the palette brings motion and the search library, about
+  // 150 kB to parse, and idle right after hydration is still inside page load.
   useEffect(() => {
-    const ric = window.requestIdleCallback;
-    if (ric) {
-      const id = ric(warmOverlays, { timeout: 2500 });
-      return () => window.cancelIdleCallback?.(id);
-    }
-    const t = window.setTimeout(warmOverlays, 1200);
-    return () => window.clearTimeout(t);
+    const events = ["pointermove", "keydown", "touchstart", "focusin"] as const;
+    const warm = () => {
+      for (const type of events) window.removeEventListener(type, warm, true);
+      warmOverlays();
+    };
+    for (const type of events) window.addEventListener(type, warm, { capture: true, passive: true });
+    return () => {
+      for (const type of events) window.removeEventListener(type, warm, true);
+    };
   }, []);
 
   return (
