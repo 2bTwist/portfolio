@@ -99,3 +99,18 @@ test("muting silences the typing piano", async ({ page }) => {
   await page.waitForTimeout(200);
   expect(await oscillators()).toBe(muted);
 });
+
+test("the cursor quip bubble has no pop-in with reduced motion", async ({ page }) => {
+  await page.emulateMedia({ reducedMotion: "reduce" });
+  await page.goto("/");
+  // The bubble's stylesheet contract, checked on a bare element of its class.
+  const name = await page.evaluate(() => {
+    const el = document.createElement("div");
+    el.className = "cursor-bubble";
+    document.body.append(el);
+    const value = getComputedStyle(el).animationName;
+    el.remove();
+    return value;
+  });
+  expect(name).toBe("none");
+});

@@ -1142,7 +1142,7 @@ html[data-site-hint] [data-tour="themes"]::after {
   }
 }
 @media (prefers-reduced-motion: reduce) {
-  .ide-terminal-quip {
+  .cursor-bubble {
     animation: none;
   }
 }
