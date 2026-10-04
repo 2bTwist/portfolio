@@ -72,6 +72,27 @@ function clientRows(): Row[] {
   return rows.filter((r): r is Row => r !== null);
 }
 
+// What the edge already knows about this request, bounded by WHOAMI_TIMEOUT_MS;
+// null when it is unknown, slow, or offline (the reveal then shows client data
+// only). Module scope: React Compiler cannot lower try/finally in a component.
+async function serverGroup(lookup: AbortController): Promise<Group | null> {
+  const giveUp = window.setTimeout(() => lookup.abort(), WHOAMI_TIMEOUT_MS);
+  try {
+    const res = await fetch("/api/whoami", { cache: "no-store", signal: lookup.signal });
+    const d = (await res.json()) as Record<string, string | null>;
+    const rows: Row[] = [];
+    if (d.ip) rows.push({ label: "IP address", value: d.ip });
+    const place = [d.city, d.region, d.country].filter(Boolean).join(", ");
+    if (place) rows.push({ label: "Approx. location", value: place });
+    if (d.timezone) rows.push({ label: "Located in", value: d.timezone });
+    return rows.length ? { title: "What the server already knows", rows } : null;
+  } catch {
+    return null;
+  } finally {
+    window.clearTimeout(giveUp);
+  }
+}
+
 export function DataReveal() {
   const [groups, setGroups] = useState<Group[] | null>(null);
   const closeRef = useRef<HTMLButtonElement>(null);
@@ -109,22 +130,7 @@ export function DataReveal() {
     };
     const timer = window.setTimeout(async () => {
       const client: Group = { title: "What your browser just told it", rows: clientRows() };
-      let server: Group | null = null;
-      const giveUp = window.setTimeout(() => lookup.abort(), WHOAMI_TIMEOUT_MS);
-      try {
-        const res = await fetch("/api/whoami", { cache: "no-store", signal: lookup.signal });
-        const d = (await res.json()) as Record<string, string | null>;
-        const rows: Row[] = [];
-        if (d.ip) rows.push({ label: "IP address", value: d.ip });
-        const place = [d.city, d.region, d.country].filter(Boolean).join(", ");
-        if (place) rows.push({ label: "Approx. location", value: place });
-        if (d.timezone) rows.push({ label: "Located in", value: d.timezone });
-        if (rows.length) server = { title: "What the server already knows", rows };
-      } catch {
-        /* offline, slow, or local dev: just show client data */
-      } finally {
-        window.clearTimeout(giveUp);
-      }
+      const server = await serverGroup(lookup);
       show(server ? [server, client] : [client]);
     }, 3500);
 
