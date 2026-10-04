@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
+import { DEFAULT_COLORS } from "@/app/lib/palette";
 
 /* Module-scope helpers: kept out of the component body so the React Compiler
    doesn't try to lower the dynamic import() (it bails on import expressions).
@@ -30,8 +31,8 @@ function loadDevReactGrab() {
 // A small hello for anyone who opens devtools (prod only, so dev stays quiet).
 function printConsoleGreeting() {
   if (process.env.NODE_ENV !== "production") return;
-  const head = "color:#a04c39;font-size:14px;font-weight:700";
-  const dim = "color:#726552;font-size:12px";
+  const head = `color:${DEFAULT_COLORS["--accent"]};font-size:14px;font-weight:700`;
+  const dim = `color:${DEFAULT_COLORS["--muted"]};font-size:12px`;
   console.log("%cHey, you opened the console 👋", head);
   console.log("%cYou can read the source → https://github.com/2bTwist/portfolio", dim);
   console.log("%cLike what you see? Let's talk → ndanjiedmond@gmail.com", dim);

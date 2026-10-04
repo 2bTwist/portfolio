@@ -1,5 +1,5 @@
 import { expect, test } from "@playwright/test";
-import { PALETTES } from "../../app/lib/palette";
+import { DEFAULT_PALETTE_INDEX, PALETTES } from "../../app/lib/palette";
 
 /* Preferences (CONTEXT.md: preference): a returning visitor's saved
    palette and explorer width are in place from the first painted frame and still
@@ -53,6 +53,6 @@ test("with nothing saved, the default palette and width render", async ({ page }
   await page.goto("/");
   await expect
     .poll(() => page.evaluate(() => getComputedStyle(document.body).getPropertyValue("--bg").trim()))
-    .toBe(PALETTES[0].vars["--bg"]);
+    .toBe(PALETTES[DEFAULT_PALETTE_INDEX].vars["--bg"]);
   await expect.poll(() => page.locator("#ide-explorer").evaluate((el) => Math.round(el.getBoundingClientRect().width))).toBe(220);
 });
