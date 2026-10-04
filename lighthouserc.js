@@ -2,6 +2,7 @@
 // metrics with a calibrated (non-null) budget are enforced as errors; the rest
 // stay as warnings until `pnpm perf:calibrate` fills them in (decision 10).
 const budgets = require("./budgets.json");
+const { lighthouseSettings, declaredNetwork } = require("./perf/lighthouse-settings.js");
 const m = budgets.metrics;
 
 const assertions = {
@@ -17,13 +18,12 @@ function gate(key, auditId, severity = "error") {
     assertions[auditId] = [severity, { maxNumericValue: m[key].budget, aggregationMethod: "median" }];
   }
 }
-// LCP is advisory here, NOT a hard gate. Lighthouse measures simulated mobile
-// Slow-4G (Lantern), which projects ~3.5s for this page even though the observed
-// resource load is ~30ms and the real-world LCP is ~1s (load ~444ms). budgets.json
-// documents Fast-4G, which lighthouse has no profile for, so the two never aligned.
-// CLS and TBT stay hard errors; INP is hard-gated by e2e/perf.spec.ts. The LCP
-// budget stays documented in budgets.json as the target.
-gate("lcp", "largest-contentful-paint", "warn");
+// Every budget is a hard gate under the conditions budgets.json declares
+// (`measurement.network`, simulated by Lighthouse; see perf/lighthouse-settings.js).
+// lighthouserc.slow4g.js re-runs the same audits on Lighthouse's slower mobile
+// default and reports LCP there as a warning. INP is hard-gated by
+// e2e/perf.spec.ts.
+gate("lcp", "largest-contentful-paint");
 gate("cls", "cumulative-layout-shift");
 gate("tbt", "total-blocking-time");
 
@@ -65,6 +65,7 @@ module.exports = {
       numberOfRuns: budgets.measurement.runs || 5,
       startServerCommand: "pnpm start",
       url: [budgets.url],
+      settings: lighthouseSettings(declaredNetwork),
     },
     assert: { preset: "lighthouse:no-pwa", assertions },
     // Filesystem, not temporary-public-storage: that target gets a public URL
