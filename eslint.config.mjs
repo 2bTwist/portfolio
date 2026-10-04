@@ -40,6 +40,9 @@ const eslintConfig = defineConfig([
     "next-env.d.ts",
     // CommonJS tool configs (lhci / size-limit expect module.exports + require).
     "lighthouserc.js",
+    "lighthouserc.slow4g.js",
+    "perf/lighthouse-settings.js",
+    "perf/lighthouse.config.js",
     ".size-limit.js",
   ]),
 ]);

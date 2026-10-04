@@ -29,6 +29,8 @@ async function once(url: string) {
       "exec", "lighthouse", url,
       "--quiet",
       "--only-categories=performance",
+      // budgets.json's declared network and CPU conditions, as Lighthouse CI uses.
+      "--config-path=perf/lighthouse.config.js",
       "--output=json",
       "--output-path=stdout",
       "--chrome-flags=--headless=new --no-sandbox",

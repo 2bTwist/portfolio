@@ -1,0 +1,16 @@
+{
+  "Fast4G": {
+    "rttMs": 60,
+    "throughputKbps": 8100,
+    "requestLatencyMs": 165,
+    "downloadThroughputKbps": 8100,
+    "uploadThroughputKbps": 1350
+  },
+  "Slow4G": {
+    "rttMs": 150,
+    "throughputKbps": 1638.4,
+    "requestLatencyMs": 562.5,
+    "downloadThroughputKbps": 1474.56,
+    "uploadThroughputKbps": 675
+  }
+}

@@ -16,6 +16,7 @@
     "size": "size-limit",
     "analyze": "ANALYZE=true next build",
     "lh": "lhci autorun",
+    "lh:slow4g": "lhci autorun --config=./lighthouserc.slow4g.js",
     "perf:check": "tsx tools/perf-check/cli.ts check",
     "perf:calibrate": "tsx tools/perf-check/cli.ts calibrate",
     "perf": "next build && size-limit && playwright test e2e/perf.spec.ts && tsx tools/perf-check/cli.ts check",

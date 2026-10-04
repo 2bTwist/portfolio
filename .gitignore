@@ -45,6 +45,7 @@ next-env.d.ts
 /test-results
 /playwright-report
 /lhci-results
+/lhci-results-slow4g
 
 # stray
 .swift-version
