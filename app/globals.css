@@ -3115,6 +3115,23 @@ body[data-dragging] iframe {
 .site-theme-swatch::before {
   inset: -7px;
 }
+/* Compact sound switch: a 28px touch target matching the swatches'. */
+.site-mute {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  margin-inline: -6px;
+  padding: 0;
+  border: none;
+  background: none;
+  color: var(--muted);
+  cursor: pointer;
+}
+.site-mute:hover {
+  color: var(--text);
+}
 @media (max-width: 359px) {
   .site-nav-links { font-size: 0.75rem; }
 }

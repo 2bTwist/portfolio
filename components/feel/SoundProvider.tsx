@@ -16,7 +16,15 @@ import { hoverOwner, hoverSound, pressSound } from "./soundAttributes";
 import { PREFERENCES } from "@/app/lib/preferences";
 import { getPreference, setPreference, usePreference } from "@/components/hooks/usePreference";
 
-type SoundCtx = { muted: boolean; toggleMuted: () => void; play: (kind: keyof typeof sfx) => void };
+type SoundCtx = {
+  muted: boolean;
+  toggleMuted: () => void;
+  play: (kind: keyof typeof sfx) => void;
+  /* False when muted, or when reduced motion or reduced data is requested (the
+     same gate as every interface sound). Audio played outside `play` (the
+     terminal's piano and applause) checks this so one policy silences all. */
+  soundAllowed: boolean;
+};
 const Ctx = createContext<SoundCtx | null>(null);
 
 /* --- reduced motion / data external store --- */
@@ -39,8 +47,10 @@ function readReduced(): boolean {
 const serverFalse = () => false;
 
 // Every sound goes through here. The mark lets tests see which sound played
-// without audio; it writes nothing to the DOM.
+// without audio; it writes nothing to the DOM. Only the latest mark per sound
+// is kept, so a long session does not accumulate one entry per press.
 function emit(kind: keyof typeof sfx) {
+  performance.clearMarks(`sound:${kind}`);
   performance.mark(`sound:${kind}`);
   sfx[kind]();
 }
@@ -106,7 +116,7 @@ export function SoundProvider({ children }: { children: ReactNode }) {
     if (allowed) emit(kind);
   };
 
-  return <Ctx.Provider value={{ muted, toggleMuted, play }}>{children}</Ctx.Provider>;
+  return <Ctx.Provider value={{ muted, toggleMuted, play, soundAllowed: allowed }}>{children}</Ctx.Provider>;
 }
 
 export function useSound() {

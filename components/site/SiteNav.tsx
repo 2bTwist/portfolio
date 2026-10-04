@@ -7,6 +7,7 @@ import Link from "next/link";
 import { profile } from "@/data/profile";
 import { PAGES } from "@/data/pages";
 import { ThemeSwatches } from "@/components/ide/ThemeSwatches";
+import { MuteToggle } from "@/components/feel/MuteToggle";
 import { tourAnchor } from "./tour";
 
 // The compact subset each page declares in data/pages.ts, in its declared order.
@@ -40,8 +41,10 @@ export function SiteNav() {
         ))}
       </nav>
       <div className="site-nav-actions">
-        {/* The desktop switcher lives in the status bar, which is hidden here. */}
+        {/* The desktop theme and sound switches live in the status bar, which is
+            hidden here. */}
         <ThemeSwatches className="site-theme" swatchClassName="site-theme-swatch" {...tourAnchor("themes")} />
+        <MuteToggle className="site-mute" />
         <a
           href={profile.links.github}
           target="_blank"
