@@ -102,7 +102,8 @@ async function measureRun(page: Page): Promise<{
   expect(twistieCount).toBeGreaterThan(0);
   for (let i = 0; i < twistieCount; i++) {
     const twistie = twisties.nth(i);
-    const row = twistie.locator("xpath=..");
+    // The disclosure button itself carries aria-expanded.
+    const row = twistie;
     const before = await row.getAttribute("aria-expanded");
     expect(before === "true" || before === "false").toBe(true);
     const expected = before === "true" ? "false" : "true";
@@ -116,7 +117,8 @@ async function measureRun(page: Page): Promise<{
   }
   const twistie = twisties.first();
   for (let i = 0; i < 4; i++) {
-    const row = twistie.locator("xpath=..");
+    // The disclosure button itself carries aria-expanded.
+    const row = twistie;
     const before = await row.getAttribute("aria-expanded");
     expect(before === "true" || before === "false").toBe(true);
     const expected = before === "true" ? "false" : "true";

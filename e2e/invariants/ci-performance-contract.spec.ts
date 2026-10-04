@@ -131,11 +131,12 @@ test("palette changes suppress global transitions without muting local interacti
     await page.evaluate(() => {
       (window as typeof window & { __transitionRuns?: unknown[] }).__transitionRuns = [];
     });
+    // Explorer rows hold still; their local hover feedback is a background wash.
     await row.hover();
     await expect.poll(() =>
       page.evaluate(() =>
         (window as typeof window & { __transitionRuns?: { property: string; target: string }[] }).__transitionRuns?.some(
-          (transition) => transition.target.includes("ide-row") && transition.property === "transform",
+          (transition) => transition.target.includes("ide-row") && transition.property === "background-color",
         ),
       ),
     ).toBe(true);
