@@ -1278,6 +1278,26 @@ html[data-site-hint] [data-tour="themes"]::after {
     color: var(--term-muted);
   }
 }
+/* The same block resting on a typed character mid-line: its off phase shows the
+   character as typed, not dimmed like a suggestion. */
+.ide-terminal-caret-char[data-typed] {
+  animation-name: ideCaretTypedBlink;
+}
+@keyframes ideCaretTypedBlink {
+  0%,
+  49.9% {
+    background: var(--term-accent);
+    color: var(--term-bg);
+  }
+  50%,
+  100% {
+    background: transparent;
+    color: var(--term-text);
+  }
+}
+.ide-terminal-selected {
+  background: color-mix(in srgb, var(--term-accent) 35%, transparent);
+}
 @media (prefers-reduced-motion: reduce) {
   .ide-terminal-caret-char {
     animation: none;

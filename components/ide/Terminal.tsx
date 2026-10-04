@@ -18,6 +18,7 @@ import { PALETTES } from "@/app/lib/palette";
 import { profile } from "@/data/profile";
 import { TerminalIcon } from "@/components/feel/animated-icons";
 import { playNote, FUR_ELISE } from "@/components/feel/sound";
+import { useSound } from "@/components/feel/SoundProvider";
 import { BANNER } from "./banner";
 import { useOverlay, useSession } from "./store";
 import { ResizeHandle } from "./ResizeHandle";
@@ -96,9 +97,17 @@ export default function Terminal() {
   const { closeTerm, termOpen } = useOverlay();
   const { setPaletteIndex, openTab } = useSession();
   const { tree } = useCatalogue();
+  const { soundAllowed } = useSound();
   // Seed from the persisted session so a remount restores the scrollback + cwd.
   const [lines, setLines] = useState<Line[]>(sessionLines);
-  const [value, setValue] = useState("");
+  const [value, setRawValue] = useState("");
+  // The input's selection, mirrored so the drawn caret sits where editing happens.
+  const [selection, setSelection] = useState({ start: 0, end: 0 });
+  // Writing the value leaves the browser's caret at the end; mirror that.
+  const setValue = (next: string) => {
+    setRawValue(next);
+    setSelection({ start: next.length, end: next.length });
+  };
   const [cwd, setCwd] = useState<string[]>(sessionCwd);
   const inputRef = useRef<HTMLInputElement>(null);
   const outRef = useRef<HTMLDivElement>(null);
@@ -182,13 +191,15 @@ export default function Terminal() {
   }
 
   function finale() {
-    try {
-      if (!applauseRef.current) applauseRef.current = new Audio("/sounds/applause.mp3");
-      applauseRef.current.currentTime = 0;
-      applauseRef.current.volume = 0.7;
-      void applauseRef.current.play();
-    } catch {
-      /* audio blocked — visual finale still runs */
+    if (soundAllowed) {
+      try {
+        if (!applauseRef.current) applauseRef.current = new Audio("/sounds/applause.mp3");
+        applauseRef.current.currentTime = 0;
+        applauseRef.current.volume = 0.7;
+        void applauseRef.current.play();
+      } catch {
+        /* audio blocked — visual finale still runs */
+      }
     }
     setCelebrating(true);
     showQuip("congratulations!", MEOW_GIF, true);
@@ -220,7 +231,7 @@ export default function Terminal() {
     } else {
       fastRun.current = 0;
     }
-    playNote(FUR_ELISE[noteIdx.current]);
+    if (soundAllowed) playNote(FUR_ELISE[noteIdx.current]);
     noteIdx.current += 1;
     streak.current += 1;
     if (streak.current >= nextQuipAt.current) {
@@ -231,7 +242,10 @@ export default function Terminal() {
   }
 
   function onInputChange(e: ChangeEvent<HTMLInputElement>) {
-    setValue(e.target.value); // the input scrolls; no false "out of space" quip
+    // the input scrolls; no false "out of space" quip
+    const input = e.target;
+    setRawValue(input.value);
+    setSelection({ start: input.selectionStart ?? input.value.length, end: input.selectionEnd ?? input.value.length });
   }
 
   // Focus the input on mount AND every time the drawer opens, so it's always
@@ -411,11 +425,14 @@ export default function Terminal() {
   }
 
   // Tab → complete the current token to the longest common prefix (or fully, if
-  // unique). Right/End → accept the ghost suggestion.
+  // unique); it never leaves the input, as in a shell. Shift+Tab moves focus on
+  // as usual. Right/End at the end of the line accept the ghost suggestion.
   function onKeyDown(e: KeyboardEvent<HTMLInputElement>) {
-    if (e.key.length === 1) onPlay(); // printable key -> next piano note + quips
-    if (e.key === "Tab") {
+    // printable key -> next piano note + quips (not ⌘K and other shortcuts)
+    if (e.key.length === 1 && !e.metaKey && !e.ctrlKey) onPlay();
+    if (e.key === "Tab" && !e.shiftKey) {
       e.preventDefault();
+      if (!caretAtEnd) return;
       const tokens = value.split(" ");
       const cur = tokens[tokens.length - 1] ?? "";
       const cands = candidatesFor(tree, value, cwd);
@@ -425,18 +442,22 @@ export default function Terminal() {
         tokens[tokens.length - 1] = target;
         setValue(tokens.join(" "));
       }
-    } else if ((e.key === "ArrowRight" || e.key === "End") && ghost) {
+    } else if ((e.key === "ArrowRight" || e.key === "End") && ghost && caretAtEnd) {
       e.preventDefault();
       setValue(value + ghost);
     }
   }
 
-  // Ghost completion: the remainder of the best match, shown dimmed after the
-  // caret (fish-style). Empty when there's nothing to suggest.
+  // The drawn caret follows the input's real selection. Ghost completion (the
+  // remainder of the best match, dimmed after the caret, fish-style) shows only
+  // with the caret at the end, where accepting it appends.
+  const selStart = Math.min(selection.start, value.length);
+  const selEnd = Math.min(Math.max(selection.end, selStart), value.length);
+  const caretAtEnd = selStart === value.length;
   const tokens = value.split(" ");
   const cur = tokens[tokens.length - 1] ?? "";
   const cands = value && !value.endsWith(" ") ? candidatesFor(tree, value, cwd) : [];
-  const ghost = cands.length ? cands[0].slice(cur.length) : "";
+  const ghost = caretAtEnd && cands.length ? cands[0].slice(cur.length) : "";
 
   return (
     <div
@@ -518,7 +539,7 @@ export default function Terminal() {
           ×
         </button>
       </div>
-      <div ref={outRef} id="ide-terminal-out" className="ide-terminal-out">
+      <div ref={outRef} id="ide-terminal-out" className="ide-terminal-out" role="log" aria-label="Terminal output">
         <pre className="ide-terminal-banner" aria-hidden="true">{BANNER}</pre>
         {lines.map((l, i) => (
           <div key={i} className="ide-terminal-line" data-kind={l.kind}>
@@ -536,8 +557,24 @@ export default function Terminal() {
             keystroke sink (the block replaces the native caret). */}
         <span className="ide-terminal-live" aria-hidden="true">
           <span className="ide-terminal-prompt">{promptFor(cwd)}</span>
-          <span className="ide-terminal-typed">{value}</span>
-          {ghost ? (
+          {selEnd > selStart ? (
+            <>
+              <span className="ide-terminal-typed">{value.slice(0, selStart)}</span>
+              <span className="ide-terminal-typed ide-terminal-selected">{value.slice(selStart, selEnd)}</span>
+              <span className="ide-terminal-typed">{value.slice(selEnd)}</span>
+            </>
+          ) : !caretAtEnd ? (
+            <>
+              <span className="ide-terminal-typed">{value.slice(0, selStart)}</span>
+              <span className="ide-terminal-caret-char" data-typed="">
+                {value[selStart]}
+              </span>
+              <span className="ide-terminal-typed">{value.slice(selStart + 1)}</span>
+            </>
+          ) : (
+            <span className="ide-terminal-typed">{value}</span>
+          )}
+          {selEnd > selStart || !caretAtEnd ? null : ghost ? (
             // cursor sits ON the first suggested char (no gap), rest dimmed
             <>
               <span className="ide-terminal-caret-char">{ghost.slice(0, 1)}</span>
@@ -553,6 +590,10 @@ export default function Terminal() {
           value={value}
           onChange={onInputChange}
           onKeyDown={onKeyDown}
+          onSelect={(e) => {
+            const input = e.currentTarget;
+            setSelection({ start: input.selectionStart ?? input.value.length, end: input.selectionEnd ?? input.value.length });
+          }}
           aria-label="Terminal input"
           autoComplete="off"
           spellCheck={false}
