@@ -21,8 +21,11 @@
    - Different `role`: only morph a `card` against a `banner` (the detail hero),
      never card-to-card. Without this, the same project cards on the home grid
      and the /projects grid would all morph just from navigating between them.
-   - `role === "card"` arrivals scroll the card to center first, so going back
-     focuses the exact card you clicked and the morph lands on it.
+   - A card arrival is a return: it morphs, and scrolls the card to center first,
+     only when the visitor left this page by activating that same card. Back, the
+     "← projects/" link, or a tab all count; reaching the page any other way (say
+     a tab click after arriving at the detail page from the explorer) leaves the
+     page's scroll alone instead of jumping to a card nobody clicked.
 
    Pure client animation, no server round-trip, no router coupling. */
 
@@ -63,6 +66,8 @@ const activeMorphs = new Map<string, {
 // never advanced the pointer.
 let lastLeftPath = "";
 let currentPath = "";
+// The card most recently activated to leave its page (see the return rule above).
+let departure: { key: string; from: string } | null = null;
 const MAX_AGE = 300_000; // ms — generous (reading a detail page takes a while)
 const DURATION = 380;
 const EASING = "cubic-bezier(0.22, 1, 0.36, 1)";
@@ -132,12 +137,21 @@ export function MorphImage({
     // Morph only a genuine cross-page card<->banner pair, AND only when the twin
     // was on the page we just left (not a detail page visited earlier whose
     // banner entry is still lingering in the store).
+    const returning = departure?.key === morphKey && departure.from === here;
     const shouldMorph =
       !!prev &&
       prev.from !== here &&
       prev.from === lastLeftPath &&
       prev.kind !== kind &&
+      (kind === "banner" || returning) &&
       Date.now() - prev.t < MAX_AGE;
+
+    // Activating the card's link (click, or Enter) marks it as the way out.
+    const link = kind === "card" ? el.closest("a") : null;
+    const markDeparture = () => {
+      departure = { key: morphKey, from: here };
+    };
+    link?.addEventListener("click", markDeparture);
 
     let raf = 0;
     if (shouldMorph && reduce && prev) {
@@ -236,6 +250,7 @@ export function MorphImage({
       // fires between the two mounts, and cancelling would kill the morph. The
       // rAF guards itself with el.isConnected for real unmounts.
       void raf;
+      link?.removeEventListener("click", markDeparture);
       const active = activeMorphs.get(morphKey);
       const presented = active?.destination === el ? active.clone : null;
       const rect = (presented ?? el).getBoundingClientRect();
