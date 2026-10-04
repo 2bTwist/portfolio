@@ -3,14 +3,18 @@
 /* Open-file tabs. Driven entirely by navigation (see store.tsx): visiting a
    known route opens a tab here. Clicking a tab navigates; the × closes it.
 
-   Right-click a tab for a VS Code-style menu (Close / Close Others / Close All).
+   Right-click a tab, or press Shift+F10 / the context-menu key on it, for a VS
+   Code-style menu (Close / Close Others / Close All). The menu follows the
+   WAI-ARIA menu pattern: focus moves to its first item, Up/Down/Home/End move
+   between enabled items, and Escape or Tab closes it and returns focus to the
+   tab it was opened from (or to the current tab if that one was closed).
    Keyboard shortcuts use Alt instead of ⌘ because the browser reserves ⌘W /
    Ctrl+W (it closes the browser tab and can't be reliably intercepted):
      Alt+W → close active · Alt+Shift+W → close others · Alt+Shift+A → close all */
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useCallback, useEffect, useState } from "react";
+import { useEffect, useRef, useState, type KeyboardEvent as ReactKeyboardEvent } from "react";
 import { createPortal } from "react-dom";
 import { FileIcon } from "./FileIcon";
 import { useTabSession } from "./store";
@@ -27,7 +31,57 @@ export function Tabs({ className = "" }: { className?: string }) {
   const [menu, setMenu] = useState<MenuState>(null);
   const isMac = useIsMac();
 
-  const closeMenu = useCallback(() => setMenu(null), []);
+  const menuRef = useRef<HTMLDivElement>(null);
+  const triggerRef = useRef<HTMLElement | null>(null);
+
+  const restoreFocusRef = useRef(false);
+
+  // Closing from the keyboard or an item returns focus to the tab that opened
+  // the menu, or to the current tab when an item just closed that one.
+  const dismissMenu = () => {
+    restoreFocusRef.current = true;
+    setMenu(null);
+  };
+  // After the commit, so a tab the item closed is already gone.
+  useEffect(() => {
+    if (menu || !restoreFocusRef.current) return;
+    restoreFocusRef.current = false;
+    const trigger = triggerRef.current;
+    const target = trigger?.isConnected
+      ? trigger
+      : document.querySelector<HTMLElement>('[aria-label="Open files"] a[aria-current="page"]');
+    target?.focus();
+  }, [menu, tabs]);
+
+  // Opens the menu for `tab`, at the pointer or, from the keyboard, under the tab.
+  function openMenu(tab: { href: string; name: string }, tabEl: HTMLElement, at?: { x: number; y: number }) {
+    triggerRef.current = tabEl.querySelector("a");
+    const box = tabEl.getBoundingClientRect();
+    setMenu({ href: tab.href, name: tab.name, x: at?.x ?? box.left, y: at?.y ?? box.bottom });
+  }
+
+  // Focus the first enabled item as the menu opens.
+  useEffect(() => {
+    if (menu) menuRef.current?.querySelector<HTMLElement>('[role="menuitem"]:not(:disabled)')?.focus();
+  }, [menu]);
+
+  function onMenuKeyDown(e: ReactKeyboardEvent<HTMLDivElement>) {
+    const items = [...e.currentTarget.querySelectorAll<HTMLElement>('[role="menuitem"]:not(:disabled)')];
+    const at = items.indexOf(document.activeElement as HTMLElement);
+    const move = (i: number) => {
+      e.preventDefault();
+      items[(i + items.length) % items.length]?.focus();
+    };
+    if (e.key === "ArrowDown") move(at + 1);
+    else if (e.key === "ArrowUp") move(at - 1);
+    else if (e.key === "Home") move(0);
+    else if (e.key === "End") move(items.length - 1);
+    else if (e.key === "Escape" || e.key === "Tab") {
+      e.preventDefault();
+      e.stopPropagation();
+      dismissMenu();
+    }
+  }
 
   // Browser-safe keyboard shortcuts. Ignored while typing in a field so Option
   // key combos that produce characters don't also nuke tabs.
@@ -57,6 +111,7 @@ export function Tabs({ className = "" }: { className?: string }) {
   // Dismiss the context menu on any outside interaction / Escape / blur.
   useEffect(() => {
     if (!menu) return;
+    const closeMenu = () => setMenu(null);
     function onKey(e: KeyboardEvent) {
       if (e.key === "Escape") setMenu(null);
     }
@@ -70,7 +125,7 @@ export function Tabs({ className = "" }: { className?: string }) {
       window.removeEventListener("resize", closeMenu);
       window.removeEventListener("keydown", onKey);
     };
-  }, [menu, closeMenu]);
+  }, [menu]);
 
   if (tabs.length === 0) {
     return <div className={className} aria-hidden />;
@@ -92,7 +147,19 @@ export function Tabs({ className = "" }: { className?: string }) {
               onPointerDown={(e) => beginRowDrag(e, tab.href, tab.name)}
               onContextMenu={(e) => {
                 e.preventDefault();
-                setMenu({ href: tab.href, name: tab.name, x: e.clientX, y: e.clientY });
+                // A context-menu event without a pointer position on the tab
+                // (a screen reader's menu command) opens under the tab instead.
+                const box = e.currentTarget.getBoundingClientRect();
+                const onTab = e.clientX >= box.left && e.clientX <= box.right && e.clientY >= box.top && e.clientY <= box.bottom;
+                openMenu(tab, e.currentTarget, onTab ? { x: e.clientX, y: e.clientY } : undefined);
+              }}
+              // Shift+F10 and the context-menu key open the menu the same way on
+              // every platform (browsers only map Shift+F10 off macOS).
+              onKeyDown={(e) => {
+                if ((e.key === "F10" && e.shiftKey) || e.key === "ContextMenu") {
+                  e.preventDefault();
+                  openMenu(tab, e.currentTarget);
+                }
               }}
             >
               <Link
@@ -157,8 +224,11 @@ export function Tabs({ className = "" }: { className?: string }) {
       {menu
         ? createPortal(
             <div
+              ref={menuRef}
               className="ide-tab-menu"
               role="menu"
+              aria-label={`${menu.name} tab`}
+              onKeyDown={onMenuKeyDown}
               // clamp so the menu never spills off-screen (~210px wide)
               style={{
                 left: Math.min(menu.x, window.innerWidth - 218),
@@ -170,10 +240,11 @@ export function Tabs({ className = "" }: { className?: string }) {
               <button
                 type="button"
                 role="menuitem"
+                tabIndex={-1}
                 className="ide-tab-menu-item"
                 onClick={() => {
                   closeTab(menu.href);
-                  closeMenu();
+                  dismissMenu();
                 }}
               >
                 <span>Close</span>
@@ -182,11 +253,12 @@ export function Tabs({ className = "" }: { className?: string }) {
               <button
                 type="button"
                 role="menuitem"
+                tabIndex={-1}
                 className="ide-tab-menu-item"
                 disabled={soloTab}
                 onClick={() => {
                   closeOthers(menu.href);
-                  closeMenu();
+                  dismissMenu();
                 }}
               >
                 <span>Close Others</span>
@@ -195,10 +267,11 @@ export function Tabs({ className = "" }: { className?: string }) {
               <button
                 type="button"
                 role="menuitem"
+                tabIndex={-1}
                 className="ide-tab-menu-item"
                 onClick={() => {
                   closeAll();
-                  closeMenu();
+                  dismissMenu();
                 }}
               >
                 <span>Close All</span>
