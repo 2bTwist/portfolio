@@ -110,26 +110,16 @@ export function CustomCursor() {
     // Over an <iframe> (e.g. the resume PDF viewer) the parent window receives
     // no pointermove, so the fake cursor would freeze at the boundary while the
     // iframe shows the OS cursor — two cursors. Hand off to the native cursor
-    // on iframe enter; onMove re-arms the instant the pointer returns to the
-    // parent. (During a drag the iframe is pointer-events:none, so it gets no
-    // enter and the captured drag keeps tracking.)
-    const attached: HTMLIFrameElement[] = [];
-    const attachIframe = (f: HTMLIFrameElement) => {
-      f.addEventListener("pointerenter", hide);
-      attached.push(f);
+    // as the pointer comes over an iframe; onMove re-arms the instant it returns
+    // to the parent. (During a drag the iframe is pointer-events:none, so it
+    // gets no pointerover and the captured drag keeps tracking.) One delegated
+    // listener, so the cursor holds no reference to any frame and a removed
+    // frame can be collected.
+    const onOver = (e: PointerEvent) => {
+      if (e.target instanceof HTMLIFrameElement) hide();
     };
-    document.querySelectorAll("iframe").forEach((f) => attachIframe(f as HTMLIFrameElement));
-    const mo = new MutationObserver((muts) => {
-      for (const m of muts) {
-        for (const n of m.addedNodes) {
-          if (!(n instanceof HTMLElement)) continue;
-          if (n.tagName === "IFRAME") attachIframe(n as HTMLIFrameElement);
-          else n.querySelectorAll?.("iframe").forEach((f) => attachIframe(f as HTMLIFrameElement));
-        }
-      }
-    });
-    mo.observe(document.body, { childList: true, subtree: true });
 
+    document.addEventListener("pointerover", onOver, { passive: true });
     window.addEventListener("pointermove", onMove, { passive: true });
     window.addEventListener("pointerdown", onDown, { passive: true });
     window.addEventListener("pointerup", onUp, { passive: true });
@@ -140,8 +130,7 @@ export function CustomCursor() {
 
     return () => {
       clearTimeout(settle);
-      mo.disconnect();
-      for (const f of attached) f.removeEventListener("pointerenter", hide);
+      document.removeEventListener("pointerover", onOver);
       window.removeEventListener("pointermove", onMove);
       window.removeEventListener("pointerdown", onDown);
       window.removeEventListener("pointerup", onUp);
@@ -154,6 +143,7 @@ export function CustomCursor() {
       delete root.dataset.cursorHover;
       delete root.dataset.cursorActive;
       delete root.dataset.cursorGrab;
+      delete root.dataset.cursorAxis;
     };
   }, [mounted]);
 
