@@ -1,5 +1,39 @@
 import { expect, test } from "@playwright/test";
 
+test("blog image morph completes on entry and browser back without hiding either image", async ({ page }) => {
+  await page.emulateMedia({ reducedMotion: "no-preference" });
+  await page.addInitScript(() => {
+    const state = window as Window & { __completedBlogMorphs?: number };
+    state.__completedBlogMorphs = 0;
+    const animate = Element.prototype.animate;
+    Element.prototype.animate = function (...args) {
+      const animation = animate.apply(this, args);
+      if (this instanceof HTMLImageElement && this.style.position === "fixed") {
+        animation.addEventListener("finish", () => { state.__completedBlogMorphs! += 1; });
+      }
+      return animation;
+    };
+  });
+  await page.goto("/blog");
+  const card = page.locator('a.proj-card[href="/blog/you-cant-prompt-taste"]');
+  const image = card.locator(".morph-img-wrap img");
+  await expect(image).toBeVisible();
+  await expect(image).toHaveJSProperty("complete", true);
+  await expect.poll(() => image.evaluate((img: HTMLImageElement) => img.naturalWidth)).toBeGreaterThan(0);
+  await card.click();
+  await page.waitForURL("**/blog/you-cant-prompt-taste");
+  await page.waitForFunction(() => (window as Window & { __completedBlogMorphs?: number }).__completedBlogMorphs === 1);
+  const banner = page.locator(".project-banner .morph-img-wrap img");
+  await expect(banner).toBeVisible();
+  await expect(banner).toHaveJSProperty("complete", true);
+  await expect.poll(() => banner.evaluate((img: HTMLImageElement) => img.naturalWidth)).toBeGreaterThan(0);
+  await page.goBack();
+  await page.waitForURL("**/blog");
+  await page.waitForFunction(() => (window as Window & { __completedBlogMorphs?: number }).__completedBlogMorphs === 2);
+  await expect(image).toBeVisible();
+  await expect(page.locator('img[aria-hidden="true"][style*="position: fixed"]')).toHaveCount(0);
+});
+
 test("shared image morph lands on stationary destinations in both directions", async ({ page }) => {
   await page.setViewportSize({ width: 1440, height: 1000 });
   await page.emulateMedia({ reducedMotion: "no-preference" });
