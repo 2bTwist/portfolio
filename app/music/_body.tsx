@@ -1,9 +1,9 @@
-import { PageShell } from "@/components/site/PageShell";
+import { PageShell, type PaneProps } from "@/components/site/PageShell";
 import { VinylPlayer } from "@/components/music/VinylPlayer";
 
-export function MusicBody() {
+export function MusicBody({ paneLabel }: PaneProps = {}) {
   return (
-    <PageShell width="wide">
+    <PageShell width="wide" paneLabel={paneLabel}>
       <h1 className="display text-4xl sm:text-5xl font-bold mb-2" style={{ color: "var(--text)" }}>
         On repeat
       </h1>

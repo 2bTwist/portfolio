@@ -1,10 +1,12 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { isBrowserOwnedClick } from "@/components/ide/linkActivation";
 
 /* Side table-of-contents with scroll-spy for long articles (project stories and
-   blog posts). Reads the rendered `.prose-content` headings on mount — their
-   ids are assigned server-side by the MDX heading components — builds the list,
+   blog posts). Reads the route's rendered `.prose-content` headings on mount
+   (inside <main>, so an article open in a split pane never joins the outline);
+   their ids are assigned server-side by the MDX heading components. Builds the list,
    and tracks the section in view with an IntersectionObserver. Click jumps to a
    section (smooth unless the reader prefers reduced motion).
 
@@ -39,7 +41,7 @@ export function ArticleToc() {
     const TOC_WIDTH = 168;
     const GAP = 24;
     const place = () => {
-      const col = document.querySelector<HTMLElement>(".prose-content");
+      const col = document.querySelector<HTMLElement>("main .prose-content");
       if (!col) return;
       const colLeft = col.getBoundingClientRect().left;
       const mainLeft = document.querySelector("main")?.getBoundingClientRect().left ?? 0;
@@ -67,7 +69,7 @@ export function ArticleToc() {
     // settled and we are not setting state synchronously during the effect.
     const frame = requestAnimationFrame(() => {
       const nodes = Array.from(
-        document.querySelectorAll<HTMLElement>(".prose-content h2, .prose-content h3"),
+        document.querySelectorAll<HTMLElement>("main .prose-content h2, main .prose-content h3"),
       ).filter((el) => el.id);
       if (nodes.length === 0) return;
 
@@ -112,6 +114,7 @@ export function ArticleToc() {
   if (headings.length < 2 || !pos.show) return null;
 
   const onJump = (e: React.MouseEvent<HTMLAnchorElement>, id: string) => {
+    if (isBrowserOwnedClick(e)) return; // new tab / window keeps the #anchor link
     e.preventDefault();
     const el = document.getElementById(id);
     if (!el) return;

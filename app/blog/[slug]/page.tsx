@@ -9,6 +9,7 @@ import { ArticleTocMount } from "@/components/content/ArticleTocMount";
 import { MorphImage } from "@/components/content/MorphImage";
 import { JsonLd } from "@/components/site/JsonLd";
 import { PageShell } from "@/components/site/PageShell";
+import { PostHeader } from "@/components/content/ArticleHeaders";
 import { SITE_URL } from "@/app/lib/site";
 import { profile } from "@/data/profile";
 
@@ -83,54 +84,19 @@ export default async function BlogPost({ params }: Params) {
       <JsonLd data={breadcrumb} />
       <ReadingProgress />
       <PageShell>
-        <Link
-          href="/blog"
-          prefetch={false}
-          className="mono text-sm no-underline transition-opacity hover:opacity-70"
-          style={{ color: "var(--muted)" }}
-        >
-          ← blog/
-        </Link>
-
-        {/* Banner up top (Twitter-article style). Carries the shared
-            view-transition name so it morphs from the index card on nav. */}
-        {post.image ? (
-          <div className="project-banner mt-4">
+        <PostHeader
+          post={post}
+          banner={(src) => (
             <MorphImage
               morphKey={`post-img-${post.slug}`}
-              src={post.image}
+              src={src}
               alt={post.title}
               sizes="(min-width: 768px) 720px, 100vw"
               priority
               kind="banner"
             />
-          </div>
-        ) : null}
-
-        <h1
-          className={`display text-3xl sm:text-4xl font-bold ${post.image ? "mt-6" : "mt-4"}`}
-          style={{ color: "var(--text)" }}
-        >
-          {post.title}
-        </h1>
-
-        <div className="mt-3 flex flex-wrap items-center gap-3">
-          <span className="mono text-xs" style={{ color: "var(--muted)" }}>
-            {post.date}
-          </span>
-          {post.tags.map((tag) => (
-            <Link
-              key={tag}
-              href={`/blog/tag/${tag}`}
-              prefetch={false}
-              className="mono text-xs no-underline transition-opacity hover:opacity-70"
-              style={{ color: "var(--accent)" }}
-            >
-              #{tag}
-            </Link>
-          ))}
-        </div>
-
+          )}
+        />
         <ArticleTocMount />
         <div className="prose-content mt-10">{content}</div>
 

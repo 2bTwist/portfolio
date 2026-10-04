@@ -1,13 +1,11 @@
 import type { Metadata } from "next";
-import Link from "next/link";
 import { notFound } from "next/navigation";
 import { compileMDX } from "next-mdx-remote/rsc";
 import { PROJECTS, getProject } from "@/data/projects";
 import { getProjectStory } from "@/app/lib/project-story";
 import { MDXComponents } from "@/components/mdx/MDXComponents";
 import { PageShell } from "@/components/site/PageShell";
-import { TagRow, ActionLink } from "@/components/content/ui";
-import { GitHubIcon, AppStoreIcon, TagIcon } from "@/components/content/tagIcons";
+import { ProjectHeader } from "@/components/content/ArticleHeaders";
 import { CogitoPreview } from "@/components/content/CogitoPreview";
 import { MorphImage } from "@/components/content/MorphImage";
 import { ArticleTocMount } from "@/components/content/ArticleTocMount";
@@ -60,68 +58,23 @@ export default async function ProjectPage({ params }: Params) {
   return (
     <PageShell>
       <JsonLd data={breadcrumb} />
-      <Link
-        href="/projects"
-        prefetch={false}
-        className="mono text-sm no-underline transition-opacity hover:opacity-70"
-        style={{ color: "var(--muted)" }}
-      >
-        ← projects/
-      </Link>
-
-      {/* Banner image up top (Twitter-article style). Carries the shared
-          view-transition name so it can morph from the card on navigation. */}
-      {project.image ? (
-        <div className="project-banner mt-4">
-          {project.preview === "cogito" ? <CogitoPreview replayControl /> : <MorphImage
-            morphKey={`project-img-${project.id}`}
-            src={project.image}
-            alt={project.title}
-            sizes="(min-width: 768px) 720px, 100vw"
-            priority
-            kind="banner"
-          />}
-        </div>
-      ) : null}
-
-      <div className={project.image ? "mt-6" : "mt-4"}>
-        <span
-          className="mono text-xs px-2 py-0.5 rounded-full inline-flex items-center gap-1"
-          style={{ background: "var(--surface)", color: "var(--muted)", border: "1px solid var(--border)" }}
-        >
-          <TagIcon name={project.kind} />
-          {project.status ? `${project.kind} · ${project.status}` : project.kind}
-        </span>
-      </div>
-
-      <h1 className="display text-3xl sm:text-4xl font-bold mt-3" style={{ color: "var(--text)" }}>
-        {project.title}
-      </h1>
-      <p className="mt-3 text-lg leading-relaxed" style={{ color: "var(--muted)" }}>
-        {project.blurb}
-      </p>
-
-      <div className="mt-5">
-        <TagRow tags={project.tags} />
-      </div>
-
-      {(project.links?.live || project.links?.repo) && (
-        <div className="mt-6 flex flex-wrap gap-4">
-          {project.links?.live ? (
-            <ActionLink
-              href={project.links.live}
-              icon={project.links.live.includes("apps.apple.com") ? <AppStoreIcon /> : undefined}
-            >
-              View live
-            </ActionLink>
-          ) : null}
-          {project.links?.repo ? (
-            <ActionLink href={project.links.repo} variant="ghost" icon={<GitHubIcon />}>
-              Source
-            </ActionLink>
-          ) : null}
-        </div>
-      )}
+      <ProjectHeader
+        project={project}
+        banner={(src) =>
+          project.preview === "cogito" ? (
+            <CogitoPreview replayControl />
+          ) : (
+            <MorphImage
+              morphKey={`project-img-${project.id}`}
+              src={src}
+              alt={project.title}
+              sizes="(min-width: 768px) 720px, 100vw"
+              priority
+              kind="banner"
+            />
+          )
+        }
+      />
 
       {content ? (
         <>
