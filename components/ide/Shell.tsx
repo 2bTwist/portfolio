@@ -117,7 +117,9 @@ export function Shell({
         <SiteNav />
       </div>
 
-      <div className="flex flex-col min-h-[100dvh] md:h-[100dvh] md:min-h-0 md:overflow-hidden">
+      {/* clip, not hidden: a clipped box is not a scroll container, so a
+          scrollIntoView inside the editor can never scroll the chrome away. */}
+      <div className="flex flex-col min-h-[100dvh] md:h-[100dvh] md:min-h-0 md:overflow-clip">
         <div className="ide-titlebar hidden md:flex">
           {/* macOS window controls: the glyphs (✕ / − / fullscreen arrows) fade
               in when you approach the cluster, exactly like the real traffic
