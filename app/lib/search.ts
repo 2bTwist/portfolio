@@ -78,12 +78,17 @@ export function searchStatic(query: string): SearchResult[] {
 }
 
 // ---- Post index: lazily fetched JSON, then Fuse ----
+// searchPosts rejects when the index cannot be loaded; callers show that and
+// keep the static results.
 let postFusePromise: Promise<Fuse<SearchDoc>> | null = null;
 
 function postFuse() {
   if (!postFusePromise) {
     postFusePromise = fetch("/search-index.json")
-      .then((r) => r.json())
+      .then((r) => {
+        if (!r.ok) throw new Error(`search index: HTTP ${r.status}`);
+        return r.json();
+      })
       .then(
         (docs: SearchDoc[]) =>
           new Fuse(docs, {
@@ -99,6 +104,11 @@ function postFuse() {
             ],
           }),
       );
+    // Cache only a loaded index: after a failure the next search fetches again,
+    // so post results come back once the network does.
+    postFusePromise.catch(() => {
+      postFusePromise = null;
+    });
   }
   return postFusePromise;
 }

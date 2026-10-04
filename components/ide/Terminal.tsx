@@ -372,10 +372,13 @@ export default function Terminal() {
         }
         const staticHits = searchStatic(arg);
         if (staticHits.length) print(staticHits.map((r) => `${r.name}  ${r.href}`).join("\n"));
-        searchPosts(arg).then((postHits) => {
-          if (postHits.length) print(postHits.map((p) => `${p.name}  ${p.href}`).join("\n"));
-          else if (!staticHits.length) print(`no matches for "${arg}"`);
-        });
+        searchPosts(arg).then(
+          (postHits) => {
+            if (postHits.length) print(postHits.map((p) => `${p.name}  ${p.href}`).join("\n"));
+            else if (!staticHits.length) print(`no matches for "${arg}"`);
+          },
+          () => print("grep: couldn't load blog posts; try again"),
+        );
         break;
       }
       // Hidden easter eggs (not advertised in `help`).
