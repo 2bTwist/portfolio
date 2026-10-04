@@ -8,11 +8,13 @@
 
 import { lazy, type ComponentType, type LazyExoticComponent } from "react";
 import type { SplittableHref } from "@/data/pages";
+import type { PaneProps } from "@/components/site/PageShell";
 
-type PaneBody = LazyExoticComponent<ComponentType>;
+// A body renders its page as a region named `paneLabel`, not the route's <main>.
+type PaneBody = LazyExoticComponent<ComponentType<Required<PaneProps>>>;
 
 /* Blog posts + project stories render MDX server-side; their pane body fetches
-   the rendered HTML from /api/pane (see MdxPaneBody). One lazy component handles
+   the serialized MDX from /api/pane (see MdxPaneBody). One lazy component handles
    every such route — it reads the target href from the split store. */
 const MdxPaneBody = lazy(() => import("./MdxPaneBody").then((m) => ({ default: m.MdxPaneBody })));
 const MDX_HREF = /^\/(blog|projects)\/[^/]+$/;

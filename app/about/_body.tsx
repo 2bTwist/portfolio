@@ -2,16 +2,16 @@ import Link from "next/link";
 import Image from "next/image";
 import portrait from "@/public/images/portrait.jpg";
 import { profile } from "@/data/profile";
-import { PageShell } from "@/components/site/PageShell";
+import { PageShell, type PaneProps } from "@/components/site/PageShell";
 import { CogitoMention } from "@/components/site/CogitoMention";
 import { HoverWord } from "@/components/site/HoverWord";
 import { CopyEmail } from "@/components/site/CopyEmail";
 import { CompanyLink } from "@/components/site/CompanyLink";
 import { SocialLinks } from "@/components/site/SocialLinks";
 
-export function AboutBody() {
+export function AboutBody({ paneLabel }: PaneProps = {}) {
   return (
-    <PageShell width="wide">
+    <PageShell width="wide" paneLabel={paneLabel}>
       <h1 className="display text-4xl sm:text-5xl font-bold mb-8" style={{ color: "var(--text)" }}>
         About
       </h1>

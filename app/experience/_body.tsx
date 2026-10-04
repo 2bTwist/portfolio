@@ -1,10 +1,10 @@
 import Link from "next/link";
 import { EXPERIENCE, LEADERSHIP } from "@/data/experience";
-import { PageShell } from "@/components/site/PageShell";
+import { PageShell, type PaneProps } from "@/components/site/PageShell";
 
-export function ExperienceBody() {
+export function ExperienceBody({ paneLabel }: PaneProps = {}) {
   return (
-    <PageShell>
+    <PageShell paneLabel={paneLabel}>
       <h1 className="display text-4xl sm:text-5xl font-bold mb-8" style={{ color: "var(--text)" }}>
         Experience
       </h1>

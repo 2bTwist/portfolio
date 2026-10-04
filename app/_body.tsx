@@ -2,7 +2,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { profile } from "@/data/profile";
 import { PROJECTS } from "@/data/projects";
-import { PageShell } from "@/components/site/PageShell";
+import { PageShell, type PaneProps } from "@/components/site/PageShell";
 import { ActionLink } from "@/components/content/ui";
 import { ProjectCard } from "@/components/content/ProjectCard";
 import { SocialLinks } from "@/components/site/SocialLinks";
@@ -11,10 +11,10 @@ import { TechStack } from "@/components/site/TechStack";
 import { CompanyLink } from "@/components/site/CompanyLink";
 import { ContributionPulse } from "@/components/site/ContributionPulse";
 
-export function HomeBody() {
+export function HomeBody({ paneLabel }: PaneProps = {}) {
   const featured = PROJECTS.filter((p) => p.featured);
   return (
-    <PageShell width="wide">
+    <PageShell width="wide" paneLabel={paneLabel}>
       <header className="hero">
         <div className="hero-copy">
           <h1 className="display text-5xl sm:text-6xl font-bold" style={{ color: "var(--text)" }}>

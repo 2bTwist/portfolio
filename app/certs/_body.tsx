@@ -1,11 +1,11 @@
-import { PageShell } from "@/components/site/PageShell";
+import { PageShell, type PaneProps } from "@/components/site/PageShell";
 import { PageHeader, Body } from "@/components/content/ui";
 import { CERTS } from "@/data/certs";
 import { CertBadge } from "@/components/certs/CertBadge";
 
-export function CertsBody() {
+export function CertsBody({ paneLabel }: PaneProps = {}) {
   return (
-    <PageShell>
+    <PageShell paneLabel={paneLabel}>
       <PageHeader title="Certifications" />
       <Body>Credentials I have earned. Each badge links out to verify it.</Body>
       <ul className="cert-grid" aria-label="Certifications">

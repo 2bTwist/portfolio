@@ -1,10 +1,10 @@
 import Link from "next/link";
-import { PageShell } from "@/components/site/PageShell";
+import { PageShell, type PaneProps } from "@/components/site/PageShell";
 import { PageHeader, Body, Prose } from "@/components/content/ui";
 
-export function PrivacyBody() {
+export function PrivacyBody({ paneLabel }: PaneProps = {}) {
   return (
-    <PageShell>
+    <PageShell paneLabel={paneLabel}>
       <PageHeader title="Privacy Policy" />
       <Prose>
         <Body>

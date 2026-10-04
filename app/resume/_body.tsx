@@ -1,6 +1,8 @@
-export function ResumeBody() {
+import { Landmark, type PaneProps } from "@/components/site/PageShell";
+
+export function ResumeBody({ paneLabel }: PaneProps = {}) {
   return (
-    <main className="cv-full">
+    <Landmark className="cv-full" paneLabel={paneLabel}>
       <nav aria-label="Resume actions" className="flex flex-wrap gap-5 px-5 py-4 md:hidden">
         <a className="txt-link" href="/resume.pdf" target="_blank" rel="noopener noreferrer">Open PDF</a>
         <a className="txt-link" href="/resume/download">Download PDF</a>
@@ -17,6 +19,6 @@ export function ResumeBody() {
         src="/resume.pdf#pagemode=none&zoom=125"
         title="Edmond Ndanji's resume (PDF)"
       />
-    </main>
+    </Landmark>
   );
 }

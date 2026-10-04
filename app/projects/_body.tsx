@@ -1,13 +1,13 @@
 import { PROJECTS } from "@/data/projects";
-import { PageShell } from "@/components/site/PageShell";
+import { PageShell, type PaneProps } from "@/components/site/PageShell";
 import { PageHeader } from "@/components/content/ui";
 import { ProjectCard } from "@/components/content/ProjectCard";
 
-export function ProjectsBody() {
+export function ProjectsBody({ paneLabel }: PaneProps = {}) {
   const web = PROJECTS.filter((p) => p.kind === "web");
   const mobile = PROJECTS.filter((p) => p.kind === "mobile");
   return (
-    <PageShell>
+    <PageShell paneLabel={paneLabel}>
       <PageHeader
         title="Projects"
         lead="Things I have built and things I’m building, split by where they run."

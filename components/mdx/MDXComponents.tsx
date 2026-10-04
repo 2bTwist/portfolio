@@ -24,18 +24,26 @@ function slugify(s: string): string {
     .replace(/\s+/g, "-");
 }
 
+/* `idPrefix` keeps a second rendering of the same article (a split pane) from
+   repeating the route's heading ids. */
+export function headingComponents(idPrefix = "") {
+  return {
+    h2: ({ children, ...props }: any) => (
+      <h2 id={idPrefix + slugify(textOf(children))} {...props}>
+        {children}
+      </h2>
+    ),
+    h3: ({ children, ...props }: any) => (
+      <h3 id={idPrefix + slugify(textOf(children))} {...props}>
+        {children}
+      </h3>
+    ),
+  };
+}
+
 export const MDXComponents = {
   pre: (props: any) => <CodeBlock {...props} />,
-  h2: ({ children, ...props }: any) => (
-    <h2 id={slugify(textOf(children))} {...props}>
-      {children}
-    </h2>
-  ),
-  h3: ({ children, ...props }: any) => (
-    <h3 id={slugify(textOf(children))} {...props}>
-      {children}
-    </h3>
-  ),
+  ...headingComponents(),
   img: (props: any) => (
     <Image
       alt={props.alt ?? ""}
