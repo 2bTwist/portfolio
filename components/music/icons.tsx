@@ -7,7 +7,8 @@ const base = { viewBox: "0 0 24 24", fill: "currentColor", "aria-hidden": true }
 
 export const PlayGlyph = ({ className }: P) => (
   <svg {...base} className={className}>
-    <path d="M8 5.14v13.72a1 1 0 0 0 1.54.84l10.29-6.86a1 1 0 0 0 0-1.68L9.54 4.3A1 1 0 0 0 8 5.14Z" />
+    {/* Center the triangle's visual mass, rather than its bounding box. */}
+    <path transform="translate(-1 0)" d="M8 5.14v13.72a1 1 0 0 0 1.54.84l10.29-6.86a1 1 0 0 0 0-1.68L9.54 4.3A1 1 0 0 0 8 5.14Z" />
   </svg>
 );
 
