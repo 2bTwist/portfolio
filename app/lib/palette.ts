@@ -2,17 +2,16 @@
    globals.css (no JS needed); the runtime switcher returns in Phase 2 as an
    additive client enhancement over that default.
 
-   The Cream default's --muted / --accent were darkened from the prototype to
-   pass the axe color-contrast invariant (4.5:1 on body text and button labels).
-   Latte / Frappe are kept for the Phase 2 switcher and get the same treatment
-   when switching returns. */
+   Saved palettes are stored as an index into PALETTES (app/lib/preferences.ts),
+   so the order never changes; only DEFAULT_PALETTE_INDEX picks the default.
+   Every palette passes the axe color-contrast invariant (a11y.spec.ts). */
 
 export type Palette = {
   name: string;
   vars: Record<string, string>;
 };
 
-export const DEFAULT_PALETTE_INDEX = 0;
+export const DEFAULT_PALETTE_INDEX = 1;
 
 export const PALETTES: Palette[] = [
   {
@@ -79,3 +78,7 @@ export const PALETTES: Palette[] = [
     },
   },
 ];
+
+/** The default palette's colours, for surfaces rendered outside the page's CSS
+ * (social cards, the console greeting), so they follow the default. */
+export const DEFAULT_COLORS = PALETTES[DEFAULT_PALETTE_INDEX].vars;

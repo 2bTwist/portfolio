@@ -1,8 +1,9 @@
 import { ImageResponse } from "next/og";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
+import { DEFAULT_COLORS as C } from "@/app/lib/palette";
 
-/* Branded social card (1200x630): the site's editor-window motif on the cream
+/* Branded social card (1200x630): the site's editor-window motif in the default
    palette, the pixel mascot, and the real Clash Display / Satoshi faces. Static
    (prerendered once), so assets are read from disk at build time. */
 
@@ -28,7 +29,7 @@ export default function OpengraphImage() {
           height: "100%",
           display: "flex",
           padding: 48,
-          background: "#f3ecdd",
+          background: C["--bg"],
           fontFamily: "Satoshi",
         }}
       >
@@ -37,10 +38,10 @@ export default function OpengraphImage() {
             flex: 1,
             display: "flex",
             flexDirection: "column",
-            background: "#fbf6ea",
+            background: C["--surface"],
             borderRadius: 26,
-            border: "1px solid #e3d8c2",
-            boxShadow: "0 30px 60px -22px rgba(70,50,30,0.3)",
+            border: `1px solid ${C["--border"]}`,
+            boxShadow: `0 30px 60px -22px ${C["--text"]}4d`,
             overflow: "hidden",
           }}
         >
@@ -50,26 +51,26 @@ export default function OpengraphImage() {
               alignItems: "center",
               gap: 11,
               padding: "24px 30px",
-              borderBottom: "1px solid #e3d8c2",
-              background: "#f3ecdd",
+              borderBottom: `1px solid ${C["--border"]}`,
+              background: C["--bg"],
             }}
           >
-            <div style={dot("#cf5b4e")} />
-            <div style={dot("#d9a441")} />
-            <div style={dot("#6fa85f")} />
-            <div style={{ marginLeft: 20, fontSize: 25, color: "#726552" }}>README.md</div>
+            <div style={dot(C["--dot-close"])} />
+            <div style={dot(C["--dot-min"])} />
+            <div style={dot(C["--dot-max"])} />
+            <div style={{ marginLeft: 20, fontSize: 25, color: C["--muted"] }}>README.md</div>
           </div>
 
           <div style={{ flex: 1, display: "flex", alignItems: "center", padding: "0 66px" }}>
             <div style={{ display: "flex", flexDirection: "column", flex: 1 }}>
-              <div style={{ fontSize: 28, letterSpacing: 4, color: "#a04c39", fontWeight: 700 }}>EDDYB.DEV</div>
-              <div style={{ fontFamily: "Clash", fontSize: 94, color: "#463f33", lineHeight: 1.05, marginTop: 16 }}>
+              <div style={{ fontSize: 28, letterSpacing: 4, color: C["--accent"], fontWeight: 700 }}>EDDYB.DEV</div>
+              <div style={{ fontFamily: "Clash", fontSize: 94, color: C["--text"], lineHeight: 1.05, marginTop: 16 }}>
                 Edmond Ndanji
               </div>
-              <div style={{ fontSize: 40, color: "#726552", marginTop: 16 }}>Full-stack &amp; mobile engineer</div>
+              <div style={{ fontSize: 40, color: C["--muted"], marginTop: 16 }}>Full-stack &amp; mobile engineer</div>
               <div style={{ display: "flex", alignItems: "center", gap: 14, marginTop: 38, maxWidth: 540 }}>
-                <div style={{ width: 12, height: 12, borderRadius: 999, background: "#a04c39", flexShrink: 0 }} />
-                <div style={{ fontSize: 24, color: "#726552", lineHeight: 1.35 }}>
+                <div style={{ width: 12, height: 12, borderRadius: 999, background: C["--accent"], flexShrink: 0 }} />
+                <div style={{ fontSize: 24, color: C["--muted"], lineHeight: 1.35 }}>
                   Non-invasive, carefully crafted software that just works
                 </div>
               </div>

@@ -1,6 +1,7 @@
 import { ImageResponse } from "next/og";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
+import { DEFAULT_COLORS as C } from "@/app/lib/palette";
 
 /* Shared renderer for per-page social cards (1200x630). Same editor-window
    motif as the root app/opengraph-image.tsx, parameterised by the page's tab
@@ -72,7 +73,7 @@ export function renderOgCard({ tab, eyebrow, title, summary, art }: OgCard) {
           height: "100%",
           display: "flex",
           padding: 48,
-          background: "#f3ecdd",
+          background: C["--bg"],
           fontFamily: "Satoshi",
         }}
       >
@@ -81,10 +82,10 @@ export function renderOgCard({ tab, eyebrow, title, summary, art }: OgCard) {
             flex: 1,
             display: "flex",
             flexDirection: "column",
-            background: "#fbf6ea",
+            background: C["--surface"],
             borderRadius: 26,
-            border: "1px solid #e3d8c2",
-            boxShadow: "0 30px 60px -22px rgba(70,50,30,0.3)",
+            border: `1px solid ${C["--border"]}`,
+            boxShadow: `0 30px 60px -22px ${C["--text"]}4d`,
             overflow: "hidden",
           }}
         >
@@ -95,27 +96,27 @@ export function renderOgCard({ tab, eyebrow, title, summary, art }: OgCard) {
               alignItems: "center",
               gap: 11,
               padding: "24px 30px",
-              borderBottom: "1px solid #e3d8c2",
-              background: "#f3ecdd",
+              borderBottom: `1px solid ${C["--border"]}`,
+              background: C["--bg"],
             }}
           >
-            <div style={dot("#cf5b4e")} />
-            <div style={dot("#d9a441")} />
-            <div style={dot("#6fa85f")} />
-            <div style={{ marginLeft: 20, fontSize: 25, color: "#726552" }}>{tab}</div>
+            <div style={dot(C["--dot-close"])} />
+            <div style={dot(C["--dot-min"])} />
+            <div style={dot(C["--dot-max"])} />
+            <div style={{ marginLeft: 20, fontSize: 25, color: C["--muted"] }}>{tab}</div>
           </div>
 
           {/* Body */}
           <div style={{ flex: 1, display: "flex" }}>
             <div style={{ flex: 1, display: "flex", flexDirection: "column", padding: artSrc ? "46px 20px 46px 66px" : "46px 66px" }}>
-              <div style={{ fontSize: 26, letterSpacing: 4, color: "#a04c39", fontWeight: 700 }}>
+              <div style={{ fontSize: 26, letterSpacing: 4, color: C["--accent"], fontWeight: 700 }}>
                 {eyebrow}
               </div>
               <div
                 style={{
                   fontFamily: "Clash",
                   fontSize: titleSize(title, !!artSrc),
-                  color: "#463f33",
+                  color: C["--text"],
                   lineHeight: 1.08,
                   marginTop: 18,
                 }}
@@ -125,7 +126,7 @@ export function renderOgCard({ tab, eyebrow, title, summary, art }: OgCard) {
               <div
                 style={{
                   fontSize: artSrc ? 24 : 28,
-                  color: "#726552",
+                  color: C["--muted"],
                   lineHeight: 1.35,
                   marginTop: artSrc ? 16 : 20,
                   maxWidth: 880,
@@ -142,8 +143,8 @@ export function renderOgCard({ tab, eyebrow, title, summary, art }: OgCard) {
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img src={mascot} width={72} height={72} alt="" />
                 <div style={{ display: "flex", flexDirection: "column" }}>
-                  <div style={{ fontSize: 30, color: "#463f33", fontWeight: 700 }}>Edmond Ndanji</div>
-                  <div style={{ fontSize: 22, letterSpacing: 3, color: "#a04c39", fontWeight: 700 }}>
+                  <div style={{ fontSize: 30, color: C["--text"], fontWeight: 700 }}>Edmond Ndanji</div>
+                  <div style={{ fontSize: 22, letterSpacing: 3, color: C["--accent"], fontWeight: 700 }}>
                     EDDYB.DEV
                   </div>
                 </div>
