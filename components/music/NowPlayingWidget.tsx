@@ -7,7 +7,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { TRACKS } from "@/app/lib/music";
+import { TRACKS, artworkAt } from "@/app/lib/music";
 import { useMusic, toggle, next, prev, stop } from "./store";
 import { PlayGlyph, PauseGlyph, NextGlyph, PrevGlyph, CloseGlyph } from "./icons";
 
@@ -26,7 +26,7 @@ export function NowPlayingWidget() {
       <Link href="/music" prefetch={false} className="np-cover" aria-label={`Open the player — ${track.title} by ${track.artist}`}>
         {/* eslint-disable-next-line @next/next/no-img-element -- remote Apple art, plain <img> avoids next/image remote config */}
         <img
-          src={track.artwork}
+          {...artworkAt(track.artwork, 44)}
           alt=""
           width={44}
           height={44}

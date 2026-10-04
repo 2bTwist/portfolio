@@ -5,7 +5,7 @@
    clickable tracklist. All of it just drives the shared module store, so the
    bottom-left widget stays in sync and playback continues as you navigate away. */
 
-import { TRACKS, albumLabel } from "@/app/lib/music";
+import { TRACKS, albumLabel, artworkAt } from "@/app/lib/music";
 import { useMusic, play, toggle, next, prev, toggleShuffle, toggleRepeat } from "./store";
 import { PlayGlyph, PauseGlyph, NextGlyph, PrevGlyph } from "./icons";
 
@@ -50,7 +50,7 @@ export function VinylPlayer() {
             <div className="vinyl-label">
               {cued && (
                 // eslint-disable-next-line @next/next/no-img-element -- remote Apple art
-                <img src={cued.artwork} alt="" width={150} height={150} decoding="async" />
+                <img {...artworkAt(cued.artwork, 150)} alt="" width={150} height={150} decoding="async" />
               )}
             </div>
             <span className="vinyl-hole" aria-hidden="true" />
@@ -116,7 +116,7 @@ export function VinylPlayer() {
                   {active && playing ? <PlayGlyph className="vinyl-glyph-xs" /> : i + 1}
                 </span>
                 {/* eslint-disable-next-line @next/next/no-img-element -- remote Apple art */}
-                <img className="vinyl-row-art" src={t.artwork} alt="" width={36} height={36} loading="lazy" decoding="async" />
+                <img className="vinyl-row-art" {...artworkAt(t.artwork, 36)} alt="" width={36} height={36} loading="lazy" decoding="async" />
                 <span className="vinyl-row-meta">
                   <span className="vinyl-row-title">{t.title}</span>
                   <span className="vinyl-row-artist">{t.artist}</span>
