@@ -11,11 +11,8 @@
 import { useEffect, useRef, useState, type ChangeEvent, type FormEvent, type KeyboardEvent } from "react";
 import { createPortal } from "react-dom";
 import { useRouter } from "next/navigation";
-import type { TreeNode, TreeFolder } from "@/app/lib/catalogue-view";
 import { useCatalogue } from "./CatalogueProvider";
 import { searchStatic, searchPosts } from "@/app/lib/search";
-import { PALETTES } from "@/app/lib/palette";
-import { profile } from "@/data/profile";
 import { TerminalIcon } from "@/components/feel/animated-icons";
 import { playNote, FUR_ELISE } from "@/components/feel/sound";
 import { useSound } from "@/components/feel/SoundProvider";
@@ -24,74 +21,21 @@ import { useOverlay, useSession } from "./store";
 import { ResizeHandle } from "./ResizeHandle";
 import { PREFERENCES, loadPreference, savePreference } from "@/app/lib/preferences";
 import { pushRoute } from "./navPending";
+import { candidatesFor, completeLine, promptFor, resolveCommand } from "./terminalCommands";
 
 const PIANO_GIF = "/images/grand-piano.gif";
 const MEOW_GIF = "/images/meow-party.gif";
 
 type Line = { kind: "in" | "out"; text: string; prompt?: string };
 
-const STRIP_EXT = /\.(tsx?|md)$/;
 const [TERM_MIN_H] = PREFERENCES.terminalHeight.range;
 const GREETING: Line = { kind: "out", text: "type `help` to get started" };
-const COMMANDS = ["help", "ls", "cd", "open", "cat", "pwd", "grep", "theme", "whoami", "clear"];
 
 // The terminal is a singleton drawer. Hold its session (history + cwd) at module
 // scope so it survives any remount of the lazy component — navigating, toggling,
 // or a Suspense bounce can never wipe the scrollback.
 let sessionLines: Line[] = [GREETING];
 let sessionCwd: string[] = [];
-
-// ── tiny filesystem over the explorer tree, indexed by cwd (array of folder names) ──
-function entriesAt(tree: TreeNode[], cwd: string[]): TreeNode[] {
-  let nodes = tree;
-  for (const seg of cwd) {
-    const f = nodes.find((n) => n.type === "folder" && n.name === seg) as TreeFolder | undefined;
-    if (!f) return [];
-    nodes = f.children;
-  }
-  return nodes;
-}
-function routeForCwd(tree: TreeNode[], cwd: string[]): string {
-  let nodes = tree;
-  let href = "/";
-  for (const seg of cwd) {
-    const f = nodes.find((n) => n.type === "folder" && n.name === seg) as TreeFolder | undefined;
-    if (!f) break;
-    href = f.href;
-    nodes = f.children;
-  }
-  return href;
-}
-// zsh `%1~`-style prompt: the basename of the cwd (root is the `edmond` workspace).
-function promptFor(cwd: string[]): string {
-  return `${cwd.length ? cwd[cwd.length - 1] : "edmond"} %`;
-}
-function listing(tree: TreeNode[], cwd: string[]): string[] {
-  return entriesAt(tree, cwd).map((n) => (n.type === "folder" ? `${n.name}/` : n.name));
-}
-function matchFile(tree: TreeNode[], cwd: string[], arg: string): TreeNode | undefined {
-  const a = arg.replace(/^\.?\//, "").replace(/\/$/, "").toLowerCase();
-  const bare = a.replace(STRIP_EXT, "");
-  return entriesAt(tree, cwd).find(
-    (n) => n.name.toLowerCase() === a || n.name.toLowerCase().replace(STRIP_EXT, "") === bare,
-  );
-}
-function candidatesFor(tree: TreeNode[], value: string, cwd: string[]): string[] {
-  const tokens = value.split(" ");
-  const cur = (tokens[tokens.length - 1] ?? "").toLowerCase();
-  const pool = tokens.length === 1 ? COMMANDS : listing(tree, cwd);
-  return pool.filter((c) => c.toLowerCase().startsWith(cur));
-}
-function commonPrefix(xs: string[]): string {
-  if (!xs.length) return "";
-  let p = xs[0];
-  for (const s of xs) {
-    let i = 0;
-    while (i < p.length && i < s.length && p[i].toLowerCase() === s[i].toLowerCase()) i++;
-    p = p.slice(0, i);
-  }
-  return p;
-}
 
 export default function Terminal() {
   const router = useRouter();
@@ -311,104 +255,38 @@ export default function Terminal() {
   }
 
   function run(raw: string) {
-    const parts = raw.trim().split(/\s+/);
-    const cmd = parts[0] ?? "";
-    const arg = parts.slice(1).join(" ");
-    switch (cmd) {
-      case "":
-        break;
-      case "help":
-        print("commands: ls, cd <dir>, open <file>, cat <file>, pwd, grep <term>, theme [name], whoami, clear");
-        break;
-      case "ls":
-        print(listing(tree, cwd).join("   "));
-        break;
-      case "pwd":
-        print(`~/edmond${cwd.length ? "/" + cwd.join("/") : ""}`);
-        break;
-      case "whoami":
-        print(`${profile.name} — ${profile.role}`);
-        break;
-      case "clear":
-        setLines([GREETING]);
-        return;
-      case "cd": {
-        // resolve the destination; the new prompt is the only feedback (no echo).
-        let next: string[] | null = null;
-        if (!arg || arg === "~" || arg === "/") next = [];
-        else if (arg === ".") next = cwd;
-        else if (arg === "..") next = cwd.slice(0, -1);
-        else {
-          const name = arg.replace(/\/$/, "");
-          const node = entriesAt(tree, cwd).find((n) => n.name.toLowerCase() === name.toLowerCase());
-          if (!node) {
-            print(`cd: no such file or directory: ${arg}`);
-            break;
-          }
-          if (node.type !== "folder") {
-            print(`cd: not a directory: ${arg}`);
-            break;
-          }
-          next = [...cwd, node.name];
-        }
-        sessionCwd = next; // sync, before navigate may remount
-        setCwd(next);
-        navigate(routeForCwd(tree, next));
-        break;
-      }
-      case "open":
-      case "cat": {
-        const file = matchFile(tree, cwd, arg);
-        if (!file) {
-          print(`${cmd}: no such file: ${arg || "(nothing)"}`);
+    for (const effect of resolveCommand(raw, { tree, cwd })) {
+      switch (effect.type) {
+        case "print":
+          print(effect.text);
+          break;
+        case "clear":
+          setLines([GREETING]);
+          break;
+        case "cd":
+          sessionCwd = effect.cwd; // sync, before navigate may remount
+          setCwd(effect.cwd);
+          navigate(effect.route);
+          break;
+        case "navigate":
+          navigate(effect.route);
+          break;
+        case "theme":
+          setPaletteIndex(effect.index);
+          break;
+        case "grep": {
+          const staticHits = searchStatic(effect.term);
+          if (staticHits.length) print(staticHits.map((r) => `${r.name}  ${r.href}`).join("\n"));
+          searchPosts(effect.term).then(
+            (postHits) => {
+              if (postHits.length) print(postHits.map((p) => `${p.name}  ${p.href}`).join("\n"));
+              else if (!staticHits.length) print(`no matches for "${effect.term}"`);
+            },
+            () => print("grep: couldn't load blog posts; try again"),
+          );
           break;
         }
-        navigate(file.href);
-        break;
       }
-      case "theme": {
-        if (!arg) {
-          print(`themes: ${PALETTES.map((p) => p.name).join(", ")}`);
-          break;
-        }
-        const i = PALETTES.findIndex((p) => p.name.toLowerCase().startsWith(arg.toLowerCase()));
-        if (i < 0) {
-          print(`no theme "${arg}"`);
-          break;
-        }
-        setPaletteIndex(i);
-        print(`theme → ${PALETTES[i].name}`);
-        break;
-      }
-      case "grep": {
-        if (!arg) {
-          print("usage: grep <term>");
-          break;
-        }
-        const staticHits = searchStatic(arg);
-        if (staticHits.length) print(staticHits.map((r) => `${r.name}  ${r.href}`).join("\n"));
-        searchPosts(arg).then(
-          (postHits) => {
-            if (postHits.length) print(postHits.map((p) => `${p.name}  ${p.href}`).join("\n"));
-            else if (!staticHits.length) print(`no matches for "${arg}"`);
-          },
-          () => print("grep: couldn't load blog posts; try again"),
-        );
-        break;
-      }
-      // Hidden easter eggs (not advertised in `help`).
-      case "emacs":
-        print("emacs?? are you for real?! 😭 lol this is a vim household. try `vim`.");
-        break;
-      case "vim":
-      case "vi":
-        print("a person of taste. :wq");
-        break;
-      case "sudo":
-        print("nice try. you don't have root on my portfolio 😌");
-        break;
-      default:
-        print(`zsh: command not found: ${cmd}`);
     }
   }
 
@@ -434,15 +312,8 @@ export default function Terminal() {
     if (e.key === "Tab" && !e.shiftKey) {
       e.preventDefault();
       if (!caretAtEnd) return;
-      const tokens = value.split(" ");
-      const cur = tokens[tokens.length - 1] ?? "";
-      const cands = candidatesFor(tree, value, cwd);
-      if (!cands.length) return;
-      const target = cands.length === 1 ? cands[0] : commonPrefix(cands);
-      if (target.length > cur.length) {
-        tokens[tokens.length - 1] = target;
-        setValue(tokens.join(" "));
-      }
+      const completed = completeLine(tree, value, cwd);
+      if (completed !== value) setValue(completed);
     } else if ((e.key === "ArrowRight" || e.key === "End") && ghost && caretAtEnd) {
       e.preventDefault();
       setValue(value + ghost);
