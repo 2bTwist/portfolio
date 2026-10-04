@@ -12,7 +12,7 @@
    Ctrl+W (it closes the browser tab and can't be reliably intercepted):
      Alt+W → close active · Alt+Shift+W → close others · Alt+Shift+A → close all */
 
-import Link from "next/link";
+import Link from "@/components/site/Link";
 import { usePathname } from "next/navigation";
 import { useEffect, useRef, useState, type KeyboardEvent as ReactKeyboardEvent } from "react";
 import { createPortal } from "react-dom";

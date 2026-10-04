@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import Link from "next/link";
+import Link from "@/components/site/Link";
 import { getAllPosts, getAllTags } from "@/app/lib/posts";
 import { PageShell } from "@/components/site/PageShell";
 import { PageHeader } from "@/components/content/ui";

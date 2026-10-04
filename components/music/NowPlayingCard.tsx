@@ -11,7 +11,7 @@
    for it. Unlike the dock this stays visible on /music — it's sidebar chrome
    like the tree, and hiding it there would reflow pinned chrome on nav. */
 
-import Link from "next/link";
+import Link from "@/components/site/Link";
 import { TRACKS } from "@/app/lib/music";
 import { useMusic, toggle, next, prev, stop } from "./store";
 import { PlayGlyph, PauseGlyph, NextGlyph, PrevGlyph, CloseGlyph } from "./icons";

@@ -3,7 +3,7 @@
    palette CSS vars set at :root. */
 
 import type { ReactNode } from "react";
-import Link from "next/link";
+import Link from "@/components/site/Link";
 import { TagIcon } from "./tagIcons";
 
 export function PageHeader({

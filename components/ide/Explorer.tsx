@@ -16,7 +16,7 @@
    the range and a scripted bouncer escalates, eventually revoking your privileges
    (a cooldown), then giving up. Keys stop at the limit and never set it off. */
 
-import Link from "next/link";
+import Link from "@/components/site/Link";
 import dynamic from "next/dynamic";
 import { createPortal } from "react-dom";
 import { usePathname } from "next/navigation";

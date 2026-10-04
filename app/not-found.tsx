@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import Link from "next/link";
+import Link from "@/components/site/Link";
 import { PageShell } from "@/components/site/PageShell";
 
 export const metadata: Metadata = {

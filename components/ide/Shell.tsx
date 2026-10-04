@@ -22,6 +22,7 @@ import { Explorer } from "./Explorer";
 import { EditorArea } from "./EditorArea";
 import { Tabs } from "./Tabs";
 import { StatusBar } from "./StatusBar";
+import { NavigationStatus } from "./NavigationStatus";
 import { useOverlay } from "./store";
 import { useIsMac, chord } from "./keys";
 import type { GitInfo } from "@/app/lib/git";
@@ -209,6 +210,7 @@ export function Shell({
 
       {cmdkOpen ? <CommandPalette /> : null}
       <DragGhost />
+      <NavigationStatus />
       <MorphRouteSync />
       {/* Hidden while the terminal drawer is up so it never floats over it. */}
       <BackToTop hidden={termMounted && termOpen} />

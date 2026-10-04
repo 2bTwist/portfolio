@@ -31,6 +31,18 @@ const eslintConfig = defineConfig([
       ],
     },
   },
+  // Internal links go through components/site/Link.tsx, which reports a pending
+  // navigation to the shell (components/ide/navPending.ts).
+  {
+    files: ["app/**/*.{ts,tsx}", "components/**/*.{ts,tsx}"],
+    ignores: ["components/site/Link.tsx"],
+    rules: {
+      "no-restricted-imports": [
+        "error",
+        { name: "next/link", message: "Import Link from @/components/site/Link so the shell can show pending navigation." },
+      ],
+    },
+  },
   // Override default ignores of eslint-config-next.
   globalIgnores([
     // Default ignores of eslint-config-next:

@@ -3,7 +3,7 @@
    (file-tree explorer) layers over this on desktop; this nav stays for mobile
    and no-JS. Rendered inside the client Shell, and still server-rendered. */
 
-import Link from "next/link";
+import Link from "@/components/site/Link";
 import { profile } from "@/data/profile";
 import { PAGES } from "@/data/pages";
 import { ThemeSwatches } from "@/components/ide/ThemeSwatches";

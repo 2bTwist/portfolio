@@ -1,4 +1,4 @@
-import Link from "next/link";
+import Link from "@/components/site/Link";
 import { PageShell, type PaneProps } from "@/components/site/PageShell";
 import { PageHeader, Body, Prose } from "@/components/content/ui";
 

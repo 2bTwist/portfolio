@@ -2,7 +2,7 @@
    an on-brand image on top, then title, a one-line description, and tags. Server
    component. Until a project's `image` is set, a tinted placeholder stands in. */
 
-import Link from "next/link";
+import Link from "@/components/site/Link";
 import type { Project } from "@/data/projects";
 import { CogitoPreview } from "./CogitoPreview";
 import { MorphImage } from "./MorphImage";

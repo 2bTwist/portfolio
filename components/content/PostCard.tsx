@@ -5,7 +5,7 @@
    post-page banner on navigation. Until a post's `image` is set, a tinted
    placeholder stands in. */
 
-import Link from "next/link";
+import Link from "@/components/site/Link";
 import type { PostMetadata } from "@/app/lib/posts";
 import { MorphImage } from "./MorphImage";
 
