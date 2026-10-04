@@ -56,6 +56,9 @@ const HANDLES: Handle[] = [
       await desktop(page);
       await page.keyboard.press("Control+`");
       await page.getByRole("separator", { name: "Resize terminal" }).waitFor();
+      // Opening finishes by focusing the input (a frame after mount); wait for
+      // it, or a test that focuses the handle first has it taken back.
+      await expect(page.getByRole("textbox", { name: "Terminal input" })).toBeFocused();
     },
     size: extent(".ide-terminal-out", "height"),
   },
