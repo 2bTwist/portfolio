@@ -1,14 +1,15 @@
 "use client";
 
-/* File-tree explorer. File rows are real prefetched <Link>s mapping file ->
-   route, so they work with JS off (folders render expanded; file links navigate).
-   Folder rows are toggle buttons: clicking the row expands/collapses it (editor
-   behaviour); the projects index is still reachable via ⌘K / the "all projects"
-   link. Active row = current pathname.
+/* File-tree explorer. Every row is an ordinary <Link> mapping file -> route, so
+   the tree works with JS off (folders render expanded). A folder row links to the
+   folder's index page; its chevron is a separate disclosure button, so navigating
+   and expanding stay distinct actions. A collapsed subtree is `hidden`, which takes
+   its links out of the tab order and the accessibility tree. Active row = current
+   pathname.
 
-   Layout is a fixed grid: [indent][twistie slot][icon slot][name]. Both slots are
-   fixed width so every row aligns deterministically and nothing shifts when the
-   client-only icons mount.
+   Row layout: [indent][twistie slot][icon slot][name]. Both slots are fixed width
+   so every row aligns and nothing shifts when the client-only icons mount. Rows
+   never move on hover or selection; only their background and marker change.
 
    Resize: drag the right edge, or focus it and use the arrow keys (ResizeHandle
    owns the drag and writes the width straight to the DOM). Shove the pointer past
@@ -27,6 +28,7 @@ import { useSound } from "@/components/feel/SoundProvider";
 import { FileIcon, FolderIcon } from "./FileIcon";
 import { useTabSession } from "./store";
 import { beginRowDrag, consumeSuppressClick } from "./rowDrag";
+import { isBrowserOwnedClick } from "./linkActivation";
 import { ResizeHandle } from "./ResizeHandle";
 import { PREFERENCES } from "@/app/lib/preferences";
 import { getPreference, setPreference, usePreference } from "@/components/hooks/usePreference";
@@ -255,7 +257,14 @@ function Breadcrumb({
   const segs = pathname === "/" ? [] : pathname.slice(1).split("/");
   return (
     <div className="ide-explorer-title">
-      <Link href="/" prefetch={false} className="ide-crumb" onClick={() => onOpen("/")}>
+      <Link
+        href="/"
+        prefetch={false}
+        className="ide-crumb"
+        onClick={(e) => {
+          if (!isBrowserOwnedClick(e)) onOpen("/");
+        }}
+      >
         ~/edmond
       </Link>
       {segs.map((seg, i) => {
@@ -273,7 +282,9 @@ function Breadcrumb({
                 href={href}
                 prefetch={false}
                 className="ide-crumb"
-                onClick={() => onOpen(href)}
+                onClick={(e) => {
+                  if (!isBrowserOwnedClick(e)) onOpen(href);
+                }}
               >
                 {seg}
               </Link>
@@ -305,7 +316,10 @@ function Node({
 }) {
   const [open, setOpen] = useState(true);
   const { openTab } = useTabSession();
-  const pad = { paddingLeft: `${BASE_PAD_REM + depth * INDENT_REM}rem` };
+  const toggleRef = useRef<HTMLButtonElement>(null);
+  const groupRef = useRef<HTMLDivElement>(null);
+  const indent = `${BASE_PAD_REM + depth * INDENT_REM}rem`;
+  const pad = { paddingLeft: indent };
 
   if (node.type === "file") {
     const active = pathname === node.href;
@@ -328,6 +342,7 @@ function Node({
             e.preventDefault();
             return;
           }
+          if (isBrowserOwnedClick(e)) return;
           // Clicking the file you're already in scrolls it back to the top
           // (IDE muscle memory) instead of a no-op same-route navigation.
           if (active) {
@@ -345,58 +360,67 @@ function Node({
     );
   }
 
+  const active = pathname === node.href;
   const childActive = pathname.startsWith(node.href);
+  const groupId = `explorer-group${node.href.replaceAll("/", "-")}`;
+  const setExpanded = (next: boolean) => {
+    // Hiding a subtree that holds focus would drop focus to <body>.
+    if (!next && groupRef.current?.contains(document.activeElement)) toggleRef.current?.focus();
+    setOpen(next);
+  };
   return (
     <div>
-      {/* Folder rows open their route (folders map to real pages) AND toggle the
-          subtree open/closed on the same click. Keeps aria-expanded so the
-          disclosure state (and the folder sound) still read. */}
-      <Link
-        href={node.href}
-        // prefetch={false}: the whole file tree is in-viewport, so forced
-        // prefetch fired a route RSC fetch for every row on load (~20+ requests).
-        // false keeps Next's hover/touch prefetch — instant nav once you point at
-        // a file — without the upfront request storm.
-        prefetch={false}
-        className="ide-row"
-        data-sound="toggle"
-        style={pad}
-        aria-expanded={open}
-        aria-current={pathname === node.href ? "page" : undefined}
-        onPointerDown={(e) => beginRowDrag(e, node.href, node.name)}
-        onClick={(e) => {
-          if (consumeSuppressClick(e)) {
-            e.preventDefault();
-            return;
-          }
-          setOpen((o) => !o);
-          openTab(node.href);
-        }}
-      >
-        {/* The chevron alone toggles the subtree (without navigating); clicking
-            anywhere else on the row opens the folder's page and expands it. */}
-        <span
+      <div className="ide-folder-row">
+        <button
+          ref={toggleRef}
+          type="button"
           className="ide-twistie-hit"
-          aria-hidden="true"
-          onClick={(e) => {
-            e.preventDefault();
-            e.stopPropagation();
-            setOpen((o) => !o);
-          }}
+          style={{ left: indent }}
+          data-sound="toggle"
+          aria-label={`${node.name} folder`}
+          aria-expanded={open}
+          aria-controls={groupId}
+          onClick={() => setExpanded(!open)}
         >
           <Chevron open={open} />
-        </span>
-        <span className="ide-row-icon">{mounted ? <FolderIcon open={open} /> : null}</span>
-        <span className="ide-row-name" style={childActive ? { color: "var(--accent)" } : undefined}>
-          {node.name}/
-        </span>
-      </Link>
-      <div className="ide-folder" data-open={open}>
-        <div className="ide-folder-inner">
-          {node.children.map((child) => (
-            <Node key={child.href} node={child} pathname={pathname} depth={depth + 1} mounted={mounted} />
-          ))}
-        </div>
+        </button>
+        <Link
+          href={node.href}
+          // See the file row: hover prefetch only.
+          prefetch={false}
+          className="ide-row"
+          data-sound="view"
+          style={pad}
+          aria-current={active ? "page" : undefined}
+          onPointerDown={(e) => beginRowDrag(e, node.href, node.name)}
+          onClick={(e) => {
+            if (consumeSuppressClick(e)) {
+              e.preventDefault();
+              return;
+            }
+            if (isBrowserOwnedClick(e)) return;
+            if (active) {
+              e.preventDefault();
+              scrollEditorTop();
+            } else {
+              openTab(node.href);
+            }
+            // Opening a folder's page reveals its files; it never hides them.
+            if (!open) setOpen(true);
+          }}
+        >
+          {/* Reserves the chevron's slot; the disclosure button sits over it. */}
+          <span className="ide-twistie" aria-hidden="true" />
+          <span className="ide-row-icon">{mounted ? <FolderIcon open={open} /> : null}</span>
+          <span className="ide-row-name" style={childActive ? { color: "var(--accent)" } : undefined}>
+            {node.name}/
+          </span>
+        </Link>
+      </div>
+      <div ref={groupRef} id={groupId} hidden={!open}>
+        {node.children.map((child) => (
+          <Node key={child.href} node={child} pathname={pathname} depth={depth + 1} mounted={mounted} />
+        ))}
       </div>
     </div>
   );

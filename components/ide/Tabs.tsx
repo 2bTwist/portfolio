@@ -15,6 +15,7 @@ import { createPortal } from "react-dom";
 import { FileIcon } from "./FileIcon";
 import { useTabSession } from "./store";
 import { beginRowDrag, consumeSuppressClick } from "./rowDrag";
+import { isBrowserOwnedClick } from "./linkActivation";
 import { useIsMac, chord } from "./keys";
 import { scrollEditorTop } from "./scroll";
 
@@ -103,8 +104,9 @@ export function Tabs({ className = "" }: { className?: string }) {
                     e.preventDefault();
                     return;
                   }
-                  // Re-clicking the active tab scrolls its page back to top.
-                  if (active) {
+                  // Re-clicking the active tab scrolls its page back to top;
+                  // a modified click still opens it in a new browser tab.
+                  if (active && !isBrowserOwnedClick(e)) {
                     e.preventDefault();
                     scrollEditorTop();
                   }

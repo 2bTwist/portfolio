@@ -80,9 +80,9 @@ const cases: Case[] = [
   { name: "the Claude tile ticks on hover", run: (p) => hover(p, tile(p, "Claude")), expected: ["slide"] },
   { name: "an explorer file row views", run: (p) => press(p, explorer(p).getByRole("link", { name: "about.md" })), expected: ["view"] },
   {
-    name: "an explorer folder row opens and closes with its state",
+    name: "an explorer folder's disclosure opens and closes with its state",
     run: async (p) => {
-      const folder = explorer(p).getByRole("link", { name: "projects/" });
+      const folder = explorer(p).getByRole("button", { name: "projects folder" });
       const sounds: string[] = [];
       for (let i = 0; i < 2; i++) {
         const expanded = await folder.getAttribute("aria-expanded");
