@@ -518,11 +518,11 @@ html[data-site-hint] [data-tour="themes"]::after {
   color: var(--accent);
 }
 /* The current file keeps the row's weight (a bolder label would reflow and
-   re-truncate); a marker on the leading edge tells it apart from hover. */
-.ide-row[aria-current="page"] {
-  background: var(--bg);
+   re-truncate); an accent-tinted wash tells it apart from hover's plain one. */
+.ide-row[aria-current="page"],
+.ide-folder-row:hover > .ide-row[aria-current="page"] {
+  background: color-mix(in srgb, var(--accent) 14%, var(--bg));
   color: var(--text);
-  box-shadow: inset 2px 0 0 var(--accent);
 }
 /* Fixed-width gutters so every row's icon + name line up deterministically and
    nothing shifts when the client-only file icons mount. */
