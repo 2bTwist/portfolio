@@ -114,3 +114,34 @@ test("the cursor quip bubble has no pop-in with reduced motion", async ({ page }
   });
   expect(name).toBe("none");
 });
+
+test("commands walk the tree, navigate, switch theme, search and clear", async ({ page }) => {
+  await openTerminal(page);
+  const log = page.getByRole("log");
+  const enter = async (line: string) => {
+    await input(page).fill(line);
+    await input(page).press("Enter");
+  };
+
+  await enter("cd projects");
+  await expect(page).toHaveURL(/\/projects$/);
+  await expect(live(page)).toContainText("projects %");
+  await enter("ls");
+  await expect(log).toContainText("cogito.tsx");
+
+  await enter("open cogito");
+  await expect(page).toHaveURL(/\/projects\/cogito$/);
+
+  await enter("theme");
+  await expect(log).toContainText("themes: ");
+  const other = (await log.innerText()).match(/themes: (.+)/)![1].split(", ")[1];
+  await enter(`theme ${other}`);
+  await expect(log).toContainText(`theme → ${other}`);
+  await expect(page.getByRole("button", { name: `Theme: ${other}` }).first()).toHaveAttribute("aria-pressed", "true");
+
+  await enter("grep cogito");
+  await expect(log).toContainText("/projects/cogito");
+
+  await enter("clear");
+  await expect(log).not.toContainText("grep cogito");
+});
