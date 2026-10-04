@@ -3945,7 +3945,7 @@ a.xp-org:hover {
   width: 52px;
   height: 52px;
   background: var(--accent);
-  color: var(--bg);
+  color: var(--on-accent);
   border-color: var(--accent);
 }
 .vinyl-glyph { width: 22px; height: 22px; }
@@ -4081,14 +4081,18 @@ a.xp-org:hover {
    viewports the height caps and the art crops via object-fit. */
 .npc {
   position: relative;
+  container-type: inline-size;
   flex: none;
   margin: 0.4rem 0.35rem 0.45rem;
-  border-radius: 12px;
+  border-radius: 0.75rem;
   overflow: hidden;
   border: 1px solid var(--border);
   background: var(--bg);
   aspect-ratio: 1;
-  max-height: min(300px, 34dvh);
+  /* Keep the close control, transport, and metadata in separate rows even
+     when a short viewport caps the artwork's height. */
+  min-height: 9rem;
+  max-height: min(18.75rem, 34dvh);
   animation: np-rise 260ms cubic-bezier(0.2, 0.7, 0.2, 1);
 }
 .npc-art {
@@ -4117,9 +4121,9 @@ a.xp-org:hover {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 0.35rem;
-  /* Leave the scrim strip to the meta link below. */
-  padding-bottom: 2.4rem;
+  gap: 0.375rem;
+  /* Reserve the top close-control row and the bottom metadata strip. */
+  padding: 2rem 0 3.5rem;
   opacity: 0;
   transition: opacity 150ms ease-out;
   pointer-events: none;
@@ -4132,32 +4136,38 @@ a.xp-org:hover {
 .npc-btn {
   display: grid;
   place-items: center;
-  width: 34px;
-  height: 34px;
+  width: clamp(1.875rem, 18cqi, 2.5rem);
+  aspect-ratio: 1;
+  flex: none;
+  padding: 0;
   border-radius: 50%;
   border: 0;
-  background: color-mix(in srgb, var(--term-bg) 62%, transparent);
-  backdrop-filter: blur(6px);
-  color: var(--on-accent);
+  background: var(--term-bg);
+  color: var(--term-text);
   cursor: pointer;
   transition: var(--palette-transition, background-color 130ms ease-out, transform 130ms ease-out);
 }
-.npc-btn:hover { background: color-mix(in srgb, var(--term-bg) 82%, transparent); }
+.npc-btn:hover { background: color-mix(in srgb, var(--term-bg) 85%, var(--term-text)); }
 .npc-btn:active { transform: scale(0.9); }
-.npc-btn--primary { color: var(--accent); }
+.npc-btn--primary {
+  background: var(--accent);
+  color: var(--on-accent);
+}
+.npc-btn--primary:hover { background: var(--accent-press); }
+.npc-btn .np-glyph { width: 55%; height: 55%; }
 .npc-close {
   position: absolute;
   top: 0.4rem;
   right: 0.4rem;
   display: grid;
   place-items: center;
-  width: 24px;
-  height: 24px;
+  width: 1.75rem;
+  height: 1.75rem;
+  padding: 0;
   border-radius: 50%;
   border: 0;
-  background: color-mix(in srgb, var(--term-bg) 62%, transparent);
-  backdrop-filter: blur(6px);
-  color: var(--on-accent);
+  background: var(--term-bg);
+  color: var(--term-text);
   cursor: pointer;
   opacity: 0;
   transition: var(--palette-transition, opacity 150ms ease-out, background-color 130ms ease-out);
@@ -4167,7 +4177,12 @@ a.xp-org:hover {
 .npc:focus-within .npc-close {
   opacity: 1;
 }
-.npc-close:hover { background: color-mix(in srgb, var(--term-bg) 82%, transparent); }
+.npc-close:hover { background: color-mix(in srgb, var(--term-bg) 85%, var(--term-text)); }
+.npc-btn:focus-visible,
+.npc-close:focus-visible {
+  outline: 2px solid var(--term-text);
+  outline-offset: 2px;
+}
 /* Bottom scrim = the minimap-label move: meta reads as part of the card, and
    the whole strip is the link into the full player. */
 .npc-meta {
@@ -4176,18 +4191,19 @@ a.xp-org:hover {
   display: flex;
   align-items: center;
   gap: 0.45rem;
-  padding: 0.9rem 0.7rem 0.55rem;
+  padding: 0.55rem 0.7rem;
   text-decoration: none;
-  background: linear-gradient(
-    to top,
-    color-mix(in srgb, var(--term-bg) 82%, transparent),
-    transparent
-  );
+  /* An opaque reading surface keeps contrast independent of the artwork. */
+  background: var(--term-bg);
+}
+.npc-meta:focus-visible {
+  outline: 2px solid var(--term-text);
+  outline-offset: -3px;
 }
 .npc-dot {
   flex: none;
-  width: 7px;
-  height: 7px;
+  width: 0.4375rem;
+  height: 0.4375rem;
   border-radius: 50%;
   background: var(--accent);
   box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 22%, transparent);
@@ -4203,19 +4219,17 @@ a.xp-org:hover {
 .npc-title {
   font-weight: 600;
   font-size: 0.78rem;
-  color: var(--on-accent);
+  color: var(--term-text);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.45);
 }
 .npc-artist {
   font-size: 0.7rem;
-  color: color-mix(in srgb, var(--on-accent) 78%, transparent);
+  color: var(--term-text);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.45);
 }
 
 /* ── now-playing dock (mobile, bottom-left; the sidebar card covers md+) ── */
@@ -4295,8 +4309,10 @@ a.xp-org:hover {
 .np-btn {
   display: grid;
   place-items: center;
-  width: 30px;
-  height: 30px;
+  width: 2rem;
+  height: 2rem;
+  padding: 0;
+  flex: none;
   border-radius: 50%;
   border: 0;
   background: transparent;
@@ -4306,15 +4322,18 @@ a.xp-org:hover {
 }
 .np-btn:hover { background: color-mix(in srgb, var(--accent) 14%, transparent); }
 .np-btn:active { transform: scale(0.9); }
-.np-btn--primary { color: var(--accent); }
-.np-glyph { width: 18px; height: 18px; }
-.np-glyph-sm { width: 13px; height: 13px; }
+.np-btn--primary { background: var(--accent); color: var(--on-accent); }
+.np-btn--primary:hover { background: var(--accent-press); }
+.np-glyph { display: block; width: 1.125rem; height: 1.125rem; }
+.np-glyph-sm { display: block; width: 0.8125rem; height: 0.8125rem; }
 .np-close {
   flex: none;
   display: grid;
   place-items: center;
-  width: 22px;
-  height: 22px;
+  width: 1.75rem;
+  height: 1.75rem;
+  padding: 0;
+  flex: none;
   border-radius: 50%;
   border: 0;
   background: transparent;
@@ -4323,6 +4342,8 @@ a.xp-org:hover {
   transition: var(--palette-transition, color 130ms ease-out, background-color 130ms ease-out);
 }
 .np-close:hover { color: var(--text); background: var(--bg); }
+.np-btn:focus-visible,
+.np-close:focus-visible { outline: 2px solid var(--text); outline-offset: 2px; }
 
 @media (max-width: 460px) {
   .np-meta { display: none; }
