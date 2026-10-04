@@ -11,7 +11,14 @@ const MOTION = "/images/projects/cogito/cogito-transparent-hop.webp";
 const DURATION = 3567;
 
 /** The original pocket toys, rendered with alpha so their edges and shadows
- * composite against every theme. One finite play; the poster also works without JS. */
+ * composite against every theme. One finite play; the poster also works without JS.
+ *
+ * Unmounting must leave the image unregistered, or Chromium keeps the whole
+ * detached page alive: a lazy `sizes="auto"` image stays in the document's
+ * auto-size observer after removal, and any width-srcset selection, even on a
+ * detached image, re-adds it as a document viewport listener. So cleanup never
+ * restores the poster; it drops `sizes`, then `srcset`, which unobserves the
+ * image and then removes its viewport listener (see the retention e2e test). */
 export function CogitoPreview({
   trigger = "visible",
   replayControl = false,
@@ -133,7 +140,11 @@ export function CogitoPreview({
     preference();
     return () => {
       disposed = true;
-      pause();
+      generationRef.current += 1;
+      clearTimeout(timer);
+      if (objectURL) URL.revokeObjectURL(objectURL);
+      image.removeAttribute("sizes");
+      image.removeAttribute("srcset");
       observer.disconnect();
       geometry.disconnect();
       target.removeEventListener("focus", placeBubble);
