@@ -1,4 +1,4 @@
-import Link from "next/link";
+import Link from "@/components/site/Link";
 import Image from "next/image";
 import { profile } from "@/data/profile";
 import { PROJECTS } from "@/data/projects";

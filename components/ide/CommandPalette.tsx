@@ -10,6 +10,7 @@ import { usePathname, useRouter } from "next/navigation";
 import { searchStatic, searchPosts, type SearchResult } from "@/app/lib/search";
 import { SearchIcon } from "@/components/feel/animated-icons";
 import { useOverlay, useTabSession } from "./store";
+import { pushRoute } from "./navPending";
 
 export default function CommandPalette() {
   const router = useRouter();
@@ -110,7 +111,7 @@ export default function CommandPalette() {
     // Leaving the page: a modal waiting on it (the privacy reveal) stays closed.
     closeCmdk(href === pathname ? "closed" : "navigation");
     openTab(href);
-    router.push(href);
+    pushRoute(router, href);
   }
 
   function onKeyDown(e: KeyboardEvent) {

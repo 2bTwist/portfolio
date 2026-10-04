@@ -27,6 +27,7 @@ import { usePathname, useRouter } from "next/navigation";
 import { useCatalogue } from "./CatalogueProvider";
 import { restoreSavedPalette, setPaletteIndex } from "./palette-store";
 import { claimModal, releaseModal, type ReleaseReason } from "./modal-owner";
+import { pushRoute } from "./navPending";
 
 type Tab = { href: string; name: string };
 
@@ -125,7 +126,7 @@ function SessionProvider({ children }: { children: ReactNode }) {
     }
     const destination = (rest[idx] ?? rest[idx - 1])?.href ?? "/";
     setTabs(withTab(rest, destination));
-    if (destination !== pathname) router.push(destination);
+    if (destination !== pathname) pushRoute(router, destination);
   };
 
   // Keep only `href`, dropping every other tab; navigate to it if it isn't the
@@ -134,13 +135,13 @@ function SessionProvider({ children }: { children: ReactNode }) {
     const keep = tabs.find((t) => t.href === href);
     if (!keep) return;
     setTabs([keep]);
-    if (href !== pathname) router.push(href);
+    if (href !== pathname) pushRoute(router, href);
   };
 
   // Close every tab and return to README, which keeps its own tab.
   const closeAll = () => {
     setTabs(withTab([], "/"));
-    if (pathname !== "/") router.push("/");
+    if (pathname !== "/") pushRoute(router, "/");
   };
 
   const session = { tabs, openTab, closeTab, closeOthers, closeAll, setPaletteIndex };

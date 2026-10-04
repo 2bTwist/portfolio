@@ -6,7 +6,7 @@
    routes stay server-rendered. */
 
 import type { ReactNode } from "react";
-import Link from "next/link";
+import Link from "@/components/site/Link";
 import type { PostMetadata } from "@/app/lib/posts";
 import type { Project } from "@/data/projects";
 import { TagRow, ActionLink } from "./ui";

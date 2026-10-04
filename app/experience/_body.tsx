@@ -1,4 +1,4 @@
-import Link from "next/link";
+import Link from "@/components/site/Link";
 import { EXPERIENCE, LEADERSHIP } from "@/data/experience";
 import { PageShell, type PaneProps } from "@/components/site/PageShell";
 

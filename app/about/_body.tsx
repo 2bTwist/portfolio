@@ -1,4 +1,4 @@
-import Link from "next/link";
+import Link from "@/components/site/Link";
 import Image from "next/image";
 import portrait from "@/public/images/portrait.jpg";
 import { profile } from "@/data/profile";

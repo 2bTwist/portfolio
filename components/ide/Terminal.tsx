@@ -23,6 +23,7 @@ import { BANNER } from "./banner";
 import { useOverlay, useSession } from "./store";
 import { ResizeHandle } from "./ResizeHandle";
 import { PREFERENCES, loadPreference, savePreference } from "@/app/lib/preferences";
+import { pushRoute } from "./navPending";
 
 const PIANO_GIF = "/images/grand-piano.gif";
 const MEOW_GIF = "/images/meow-party.gif";
@@ -306,7 +307,7 @@ export default function Terminal() {
 
   function navigate(route: string) {
     openTab(route);
-    router.push(route);
+    pushRoute(router, route);
   }
 
   function run(raw: string) {

@@ -10,7 +10,7 @@
    the palette is open when it is ready, it waits for the palette to close. */
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import Link from "next/link";
+import Link from "@/components/site/Link";
 import { PREFERENCES, loadPreference, savePreference } from "@/app/lib/preferences";
 import { claimModal, onModalRelease, releaseModal } from "@/components/ide/modal-owner";
 

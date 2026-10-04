@@ -5,7 +5,7 @@
    driving the same single <audio> in the store. The mini cover spins while
    playing and freezes when paused; dismissing it stops playback. */
 
-import Link from "next/link";
+import Link from "@/components/site/Link";
 import { usePathname } from "next/navigation";
 import { TRACKS, artworkAt } from "@/app/lib/music";
 import { useMusic, toggle, next, prev, stop } from "./store";

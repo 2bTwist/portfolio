@@ -9,7 +9,7 @@
    stroke glyphs keep the perf gate green. */
 
 import { useEffect, useState } from "react";
-import Link from "next/link";
+import Link from "@/components/site/Link";
 import { useOverlay } from "./store";
 import { ThemeSwatches } from "./ThemeSwatches";
 import { MuteToggle } from "@/components/feel/MuteToggle";
