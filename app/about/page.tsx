@@ -1,12 +1,13 @@
 import type { Metadata } from "next";
 import { profile } from "@/data/profile";
 import { AboutBody } from "./_body";
+import { pageMetadata } from "@/app/lib/metadata";
 
-export const metadata: Metadata = {
+export const metadata: Metadata = pageMetadata({
   title: "About - Edmond Ndanji",
   description: profile.blurb,
-  alternates: { canonical: "/about" },
-};
+  path: "/about",
+});
 
 export default function AboutPage() {
   return <AboutBody />;

@@ -2,17 +2,13 @@ import type { Metadata } from "next";
 import { JsonLd } from "@/components/site/JsonLd";
 import { TRACKS } from "@/app/lib/music";
 import { MusicBody } from "./_body";
+import { pageMetadata } from "@/app/lib/metadata";
 
-export const metadata: Metadata = {
+export const metadata: Metadata = pageMetadata({
   title: "Music - Edmond Ndanji",
   description: "A vinyl player of what I've had on repeat lately, from Richard Bona to Radiohead. Press play.",
-  alternates: { canonical: "/music" },
-  openGraph: {
-    title: "Music - Edmond Ndanji",
-    description: "A vinyl player of what I've had on repeat lately. Press play.",
-    url: "/music",
-  },
-};
+  path: "/music",
+});
 
 const playlistLd = {
   "@context": "https://schema.org",

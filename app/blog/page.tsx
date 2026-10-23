@@ -3,12 +3,13 @@ import { getAllPosts } from "@/app/lib/posts";
 import { PageShell } from "@/components/site/PageShell";
 import { PageHeader } from "@/components/content/ui";
 import { PostCard } from "@/components/content/PostCard";
+import { pageMetadata } from "@/app/lib/metadata";
 
-export const metadata: Metadata = {
+export const metadata: Metadata = pageMetadata({
   title: "Blog - Edmond Ndanji",
   description: "Notes on software engineering, product, and building in public.",
-  alternates: { canonical: "/blog" },
-};
+  path: "/blog",
+});
 
 export default function BlogPage() {
   const posts = getAllPosts();
