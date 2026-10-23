@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import type { CSSProperties } from "react";
 import "./globals.css";
 import { ClientBoot } from "@/components/ClientBoot";
@@ -43,6 +43,12 @@ export const metadata: Metadata = {
     description: profile.tagline,
   },
   robots: { index: true, follow: true },
+};
+
+/* The default palette's accent: Discord's embed side bar, Chrome Android's
+   toolbar, and older Safari's tab bar. It does not follow a saved palette. */
+export const viewport: Viewport = {
+  themeColor: PALETTES[DEFAULT_PALETTE_INDEX].vars["--accent"],
 };
 
 // Default palette injected as inline CSS vars (server-rendered, no JS, not
