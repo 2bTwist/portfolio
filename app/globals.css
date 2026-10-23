@@ -1532,6 +1532,16 @@ html[data-site-hint] [data-tour="themes"]::after {
 @media (prefers-reduced-motion: reduce) {
   .try-site summary::before { transition: none; }
 }
+/* Multi-line headings split evenly; prose avoids a lone last word where supported. */
+h1,
+h2,
+h3 {
+  text-wrap: balance;
+}
+.prose-content p,
+.prose-content li {
+  text-wrap: pretty;
+}
 .prose-content h1,
 .prose-content h2,
 .prose-content h3 {
@@ -3367,6 +3377,11 @@ body[data-dragging] iframe {
 .ide-terminal ::-moz-selection {
   background: color-mix(in srgb, var(--term-accent) 40%, var(--term-bg));
   color: var(--term-text);
+}
+/* A shared "link to highlight" (#:~:text=) lands on the same accent wash. */
+::target-text {
+  background: color-mix(in srgb, var(--accent) 30%, var(--surface));
+  color: var(--text);
 }
 
 /* ── Experience timeline ─────────────────────────────────────────────────────
