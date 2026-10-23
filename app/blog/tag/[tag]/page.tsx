@@ -3,6 +3,7 @@ import Link from "@/components/site/Link";
 import { getAllPosts, getAllTags } from "@/app/lib/posts";
 import { PageShell } from "@/components/site/PageShell";
 import { PageHeader } from "@/components/content/ui";
+import { pageMetadata } from "@/app/lib/metadata";
 
 type Params = { params: Promise<{ tag: string }> };
 
@@ -15,9 +16,7 @@ export async function generateMetadata({ params }: Params): Promise<Metadata> {
   // A tag no post carries still renders its empty state, but is not indexed.
   const known = getAllTags().includes(tag);
   return {
-    title: `#${tag} - Blog`,
-    description: `Posts tagged #${tag}.`,
-    alternates: { canonical: `/blog/tag/${tag}` },
+    ...pageMetadata({ title: `#${tag} - Blog`, description: `Posts tagged #${tag}.`, path: `/blog/tag/${tag}` }),
     ...(known ? {} : { robots: { index: false, follow: true } }),
   };
 }

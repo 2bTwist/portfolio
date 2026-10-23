@@ -1,11 +1,12 @@
 import type { Metadata } from "next";
 import { ResumeBody } from "./_body";
+import { pageMetadata } from "@/app/lib/metadata";
 
-export const metadata: Metadata = {
+export const metadata: Metadata = pageMetadata({
   title: "Resume - Edmond Ndanji",
   description: "Edmond Ndanji's resume.",
-  alternates: { canonical: "/resume" },
-};
+  path: "/resume",
+});
 
 /* The page IS the PDF: public/resume.pdf rendered full-bleed by the browser's
    native viewer (no pdf.js dep, no HTML re-creation). Opens with the sidebar

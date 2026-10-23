@@ -1,12 +1,13 @@
 import type { Metadata } from "next";
 import { PageShell } from "@/components/site/PageShell";
 import { PageHeader, Body, Prose } from "@/components/content/ui";
+import { pageMetadata } from "@/app/lib/metadata";
 
-export const metadata: Metadata = {
+export const metadata: Metadata = pageMetadata({
   title: "Terms - Edmond Ndanji",
   description: "Terms of use for this site.",
-  alternates: { canonical: "/terms" },
-};
+  path: "/terms",
+});
 
 export default function TermsPage() {
   return (

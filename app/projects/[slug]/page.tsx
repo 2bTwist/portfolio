@@ -11,6 +11,7 @@ import { MorphImage } from "@/components/content/MorphImage";
 import { ArticleTocMount } from "@/components/content/ArticleTocMount";
 import { JsonLd } from "@/components/site/JsonLd";
 import { SITE_URL } from "@/app/lib/site";
+import { pageMetadata } from "@/app/lib/metadata";
 
 type Params = { params: Promise<{ slug: string }> };
 
@@ -22,13 +23,14 @@ export async function generateMetadata({ params }: Params): Promise<Metadata> {
   const { slug } = await params;
   const project = getProject(slug);
   if (!project) return { title: "Project not found" };
-  return {
+  return pageMetadata({
     title: `${project.title} - Edmond Ndanji`,
     description: project.blurb,
-    alternates: { canonical: `/projects/${project.id}` },
-    openGraph: { title: project.title, description: project.blurb, type: "article" },
-    twitter: { card: "summary_large_image", title: project.title, description: project.blurb },
-  };
+    path: `/projects/${project.id}`,
+    shareTitle: project.title,
+    type: "article",
+    ownCard: true,
+  });
 }
 
 export default async function ProjectPage({ params }: Params) {

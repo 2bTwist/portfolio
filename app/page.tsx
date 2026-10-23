@@ -1,26 +1,25 @@
 import type { Metadata } from "next";
 import { profile } from "@/data/profile";
 import { SITE_URL } from "@/app/lib/site";
+import { pageMetadata } from "@/app/lib/metadata";
 import { HomeBody } from "./_body";
 
-export const metadata: Metadata = {
+const share = pageMetadata({
   title: "Edmond Ndanji - Full-stack & mobile engineer",
   description: profile.tagline,
-  alternates: {
-    canonical: "/",
-    types: { "application/rss+xml": "/rss.xml" },
-  },
-  /* A page's openGraph replaces the layout's whole object, so this restates it.
-     video.other is what lets Discord play og-home.mp4 inline; iMessage plays it
+  path: "/",
+  ownCard: true,
+});
+
+export const metadata: Metadata = {
+  ...share,
+  alternates: { ...share.alternates, types: { "application/rss+xml": "/rss.xml" } },
+  /* video.other is what lets Discord play og-home.mp4 inline; iMessage plays it
      either way. Regenerate the video with `pnpm og:video` when the card changes.
      Next does not resolve video URLs against metadataBase, so this one is absolute. */
   openGraph: {
+    ...share.openGraph,
     type: "video.other",
-    siteName: "Edmond Ndanji",
-    title: "Edmond Ndanji - Full-stack & mobile engineer",
-    description: profile.tagline,
-    url: SITE_URL,
-    locale: "en_US",
     videos: [{ url: new URL("/og-home.mp4", SITE_URL), type: "video/mp4", width: 1200, height: 630 }],
   },
 };

@@ -11,6 +11,7 @@ import { JsonLd } from "@/components/site/JsonLd";
 import { PageShell } from "@/components/site/PageShell";
 import { PostHeader } from "@/components/content/ArticleHeaders";
 import { SITE_URL } from "@/app/lib/site";
+import { pageMetadata } from "@/app/lib/metadata";
 import { profile } from "@/data/profile";
 
 type Params = { params: Promise<{ slug: string }> };
@@ -23,13 +24,14 @@ export async function generateMetadata({ params }: Params): Promise<Metadata> {
   const { slug } = await params;
   const post = getPost(slug);
   if (!post) return { title: "Post not found" };
-  return {
+  return pageMetadata({
     title: `${post.title} - Edmond Ndanji`,
     description: post.summary,
-    alternates: { canonical: `/blog/${slug}` },
-    openGraph: { title: post.title, description: post.summary, type: "article" },
-    twitter: { card: "summary_large_image", title: post.title, description: post.summary },
-  };
+    path: `/blog/${slug}`,
+    shareTitle: post.title,
+    type: "article",
+    ownCard: true,
+  });
 }
 
 export default async function BlogPost({ params }: Params) {
