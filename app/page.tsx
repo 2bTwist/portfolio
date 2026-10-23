@@ -10,6 +10,19 @@ export const metadata: Metadata = {
     canonical: "/",
     types: { "application/rss+xml": "/rss.xml" },
   },
+  /* A page's openGraph replaces the layout's whole object, so this restates it.
+     video.other is what lets Discord play og-home.mp4 inline; iMessage plays it
+     either way. Regenerate the video with `pnpm og:video` when the card changes.
+     Next does not resolve video URLs against metadataBase, so this one is absolute. */
+  openGraph: {
+    type: "video.other",
+    siteName: "Edmond Ndanji",
+    title: "Edmond Ndanji - Full-stack & mobile engineer",
+    description: profile.tagline,
+    url: SITE_URL,
+    locale: "en_US",
+    videos: [{ url: new URL("/og-home.mp4", SITE_URL), type: "video/mp4", width: 1200, height: 630 }],
+  },
 };
 
 const personLd = {
