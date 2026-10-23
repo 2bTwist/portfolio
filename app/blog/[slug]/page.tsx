@@ -30,6 +30,7 @@ export async function generateMetadata({ params }: Params): Promise<Metadata> {
     path: `/blog/${slug}`,
     shareTitle: post.title,
     type: "article",
+    publishedTime: new Date(post.date).toISOString(),
     ownCard: true,
   });
 }
@@ -82,6 +83,9 @@ export default async function BlogPost({ params }: Params) {
 
   return (
     <>
+      {/* Discord's embed timestamp reads og:pubdate, not article:published_time.
+          Next's metadata can only emit it as name=, so React hoists this one to <head>. */}
+      <meta property="og:pubdate" content={published} />
       <JsonLd data={blogPosting} />
       <JsonLd data={breadcrumb} />
       <ReadingProgress />

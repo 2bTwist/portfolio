@@ -10,7 +10,7 @@
    ever play 30s preview clips; the queue loops, so the list never "ends". */
 
 import { useSyncExternalStore } from "react";
-import { TRACKS } from "@/app/lib/music";
+import { TRACKS, artworkAt } from "@/app/lib/music";
 
 export type PlayerState = {
   /** Index into TRACKS of the loaded song, or -1 before anything starts. */
@@ -55,6 +55,47 @@ function shuffled(keepFirst: number): number[] {
   return keepFirst >= 0 ? [keepFirst, ...rest] : rest;
 }
 
+/* --- OS media controls (Media Session) ---------------------------------------
+   The lock screen, Control Center, the Android notification, and Chrome's media
+   hub show the loaded track and drive the same actions as the widget. */
+const mediaSession = () => (typeof navigator !== "undefined" && "mediaSession" in navigator ? navigator.mediaSession : null);
+
+/* iOS uses the small size for the compact lock-screen player and the large one
+   when expanded. */
+const artworkSizes = (url: string): MediaImage[] =>
+  [96, 256, 512].map((n) => ({ src: artworkAt(url, n).src, sizes: `${n}x${n}` }));
+
+function showInMediaSession(trackIndex: number) {
+  const session = mediaSession();
+  if (!session) return;
+  const track = TRACKS[trackIndex];
+  session.metadata = new MediaMetadata({
+    title: track.title,
+    artist: track.artist,
+    album: track.album,
+    artwork: artworkSizes(track.artwork),
+  });
+}
+
+function bindMediaSession() {
+  const session = mediaSession();
+  if (!session) return;
+  const handlers: [MediaSessionAction, () => void][] = [
+    ["play", () => play()],
+    ["pause", pause],
+    ["nexttrack", next],
+    ["previoustrack", prev],
+    ["stop", stop],
+  ];
+  for (const [action, handler] of handlers) {
+    try {
+      session.setActionHandler(action, handler);
+    } catch {
+      // A browser that doesn't know an action throws; the others still bind.
+    }
+  }
+}
+
 /* --- the single <audio> element (lazily created on first play) -------------- */
 let audio: HTMLAudioElement | null = null;
 
@@ -62,8 +103,18 @@ function ensureAudio(): HTMLAudioElement {
   if (audio) return audio;
   const el = new Audio();
   el.preload = "none";
-  el.addEventListener("play", () => setState({ playing: true }));
-  el.addEventListener("pause", () => setState({ playing: false }));
+  bindMediaSession();
+  el.addEventListener("play", () => {
+    setState({ playing: true });
+    const session = mediaSession();
+    if (session) session.playbackState = "playing";
+  });
+  el.addEventListener("pause", () => {
+    setState({ playing: false });
+    // stop() pauses too, but this event arrives after it has cleared the session.
+    const session = mediaSession();
+    if (session && state.started) session.playbackState = "paused";
+  });
   el.addEventListener("ended", () => {
     if (state.repeatOne) {
       el.currentTime = 0;
@@ -84,6 +135,7 @@ function loadAndPlay(trackIndex: number) {
   const el = ensureAudio();
   const track = TRACKS[trackIndex];
   el.src = track.preview;
+  showInMediaSession(trackIndex);
   setState({ current: trackIndex, started: true });
   el.play().catch(() => setState({ playing: false }));
 }
@@ -154,6 +206,11 @@ export function stop() {
     audio.pause();
     audio.removeAttribute("src");
     audio.load();
+  }
+  const session = mediaSession();
+  if (session) {
+    session.metadata = null;
+    session.playbackState = "none";
   }
   setState({ current: -1, playing: false, started: false });
 }
