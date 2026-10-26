@@ -3,6 +3,9 @@ import { OG_CONTENT_TYPE, OG_SIZE, renderOgCard } from "@/app/lib/og";
 
 /* Per-post social card (1200x630). Prerendered at build for every post. */
 
+/* Next takes only a static alt here; a per-post one needs generateImageMetadata,
+   which moves the card to a new URL. */
+export const alt = "Edmond Ndanji blog post card: the post's title and summary in an editor tab";
 export const size = OG_SIZE;
 export const contentType = OG_CONTENT_TYPE;
 
