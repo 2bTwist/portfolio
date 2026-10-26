@@ -3368,9 +3368,11 @@ body[data-dragging] iframe {
   background: color-mix(in srgb, var(--term-accent) 40%, var(--term-bg));
   color: var(--term-text);
 }
-/* No ::target-text here: in Chrome it made every palette switch restyle slower
-   and pushed the homepage over its INP budget. Shared text links keep the
-   browser's own highlight. */
+/* A shared "link to highlight" (#:~:text=) lands on the same accent wash. */
+::target-text {
+  background: color-mix(in srgb, var(--accent) 30%, var(--surface));
+  color: var(--text);
+}
 
 /* ── Experience timeline ─────────────────────────────────────────────────────
    Vertical rail with logo/icon nodes; each org groups one or more roles. */
