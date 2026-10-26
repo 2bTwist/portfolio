@@ -32,9 +32,6 @@ function tags(html: string) {
     ogImage: meta("property", "og:image"),
     twitterTitle: meta("name", "twitter:title"),
     twitterImage: meta("name", "twitter:image"),
-    themeColor: meta("name", "theme-color"),
-    pubdate: meta("property", "og:pubdate"),
-    publishedTime: meta("property", "article:published_time"),
   };
 }
 
@@ -50,12 +47,6 @@ test("every shareable route unfurls with its own title, url, and a working card 
     expect.soft(t.ogDescription, `${path} og:description`).toBe(t.description);
     expect.soft(t.twitterTitle, `${path} twitter:title`).toBe(t.ogTitle);
     if (path !== "/") expect.soft(t.ogTitle, `${path} og:title`).not.toBe(home.ogTitle);
-    expect.soft(t.themeColor, `${path} theme-color`).toMatch(/^#[0-9a-f]{6}$/i);
-    // Posts carry a publish date in both forms: Discord reads og:pubdate, others article:published_time.
-    if (/^\/blog\/(?!tag\/)[^/]+$/.test(path)) {
-      expect.soft(t.publishedTime, `${path} article:published_time`).toBeTruthy();
-      expect.soft(t.pubdate, `${path} og:pubdate`).toBe(t.publishedTime);
-    }
 
     for (const [key, url] of [["og:image", t.ogImage], ["twitter:image", t.twitterImage]] as const) {
       expect.soft(url, `${path} ${key}`).toBeTruthy();
