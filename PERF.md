@@ -15,6 +15,10 @@ measures.** This is the "launched in the background while you work" mode — it
 runs on GitHub's runners, never on your laptop. You only look when a gate goes
 red. Bundle deltas are commented on the PR.
 
+On a PR, `e2e-perf` also serves the base commit's build and interleaves its page
+loads with the PR's on the same runner, because runner speed alone moves the INP
+proxy by about 40 ms. The log shows both medians and the delta.
+
 ### 2. Local one-shot, backgrounded (when you want a local read)
 ```sh
 pnpm perf            # build + bundle + e2e perf + verdict, all at once
