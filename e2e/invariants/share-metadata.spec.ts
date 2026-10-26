@@ -30,8 +30,10 @@ function tags(html: string) {
     ogUrl: meta("property", "og:url"),
     ogSiteName: meta("property", "og:site_name"),
     ogImage: meta("property", "og:image"),
+    ogImageAlt: meta("property", "og:image:alt"),
     twitterTitle: meta("name", "twitter:title"),
     twitterImage: meta("name", "twitter:image"),
+    twitterImageAlt: meta("name", "twitter:image:alt"),
     themeColor: meta("name", "theme-color"),
     pubdate: meta("property", "og:pubdate"),
     publishedTime: meta("property", "article:published_time"),
@@ -57,8 +59,9 @@ test("every shareable route unfurls with its own title, url, and a working card 
       expect.soft(t.pubdate, `${path} og:pubdate`).toBe(t.publishedTime);
     }
 
-    for (const [key, url] of [["og:image", t.ogImage], ["twitter:image", t.twitterImage]] as const) {
+    for (const [key, url, alt] of [["og:image", t.ogImage, t.ogImageAlt], ["twitter:image", t.twitterImage, t.twitterImageAlt]] as const) {
       expect.soft(url, `${path} ${key}`).toBeTruthy();
+      expect.soft(alt, `${path} ${key}:alt`).toBeTruthy();
       if (!url) continue;
       // Absolute URLs name production; fetch the same path from the server under test.
       const { pathname, search } = new URL(url);

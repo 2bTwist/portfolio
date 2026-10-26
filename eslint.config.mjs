@@ -7,8 +7,10 @@ const eslintConfig = defineConfig([
   ...nextTs,
   // Stricter React Compiler health: exhaustive-deps as an error catches the
   // missing deps that silently defeat auto-memoization. The react-hooks plugin
-  // is already registered by eslint-config-next, so we only raise the rule.
+  // is already registered by eslint-config-next, so we only raise the rule, for
+  // the same files it registers the plugin on (a .cjs file would crash ESLint).
   {
+    files: ["**/*.{js,jsx,mjs,ts,tsx,mts,cts}"],
     rules: {
       "react-hooks/exhaustive-deps": "error",
     },
@@ -56,6 +58,10 @@ const eslintConfig = defineConfig([
     "perf/lighthouse-settings.js",
     "perf/lighthouse.config.js",
     ".size-limit.js",
+    // Local scratch and generated reports, never committed.
+    "output/**",
+    "outputs/**",
+    "tmp/**",
   ]),
 ]);
 
