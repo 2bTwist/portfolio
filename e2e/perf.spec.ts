@@ -141,42 +141,62 @@ async function measureRun(page: Page): Promise<{
 test("homepage interaction perf (INP proxy + CPU profile)", async ({ page, browser: runBrowser, baseURL }) => {
   const budgets = JSON.parse(readFileSync("budgets.json", "utf8"));
   const runCount: number = budgets.measurement?.runs ?? 5;
+  // On PRs, CI serves the base commit's build beside this one. Identical code
+  // measures 72-112 ms depending on which runner a job lands on, so a PR is
+  // judged against its base, measured on the same machine with loads interleaved.
+  const baselineURL = process.env.PERF_BASELINE_URL;
   // Each run is a fresh page load with the same CPU throttle (roughly 10 s).
-  test.setTimeout(60_000 + runCount * 20_000);
+  test.setTimeout(60_000 + runCount * 20_000 * (baselineURL ? 2 : 1));
 
   // Every run starts from the same clean state: fresh contexts built like the
   // project's own (Desktop Chrome + baseURL), and the fixture page last so the
   // diagnostics below continue on a warmed, measured page as before.
-  const runs: { inp: number; interactionCount: number; events: MeasuredEvent[]; actions: ExercisedAction[] }[] = [];
-  for (let i = 0; i < runCount - 1; i++) {
-    const context = await runBrowser.newContext({ ...devices["Desktop Chrome"], baseURL });
+  type Run = { inp: number; interactionCount: number; events: MeasuredEvent[]; actions: ExercisedAction[] };
+  const freshRun = async (url: string | undefined): Promise<Run> => {
+    const context = await runBrowser.newContext({ ...devices["Desktop Chrome"], baseURL: url });
     try {
       const run = await measureRun(await context.newPage());
-      runs.push({ inp: run.inp, interactionCount: run.events.length, events: run.events, actions: run.actions });
+      return { inp: run.inp, interactionCount: run.events.length, events: run.events, actions: run.actions };
     } finally {
       await context.close();
     }
+  };
+  const runs: Run[] = [];
+  const baselineRuns: Run[] = [];
+  for (let i = 0; i < runCount - 1; i++) {
+    // Alternate which build loads first, so drift within the job lands on both.
+    if (baselineURL && i % 2 === 1) baselineRuns.push(await freshRun(baselineURL));
+    runs.push(await freshRun(baseURL));
+    if (baselineURL && i % 2 === 0) baselineRuns.push(await freshRun(baselineURL));
   }
   const last = await measureRun(page);
   runs.push({ inp: last.inp, interactionCount: last.events.length, events: last.events, actions: last.actions });
   const { client } = last;
+  if (baselineURL) baselineRuns.push(await freshRun(baselineURL));
 
+  // Upper median when the count is even.
+  const median = (values: number[]) => [...values].sort((a, b) => a - b)[Math.floor(values.length / 2)];
   const runInps = runs.map((run) => run.inp);
-  const sorted = [...runInps].sort((a, b) => a - b);
-  const inp = sorted[Math.floor(sorted.length / 2)]; // upper median when the count is even
+  const inp = median(runInps);
+  const baseline = baselineURL
+    ? { url: baselineURL, inp: median(baselineRuns.map((run) => run.inp)), runInps: baselineRuns.map((run) => run.inp) }
+    : undefined;
 
   mkdirSync("perf-results", { recursive: true });
   const buildId = readFileSync(".next/BUILD_ID", "utf8").trim();
   writeFileSync(
     "perf-results/inp.json",
     JSON.stringify({
-      inp, aggregation: "median", runInps, url: page.url(), buildId, runs,
+      inp, aggregation: "median", runInps, url: page.url(), buildId, runs, baseline,
       specSha256: createHash("sha256").update(readFileSync("e2e/perf.spec.ts")).digest("hex"),
       browserVersion: page.context().browser()?.version(),
       measuredAt: new Date().toISOString(),
     }, null, 2),
   );
   console.log(`INP proxy (median of ${runCount} loads' max event duration): ${inp.toFixed(1)}ms [${runInps.join(", ")}]`);
+  if (baseline) {
+    console.log(`Base build on the same runner: ${baseline.inp.toFixed(1)}ms [${baseline.runInps.join(", ")}], delta ${(inp - baseline.inp).toFixed(1)}ms`);
+  }
 
   const swatches = page.locator(".ide-swatch");
   const swatchCount = await swatches.count();
@@ -351,6 +371,13 @@ test("homepage interaction perf (INP proxy + CPU profile)", async ({ page, brows
     }
   }
 
+  // A PR may not be slower than its base by more than maxRegression; until that
+  // allowance is set, and on main, the absolute budget applies.
   const inpBudget = budgets.metrics.inp.budget;
-  if (inpBudget != null) expect(inp).toBeLessThanOrEqual(inpBudget);
+  const maxRegression: number | undefined = budgets.metrics.inp.maxRegression;
+  if (baseline && maxRegression != null) {
+    expect(inp - baseline.inp, "INP proxy slower than the base build").toBeLessThanOrEqual(maxRegression);
+  } else if (inpBudget != null) {
+    expect(inp).toBeLessThanOrEqual(inpBudget);
+  }
 });
