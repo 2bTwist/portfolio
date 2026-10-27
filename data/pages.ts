@@ -27,7 +27,7 @@ export const PAGES = [
   { href: "/projects", label: "projects/", tree: "folder", listed: true, compact: { label: "projects", order: 2 }, splittable: true },
   { href: "/experience", label: "experience.md", tree: "file", listed: true, compact: { label: "experience", order: 4 }, splittable: true },
   { href: "/blog", label: "blog/", tree: "folder", listed: true, compact: { label: "blog", order: 5 }, splittable: false },
-  { href: "/certs", label: "certs.pdf", tree: "file", listed: true, compact: null, splittable: true },
+  { href: "/certs", label: "certs.pdf", tree: "file", listed: true, compact: { label: "certs", order: 7 }, splittable: true },
   { href: "/music", label: "music.mp3", tree: "file", listed: true, compact: { label: "music", order: 6 }, splittable: true },
   { href: "/resume", label: "resume.pdf", tree: null, listed: true, compact: null, splittable: true },
   { href: "/privacy", label: "privacy.md", tree: null, listed: false, compact: null, splittable: true, noindex: true },
