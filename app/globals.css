@@ -3114,14 +3114,55 @@ body[data-dragging] iframe {
   align-items: center;
   gap: 0.5rem 1rem;
 }
+/* The links scroll sideways when they outgrow the row, as they do on phones. The
+   padding, cancelled by the margin, keeps focus rings inside the scroll box. */
 .site-nav-links {
   order: 1;
   grid-column: 1 / -1;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 0.5rem;
+  gap: 1.25rem;
   min-width: 0;
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+  scrollbar-width: none;
+  padding: 4px;
+  margin: -4px;
+}
+.site-nav-links::-webkit-scrollbar {
+  display: none;
+}
+/* Fade whichever edge has more links past it. A row that fits has no scroll
+   timeline, so it gets no fade. */
+@property --nav-fade-start {
+  syntax: "<length>";
+  inherits: false;
+  initial-value: 0px;
+}
+@property --nav-fade-end {
+  syntax: "<length>";
+  inherits: false;
+  initial-value: 0px;
+}
+@keyframes site-nav-fade {
+  0% { --nav-fade-start: 0px; --nav-fade-end: 2.5rem; }
+  15% { --nav-fade-start: 2.5rem; }
+  85% { --nav-fade-end: 2.5rem; }
+  100% { --nav-fade-start: 2.5rem; --nav-fade-end: 0px; }
+}
+@supports (animation-timeline: scroll()) {
+  .site-nav-links {
+    mask-image: linear-gradient(
+      to right,
+      transparent,
+      #000 var(--nav-fade-start),
+      #000 calc(100% - var(--nav-fade-end)),
+      transparent
+    );
+    animation: site-nav-fade linear both;
+    animation-timeline: scroll(self inline);
+  }
 }
 .site-nav-actions {
   display: flex;
@@ -3778,10 +3819,16 @@ a.xp-org:hover {
   gap: 2rem;
   align-items: start;
 }
+/* The record stays in view beside the list only when they sit side by side;
+   stacked, a sticky record would cover the list scrolling under it. */
 @container page-content (min-width: 720px) {
   .vinyl {
     grid-template-columns: minmax(0, 320px) minmax(0, 1fr);
     gap: 2.75rem;
+  }
+  .vinyl-stage {
+    position: sticky;
+    top: 1.5rem;
   }
 }
 
@@ -3791,8 +3838,6 @@ a.xp-org:hover {
   flex-direction: column;
   align-items: center;
   gap: 1.25rem;
-  position: sticky;
-  top: 1.5rem;
 }
 
 .vinyl-platter {

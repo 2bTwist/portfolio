@@ -1,4 +1,9 @@
 import { expect, test, type Page } from "@playwright/test";
+import { PAGES } from "@/data/pages";
+
+/* The phone header holds every page that declares a compact slot. They outgrow a
+   phone's width, so the link row scrolls sideways on its own; the page never does. */
+const COMPACT_LINKS = PAGES.filter((p) => p.compact).length;
 
 const mobileWidths = [320, 360, 390, 600];
 const inlineWidths = [640, 673, 767];
@@ -17,17 +22,29 @@ async function navigationGeometry(page: Page) {
   });
 }
 
+// Scrolls the link row to its end and returns where the last link landed.
+async function lastLinkAtEnd(page: Page) {
+  return page.locator('nav[aria-label="Primary"]').evaluate(nav => {
+    nav.scrollLeft = nav.scrollWidth;
+    const last = nav.querySelector("a:last-of-type")!.getBoundingClientRect();
+    return { right: last.right, navRight: nav.getBoundingClientRect().right };
+  });
+}
+
 for (const width of mobileWidths) {
-  test(`mobile navigation has one evenly distributed link row at ${width}px`, async ({ page }) => {
+  test(`mobile navigation keeps every link on one scrollable row at ${width}px`, async ({ page }) => {
     await page.setViewportSize({ width, height: 800 });
     await page.goto("/");
     const nav = page.locator('header:has(nav[aria-label="Primary"])');
     await expect(nav).toBeVisible();
     const geometry = await navigationGeometry(page);
-    expect(geometry.links).toHaveLength(5);
+    expect(geometry.links).toHaveLength(COMPACT_LINKS);
     expect(Math.max(...geometry.links.map(link => link.top)) - Math.min(...geometry.links.map(link => link.top))).toBeLessThanOrEqual(1);
-    expect(geometry.links[0].left).toBeLessThanOrEqual(geometry.nav.left + 2);
-    expect(geometry.links.at(-1)!.right).toBeGreaterThanOrEqual(geometry.nav.right - 2);
+    // The row starts at its first link, and its last one can be scrolled fully into view.
+    expect(geometry.links[0].left).toBeGreaterThanOrEqual(geometry.nav.left);
+    expect(geometry.links[0].left).toBeLessThanOrEqual(geometry.nav.left + 6);
+    const end = await lastLinkAtEnd(page);
+    expect(end.right).toBeLessThanOrEqual(end.navRight + 1);
     expect(geometry.documentOverflows).toBe(false);
   });
 }
@@ -41,7 +58,11 @@ for (const width of inlineWidths) {
       .map(box => (box.top + box.bottom) / 2);
     expect(Math.max(...centers) - Math.min(...centers)).toBeLessThanOrEqual(1);
     expect(geometry.brand.right).toBeLessThan(geometry.links[0].left);
-    expect(geometry.links.at(-1)!.right).toBeLessThan(geometry.github.left);
+    expect(geometry.links).toHaveLength(COMPACT_LINKS);
+    // Links past the row's edge scroll inside it rather than running under GitHub.
+    expect(geometry.nav.right).toBeLessThan(geometry.github.left);
+    const end = await lastLinkAtEnd(page);
+    expect(end.right).toBeLessThanOrEqual(end.navRight + 1);
     expect(geometry.documentOverflows).toBe(false);
   });
 }
