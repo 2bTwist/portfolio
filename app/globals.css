@@ -2747,6 +2747,16 @@ html[data-site-hint] [data-tour="themes"]::after {
   flex: 1;
   min-width: 0;
 }
+.cv-page {
+  display: block;
+  margin: 0 1.25rem 1.5rem;
+  box-shadow: 0 10px 28px -16px rgba(0, 0, 0, 0.35);
+}
+.cv-page img {
+  display: block;
+  width: 100%;
+  height: auto;
+}
 .cv-embed {
   display: block;
   width: 100%;
@@ -2754,6 +2764,13 @@ html[data-site-hint] [data-tour="themes"]::after {
   min-height: 70vh;
   border: 0;
   background: #fffdf8;
+}
+/* Phones get the page image; wider panes get the PDF viewer (see _body.tsx). */
+@media (max-width: 767px) {
+  .cv-embed { display: none; }
+}
+@media (min-width: 768px) {
+  .cv-page { display: none; }
 }
 
 /* While dragging an IDE handle (terminal/explorer resize), shield iframes — e.g.
