@@ -80,3 +80,37 @@ for (const theme of ["Cream", "Latte", "Frappe (soft dark)"]) {
     await expect(dock).toBeHidden();
   });
 }
+
+// Scrolls the record's scroll container (the document on phones, the editor pane on
+// desktop) by most of its height, then reports the record and every track row.
+async function scrolledStage(page: import("@playwright/test").Page) {
+  return page.locator(".vinyl-stage").evaluate(stage => {
+    let scroller: Element = document.scrollingElement!;
+    for (let el = stage.parentElement; el; el = el.parentElement) {
+      const overflow = getComputedStyle(el).overflowY;
+      if ((overflow === "auto" || overflow === "scroll") && el.scrollHeight > el.clientHeight) { scroller = el; break; }
+    }
+    scroller.scrollTop = scroller.scrollHeight;
+    const box = stage.getBoundingClientRect();
+    const rows = [...document.querySelectorAll(".vinyl-row")].map(row => row.getBoundingClientRect());
+    return { stage: { top: box.top, bottom: box.bottom }, rows: rows.map(r => ({ top: r.top, bottom: r.bottom })), viewport: innerHeight };
+  });
+}
+
+test("on a phone the record scrolls away instead of covering the track list", async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.goto("/music");
+  const { stage, rows } = await scrolledStage(page);
+  expect(rows.length).toBeGreaterThan(0);
+  for (const row of rows) {
+    expect(row.bottom <= stage.top || row.top >= stage.bottom, `a track row overlaps the record`).toBe(true);
+  }
+});
+
+test("on desktop the record stays in view beside the scrolled track list", async ({ page }) => {
+  await page.setViewportSize({ width: 1440, height: 700 });
+  await page.goto("/music");
+  const { stage, viewport } = await scrolledStage(page);
+  expect(stage.top).toBeGreaterThanOrEqual(0);
+  expect(stage.top).toBeLessThan(viewport);
+});
